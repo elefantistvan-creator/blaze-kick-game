@@ -1,1 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.blazestudio.blazekick",
+        "sha256_cert_fingerprints": ["B6:5B:D6:C4:09:60:22:2C:93:9F:DA:EB:CB:98:0A:0C:02:BF:CC:8B:63:E7:F1:FC:B3:8B:D0:85:D3:80:81:19"]
+      }
+    }]
 
