@@ -10,11 +10,40 @@
 <meta name="apple-mobile-web-app-title" content="Blaze Kick">
 <meta name="theme-color" content="#1a1a2e">
 <title>Blaze Kick</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="#" id="manifestLink">
 <script>
+// Inline manifest generálás (nem kell külön fájl)
+(function() {
+  // SVG ikon → PNG data URL canvas segítségével
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" rx="80" fill="#1a472a"/><circle cx="256" cy="256" r="180" fill="white" stroke="#222" stroke-width="8"/><polygon points="256,100 290,200 256,180 222,200" fill="#222"/><polygon points="256,412 290,312 256,332 222,312" fill="#222"/><polygon points="100,256 200,222 180,256 200,290" fill="#222"/><polygon points="412,256 312,222 332,256 312,290" fill="#222"/><polygon points="256,180 290,200 280,240 232,240 222,200" fill="#222"/><polygon points="256,332 290,312 280,272 232,272 222,312" fill="#222"/><polygon points="180,256 200,222 240,232 240,280 200,290" fill="#222"/><polygon points="332,256 312,222 272,232 272,280 312,290" fill="#222"/></svg>';
+  var blob = new Blob([svg], {type:'image/svg+xml'});
+  var iconUrl = URL.createObjectURL(blob);
+
+  var manifest = {
+    name: 'Blaze Kick',
+    short_name: 'Blaze Kick',
+    description: 'Air hockey game',
+    start_url: '.',
+    display: 'fullscreen',
+    orientation: 'landscape',
+    background_color: '#1a1a2e',
+    theme_color: '#1a1a2e',
+    icons: [
+      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml' },
+      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  };
+  var mblob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  var murl = URL.createObjectURL(mblob);
+  document.getElementById('manifestLink').href = murl;
+
+  // Apple touch icon
+  var link = document.createElement('link');
+  link.rel = 'apple-touch-icon';
+  link.href = iconUrl;
+  document.head.appendChild(link);
+})();
+
 // Landscape lock
 if (screen.orientation && screen.orientation.lock) {
   screen.orientation.lock('landscape').catch(function(){});
@@ -22,7 +51,24 @@ if (screen.orientation && screen.orientation.lock) {
 
 // Service Worker regisztráció
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function(){});
+  var swCode = `
+    var CACHE = 'airhockey-v1';
+    self.addEventListener('install', function(e) {
+      e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(['./']); }));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', function(e) {
+      e.waitUntil(clients.claim());
+    });
+    self.addEventListener('fetch', function(e) {
+      e.respondWith(caches.match(e.request).then(function(r) {
+        return r || fetch(e.request);
+      }));
+    });
+  `;
+  var swBlob = new Blob([swCode], {type:'application/javascript'});
+  var swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(function(){});
 }
 </script>
 <style>
@@ -369,7 +415,9 @@ var PLAY_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABOYAAATmCAIAAAAKnj
       if (!ic._playRect) {
         ic._playRect = true;
         ic.style.cursor = 'pointer';
-        ic.addEventListener('click', function(e) {
+        // Pointer Events: egy kezelő fedi a touch-ot, egeret és touchpadot
+        ic.addEventListener('pointerup', function(e) {
+          e.preventDefault();
           var rect = ic.getBoundingClientRect();
           var cx = e.clientX - rect.left;
           var cy = e.clientY - rect.top;
@@ -378,17 +426,6 @@ var PLAY_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABOYAAATmCAIAAAAKnj
           var py2 = Math.min(finalY + logoH + H*(isLandscape ? 0.015 : 0.04), H - ps - H*0.06);
           if (cx>px2 && cx<px2+ps && cy>py2 && cy<py2+ps) startIntroExit();
         });
-        ic.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          var rect = ic.getBoundingClientRect();
-          var t2 = e.changedTouches[0];
-          var cx = t2.clientX - rect.left;
-          var cy = t2.clientY - rect.top;
-          var ps = Math.min(W,H)*(isLandscape ? 0.16 : 0.22);
-          var px2 = (W-ps)/2;
-          var py2 = Math.min(finalY + logoH + H*(isLandscape ? 0.015 : 0.04), H - ps - H*0.06);
-          if (cx>px2 && cx<px2+ps && cy>py2 && cy<py2+ps) startIntroExit();
-        }, {passive:false});
       }
     }
 
@@ -913,72 +950,76 @@ function doPowerHit(side) {
   }
 }
 
-document.addEventListener('touchstart', function(e) {
-  // Input mezőnél, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || 
+// --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
+console.log('%cBlaze Kick build: POINTER-EVENTS-V1', 'color:#ff6600;font-weight:bold');
+document.addEventListener('pointerdown', function(e) {
+  // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
       document.getElementById('mpOverlay').style.display === 'flex' ||
       document.getElementById('howToOverlay').style.display === 'flex') return;
   e.preventDefault();
-  for (var i=0; i<e.changedTouches.length; i++) {
-    var t = e.changedTouches[i];
-    var side = getTouchSide(t.clientX);
-    if (side==='left'  && touchLeft===null)  {
-      touchLeft=t.identifier;  lastLeftY=t.clientY;
-      touchStartTimes[t.identifier] = Date.now();
-      touchStartY[t.identifier] = t.clientY;
-      lastLeftVY = 0;
-    }
-    if (side==='right' && touchRight===null) {
-      touchRight=t.identifier; lastRightY=t.clientY;
-      touchStartTimes[t.identifier] = Date.now();
-      touchStartY[t.identifier] = t.clientY;
-      lastRightVY = 0;
-    }
+  var side = getTouchSide(e.clientX);
+  if (side==='left'  && touchLeft===null)  {
+    touchLeft=e.pointerId;  lastLeftY=e.clientY;
+    touchStartTimes[e.pointerId] = Date.now();
+    touchStartY[e.pointerId] = e.clientY;
+    lastLeftVY = 0;
   }
-}, {passive:false});
+  if (side==='right' && touchRight===null) {
+    touchRight=e.pointerId; lastRightY=e.clientY;
+    touchStartTimes[e.pointerId] = Date.now();
+    touchStartY[e.pointerId] = e.clientY;
+    lastRightVY = 0;
+  }
+});
 
-document.addEventListener('touchmove', function(e) {
-  if (e.target.tagName === 'INPUT' || 
+document.addEventListener('pointermove', function(e) {
+  if (e.target.tagName === 'INPUT' ||
       document.getElementById('mpOverlay').style.display === 'flex' ||
       document.getElementById('howToOverlay').style.display === 'flex') return;
-  e.preventDefault();
-  for (var i=0; i<e.changedTouches.length; i++) {
-    var t = e.changedTouches[i];
-    if (t.identifier===touchLeft && lastLeftY!==null) {
-      var d = (t.clientY - lastLeftY) * 1.5;
-      lastLeftVY = t.clientY - lastLeftY;  // csavar sebessége
-      py += d;
-      py = Math.max(WL+PR, Math.min(H-WL-PR, py));
-      lastLeftY = t.clientY;
-    }
-    if (t.identifier===touchRight && lastRightY!==null) {
-      var d = (t.clientY - lastRightY) * 1.5;
-      lastRightVY = t.clientY - lastRightY;  // csavar sebessége
-      my += d;
-      my = Math.max(WL+MR, Math.min(H-WL-MR, my));
-      lastRightY = t.clientY;
-    }
+  if (e.pointerId===touchLeft && lastLeftY!==null) {
+    e.preventDefault();
+    var d = (e.clientY - lastLeftY) * 1.5;
+    lastLeftVY = e.clientY - lastLeftY;  // csavar sebessége
+    py += d;
+    py = Math.max(WL+PR, Math.min(H-WL-PR, py));
+    lastLeftY = e.clientY;
   }
-}, {passive:false});
+  if (e.pointerId===touchRight && lastRightY!==null) {
+    e.preventDefault();
+    var d = (e.clientY - lastRightY) * 1.5;
+    lastRightVY = e.clientY - lastRightY;  // csavar sebessége
+    my += d;
+    my = Math.max(WL+MR, Math.min(H-WL-MR, my));
+    lastRightY = e.clientY;
+  }
+});
 
-document.addEventListener('touchend', function(e) {
-  e.preventDefault();
-  for (var i=0; i<e.changedTouches.length; i++) {
-    var t = e.changedTouches[i];
+function releasePointer(e, withTap) {
+  if (withTap) {
     // Koppintás detektálás
-    var elapsed = Date.now() - (touchStartTimes[t.identifier] || 0);
-    var moved = Math.abs(t.clientY - (touchStartY[t.identifier] || t.clientY));
+    var elapsed = Date.now() - (touchStartTimes[e.pointerId] || 0);
+    var moved = Math.abs(e.clientY - (touchStartY[e.pointerId] || e.clientY));
     if (elapsed < TAP_MAX_MS && moved < TAP_MAX_MOVE) {
       // Tap volt - erős ütés ha labda közel
-      if (t.identifier === touchLeft)  doPowerHit('left');
-      if (t.identifier === touchRight) doPowerHit('right');
+      if (e.pointerId === touchLeft)  doPowerHit('left');
+      if (e.pointerId === touchRight) doPowerHit('right');
     }
-    if (t.identifier===touchLeft)  { touchLeft=null;  lastLeftY=null;  lastLeftVY=0; }
-    if (t.identifier===touchRight) { touchRight=null; lastRightY=null; lastRightVY=0; }
-    delete touchStartTimes[t.identifier];
-    delete touchStartY[t.identifier];
   }
-}, {passive:false});
+  if (e.pointerId===touchLeft)  { touchLeft=null;  lastLeftY=null;  lastLeftVY=0; }
+  if (e.pointerId===touchRight) { touchRight=null; lastRightY=null; lastRightVY=0; }
+  delete touchStartTimes[e.pointerId];
+  delete touchStartY[e.pointerId];
+}
+
+document.addEventListener('pointerup', function(e) {
+  releasePointer(e, true);
+});
+
+// Megszakadt pointer (pl. rendszer elveszi a fókuszt) - ütő elengedése tap nélkül
+document.addEventListener('pointercancel', function(e) {
+  releasePointer(e, false);
+});
 
 // --- AI ---
 function updateAI() {
@@ -2461,10 +2502,9 @@ function doStart() {
   }, 1000);
 }
 
-startBtn.addEventListener('click', doStart);
-startBtn.addEventListener('touchend', function(e) {
+startBtn.addEventListener('pointerup', function(e) {
   e.stopPropagation(); e.preventDefault(); doStart();
-}, {passive:false});
+});
 
 function showHowTo() {
   document.getElementById('howToOverlay').style.display = 'flex';
@@ -2474,23 +2514,20 @@ function hideHowTo() {
 }
 var howToBtn = document.getElementById('howToBtn');
 if (howToBtn) {
-  howToBtn.addEventListener('click', function(e){ e.stopPropagation(); showHowTo(); });
-  howToBtn.addEventListener('touchend', function(e){ e.stopPropagation(); e.preventDefault(); showHowTo(); }, {passive:false});
+  howToBtn.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); showHowTo(); });
 }
 var howToBackBtn = document.getElementById('howToBackBtn');
 if (howToBackBtn) {
-  howToBackBtn.addEventListener('click', function(e){ e.stopPropagation(); hideHowTo(); });
-  howToBackBtn.addEventListener('touchend', function(e){ e.stopPropagation(); e.preventDefault(); hideHowTo(); }, {passive:false});
+  howToBackBtn.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); hideHowTo(); });
 }
-document.getElementById('howToOverlay').addEventListener('touchstart', function(e){
+document.getElementById('howToOverlay').addEventListener('pointerdown', function(e){
   e.stopPropagation();
-}, {passive:true});
+});
 
 function bindBtn(id, fn) {
   var el = document.getElementById(id);
   if (!el) return;
-  el.addEventListener('click', function(e){ e.stopPropagation(); fn(); });
-  el.addEventListener('touchend', function(e){ e.stopPropagation(); e.preventDefault(); fn(); }, {passive:false});
+  el.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); fn(); });
 }
 
 bindBtn('mpCreateBtn', mpCreateRoom);
@@ -2498,9 +2535,9 @@ bindBtn('mpJoinBtn', mpJoinRoom);
 bindBtn('mpCancelBtn', mpCancel);
 bindBtn('mpCancelWaitBtn', mpCancel);
 
-document.getElementById('mpOverlay').addEventListener('touchstart', function(e){
+document.getElementById('mpOverlay').addEventListener('pointerdown', function(e){
   if (e.target.tagName !== 'INPUT') e.stopPropagation();
-}, {passive:false});
+});
 
 window.addEventListener('resize', function(){ if(running) setup(); });
 setup(); loop();
