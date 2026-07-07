@@ -4,22 +4,33 @@ function setup() {
   H = mid.clientHeight;
   c.width = W; c.height = H;
 
+  // --- Keret-margók (dekor-sáv) — vizuálisan hangolható, később tier-enként ---
+  MARGIN_X = 0.06;
+  MARGIN_Y = 0.09;
+  PLX = W * MARGIN_X; PLW = W - 2*PLX;
+  PLY = H * MARGIN_Y; PLH = H - 2*PLY;
+
+  // --- Tárgyméretek: a TELJES magassághoz (H) viszonyítva = EREDETI méret ---
+  // (nem skálázódnak a kisebb pályával, csak a határok húzódnak be)
   WL  = Math.max(4, H * 0.015);
   PW  = WL * 1.4;          // pálcika szélesség
   PR  = H * 0.07;          // kapus fél-magasság
-  MR  = H * 0.042;         // mezőnyjátékos fél-magasság (60%)
-  GH  = H * 0.36;
-  GY  = (H - GH) / 2;
+  MR  = H * 0.042;         // mezőnyjátékos fél-magasság
+  GH  = H * 0.36;          // kapunyílás
+  GY  = PLY + (PLH - GH) / 2;   // kapu a pálya közepére igazítva
   baseSpd = H * 0.006 * stageMult();
   spd = baseSpd;
 
-  // Játékos pozíciók
-  px = WL + PW/2;             py = H/2;
-  mx = W * 0.40;              my = H/2;
+  // Labda eltűnési mélység a gólvonal mögött (a dekor-sávba gurulva) — hangolható
+  BALL_VANISH = PLX * 0.6;
 
-  // Gép pozíciók
-  ax  = W - WL - PW/2;        ay  = H/2;
-  amx = W * 0.60;             amy = H/2;
+  // --- Játékos pozíciók: a CSATÁR a túloldalra cserélve (ellenfél kapuja elé) ---
+  px = PLX + PW/2;           py = PLY + PLH/2;   // kapus (bal keret-él)
+  mx = PLX + PLW*0.62;       my = PLY + PLH/2;   // csatár (jobb térfél, GÉP kapuja előtt)
+
+  // --- Gép pozíciók: a gép csatára a JÁTÉKOS kapuja elé ---
+  ax  = PLX + PLW - PW/2;    ay  = PLY + PLH/2;  // gép kapus (jobb keret-él)
+  amx = PLX + PLW*0.38;      amy = PLY + PLH/2;  // gép csatár (bal térfél, JÁTÉKOS kapuja előtt)
 
   resetBall(1);
 }
@@ -45,7 +56,7 @@ function updateBallRotation() {
 }
 
 function resetBall(dir) {
-  bx=W/2; by=H/2;
+  bx=PLX+PLW/2; by=PLY+PLH/2;
   var currentSpd = baseSpd * goalSpeedMult;
   bvx = currentSpd * (dir>0?1:-1);
   bvy = currentSpd * (Math.random()*0.4-0.2);
@@ -53,6 +64,8 @@ function resetBall(dir) {
   spd = currentSpd;
   ballSpin = 0;
   ballSquish = 0;
+  ballVisible = true;
+  goalScored = null;
 }
 
 // --- Multi-touch ---

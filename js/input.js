@@ -50,7 +50,7 @@ function doPowerHit(side) {
 }
 
 // --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
-console.log('%cBlaze Kick build: MODULAR-V2', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V3', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
@@ -81,7 +81,7 @@ document.addEventListener('pointermove', function(e) {
     var d = (e.clientY - lastLeftY) * 1.5;
     lastLeftVY = e.clientY - lastLeftY;  // csavar sebessége
     py += d;
-    py = Math.max(WL+PR, Math.min(H-WL-PR, py));
+    py = Math.max(PLY+PR, Math.min(PLY+PLH-PR, py));
     lastLeftY = e.clientY;
   }
   if (e.pointerId===touchRight && lastRightY!==null) {
@@ -89,7 +89,7 @@ document.addEventListener('pointermove', function(e) {
     var d = (e.clientY - lastRightY) * 1.5;
     lastRightVY = e.clientY - lastRightY;  // csavar sebessége
     my += d;
-    my = Math.max(WL+MR, Math.min(H-WL-MR, my));
+    my = Math.max(PLY+MR, Math.min(PLY+PLH-MR, my));
     lastRightY = e.clientY;
   }
 });

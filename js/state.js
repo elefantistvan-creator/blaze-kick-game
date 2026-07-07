@@ -4,6 +4,16 @@ var PR;   // kapus pálcika fél-magasság
 var MR;   // mezőnyjátékos pálcika fél-magasság (rövidebb)
 var PW;   // pálcika szélesség
 
+// --- Pálya-téglalap (behúzott keret) + hangolható paraméterek ---
+var PLX, PLY, PLW, PLH;      // pálya bal-fent sarok + méret
+var MARGIN_X, MARGIN_Y;      // keret-margó (dekor-sáv) a W/H arányában
+var BALL_VANISH;             // labda eltűnési mélység a gólvonal mögött (px)
+
+// --- Gól / szünet állapot ---
+var ballVisible = true;      // false = labda a hálóban eltűnt
+var goalScored = null;       // null | 'left' | 'right' (labda begurul a hálóba)
+var paused = false;          // szünet
+
 // Játékos: kapus (bal fal) + mezőnyjátékos (30%-os vonal előtt)
 var px, py;   // kapus pozíció
 var mx, my;   // mezőnyjátékos pozíció
@@ -16,6 +26,7 @@ var bx, by, bvx, bvy, BR;
 var sc1=0, sc2=0;
 var spd, baseSpd;
 var running=false, goalTime=0;
+var gameStartTime=0;
 
 // Sebesség nyomonkövetés (csavar)
 var prevPY=0, prevMY=0, prevAY=0, prevAmY=0;

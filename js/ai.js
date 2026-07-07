@@ -4,19 +4,19 @@ function updateAI() {
   var kSpd = H * 0.005 * spdMult * stageMult();
   var mSpd = H * 0.006 * spdMult * stageMult();
 
-  // Gép kapus
+  // Gép kapus (jobb keret-él)
   var tAY = by + (Math.random()-0.5)*PR*0.4;
   var dAY = tAY - ay;
   ay += Math.sign(dAY)*Math.min(Math.abs(dAY)*0.08, kSpd);
-  ay = Math.max(WL+PR, Math.min(H-WL-PR, ay));
+  ay = Math.max(PLY+PR, Math.min(PLY+PLH-PR, ay));
 
-  // Gép mezőnyjátékos
+  // Gép csatár — most a BAL térfélen (játékos kapuja előtt), a bal oldalon aktív
   var tAmY = by + (Math.random()-0.5)*MR*0.5;
-  if (bx > W*0.55) {
+  if (bx < PLX + PLW*0.45) {
     var dAmY = tAmY - amy;
     amy += Math.sign(dAmY)*Math.min(Math.abs(dAmY)*0.1, mSpd);
   }
-  amy = Math.max(WL+MR, Math.min(H-WL-MR, amy));
+  amy = Math.max(PLY+MR, Math.min(PLY+PLH-MR, amy));
 }
 
 // --- Power-up labda ---

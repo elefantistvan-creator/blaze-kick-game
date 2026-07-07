@@ -76,6 +76,15 @@ function drawGoalText() {
 
 function updateBall() {
   if (!running) return;
+  // Gól után: a labda tovább gurul a hálóba, majd a beállított mélységnél eltűnik
+  if (goalScored) {
+    if (ballVisible) {
+      bx += bvx; by += bvy;
+      if (goalScored==='left'  && bx <= PLX - BALL_VANISH)      ballVisible = false;
+      if (goalScored==='right' && bx >= PLX + PLW + BALL_VANISH) ballVisible = false;
+    }
+    return;
+  }
   if (Date.now()-goalTime < 1200) return;
 
   // 3 perc után gyorsulás - pontszámtól független
@@ -122,24 +131,20 @@ function updateBall() {
   if (isPowerActive(powerLeft)) {
     if (powerLeft.type===1) { rightGY=GY+GH/4; rightGH=GH/2; }  // ellenfél kapuja feleződik
     if (powerLeft.type===2) { rightGY=GY-GH/2; rightGH=GH*2; }  // ellenfél kapuja duplázódik
-    if (powerLeft.type===3) { rightGY=0; rightGH=H; }            // ellenfél kapuja teljes pálya
-    if (powerLeft.type===4) { leftGY=0;  leftGH=H; }             // saját kapu teljes pálya (nehezítő)
+    if (powerLeft.type===3) { rightGY=PLY; rightGH=PLH; }        // ellenfél kapuja teljes pálya
+    if (powerLeft.type===4) { leftGY=PLY;  leftGH=PLH; }         // saját kapu teljes pálya (nehezítő)
   }
   // Gép aktív hatása → játékos kapuját érinti:
   if (isPowerActive(powerRight)) {
     if (powerRight.type===1) { leftGY=GY+GH/4;  leftGH=GH/2; }  // ellenfél kapuja feleződik
     if (powerRight.type===2) { leftGY=GY-GH/2;  leftGH=GH*2; }  // ellenfél kapuja duplázódik
-    if (powerRight.type===3) { leftGY=0;  leftGH=H; }            // ellenfél kapuja teljes pálya
-    if (powerRight.type===4) { rightGY=0; rightGH=H; }           // saját kapu teljes pálya (nehezítő)
+    if (powerRight.type===3) { leftGY=PLY;  leftGH=PLH; }        // ellenfél kapuja teljes pálya
+    if (powerRight.type===4) { rightGY=PLY; rightGH=PLH; }       // saját kapu teljes pálya (nehezítő)
   }
 
-  // Falak fel/le - type 3 NEM érinti a felső/alsó falat, csak az oldalsó kapufal tűnik el
-  var topWallLeft=WL, botWallLeft=WL, topWallRight=WL, botWallRight=WL;
-
-  var tw = bx < W/2 ? topWallLeft  : topWallRight;
-  var bw = bx < W/2 ? botWallLeft  : botWallRight;
-  if (by-BR < tw)   { by=tw+BR;   bvy=Math.abs(bvy);  soundWall(); spawnDust(bx, tw, 0); ballSquish=0.8; ballSquishDir=Math.PI/2; }
-  if (by+BR > H-bw) { by=H-bw-BR; bvy=-Math.abs(bvy); soundWall(); spawnDust(bx, H-bw, 0); ballSquish=0.8; ballSquishDir=Math.PI/2; }
+  // Falak fel/le - a keret felső/alsó éle (PLY, PLY+PLH)
+  if (by-BR < PLY)     { by=PLY+BR;     bvy=Math.abs(bvy);  soundWall(); spawnDust(bx, PLY, 0);     ballSquish=0.8; ballSquishDir=Math.PI/2; }
+  if (by+BR > PLY+PLH) { by=PLY+PLH-BR; bvy=-Math.abs(bvy); soundWall(); spawnDust(bx, PLY+PLH, 0); ballSquish=0.8; ballSquishDir=Math.PI/2; }
 
   // Kapufa ütközés - kapu belső sarkainál visszapattan
   var lBlocked = (isPowerActive(powerLeft)  && powerLeft.type===11) ||
@@ -168,20 +173,21 @@ function updateBall() {
   }
 
   if (!lBlocked) {
-    checkPost(WL, leftGY, true);           // bal felső kapufa
-    checkPost(WL, leftGY+leftGH, true);    // bal alsó kapufa
+    checkPost(PLX, leftGY, true);           // bal felső kapufa
+    checkPost(PLX, leftGY+leftGH, true);    // bal alsó kapufa
   }
   if (!rBlocked) {
-    checkPost(W-WL, rightGY, false);         // jobb felső kapufa
-    checkPost(W-WL, rightGY+rightGH, false); // jobb alsó kapufa
+    checkPost(PLX+PLW, rightGY, false);         // jobb felső kapufa
+    checkPost(PLX+PLW, rightGY+rightGH, false); // jobb alsó kapufa
   }
 
-  // Bal fal / kapu
-  if (bx-BR<WL) {
+  // Bal gólvonal (a keret belső széle, PLX)
+  if (bx-BR < PLX) {
     var leftBlocked = (isPowerActive(powerLeft)  && powerLeft.type===11) ||
                       (isPowerActive(powerRight) && powerRight.type===12);
-    if (!leftBlocked && by+BR>leftGY && by-BR<leftGY+leftGH) {
-      sc2++; s2El.textContent=sc2; goalTime=Date.now();
+    // GÓL csak ha a labda TELJESEN a nyíláson belül van (különben kapufa/fal)
+    if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
+      sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left';
       goalSpeedMult = Math.min(goalSpeedMult + 0.05, 3.0);
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('left'); triggerGoalEffect('right');
@@ -189,15 +195,15 @@ function updateBall() {
       triggerGateFlash('left'); triggerVictoryJump('right'); checkDramatic();
       if (sc2>=7) { endGame(false); return; }
       setTimeout(function(){ resetBall(-1); }, 1100); return;  // bal kapott gólt, bal indít
-    } else { bx=WL+BR; bvx=Math.abs(bvx); soundWall(); spawnDust(WL, by, 1); ballSquish=0.8; ballSquishDir=0; }
+    } else { bx=PLX+BR; bvx=Math.abs(bvx); soundWall(); spawnDust(PLX, by, 1); ballSquish=0.8; ballSquishDir=0; }
   }
 
-  // Jobb fal / kapu
-  if (bx+BR>W-WL) {
+  // Jobb gólvonal (a keret belső széle, PLX+PLW)
+  if (bx+BR > PLX+PLW) {
     var rightBlocked = (isPowerActive(powerRight) && powerRight.type===11) ||
                        (isPowerActive(powerLeft)  && powerLeft.type===12);
-    if (!rightBlocked && by+BR>rightGY && by-BR<rightGY+rightGH) {
-      sc1++; s1El.textContent=sc1; goalTime=Date.now();
+    if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
+      sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right';
       goalSpeedMult = Math.min(goalSpeedMult + 0.05, 3.0);
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('right'); triggerGoalEffect('left');
@@ -205,7 +211,7 @@ function updateBall() {
       triggerGateFlash('right'); triggerVictoryJump('left'); checkDramatic();
       if (sc1>=7) { endGame(true); return; }
       setTimeout(function(){ resetBall(1); }, 1100); return;  // jobb kapott gólt, jobb indít
-    } else { bx=W-WL-BR; bvx=-Math.abs(bvx); soundWall(); spawnDust(W-WL, by, -1); ballSquish=0.8; ballSquishDir=0; }
+    } else { bx=PLX+PLW-BR; bvx=-Math.abs(bvx); soundWall(); spawnDust(PLX+PLW, by, -1); ballSquish=0.8; ballSquishDir=0; }
   }
 
   // Kapusok ütközés

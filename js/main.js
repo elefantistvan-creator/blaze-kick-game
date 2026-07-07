@@ -27,8 +27,51 @@ function endGame(won) {
   overlay.style.display='flex';
 }
 
+// --- Immerzív: teljes képernyő visszakérése, ha a rendszer elvette ---
+function reRequestFullscreen() {
+  var el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  if (el.requestFullscreen) { el.requestFullscreen().catch(function(){}); }
+  else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+}
+// Ha játék közben felbukkant a rendszersáv (fullscreen elveszett), érintésre visszakérjük
+document.addEventListener('pointerdown', function() {
+  if (running && !paused && !document.fullscreenElement && !document.webkitFullscreenElement) {
+    reRequestFullscreen();
+  }
+}, true);
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && running && !paused) reRequestFullscreen();
+});
+
+// --- Szünet ---
+function pauseGame() {
+  if (!running || paused) return;
+  paused = true; running = false;
+  var po = document.getElementById('pauseOverlay');
+  if (po) po.style.display = 'flex';
+}
+function resumeGame() {
+  var po = document.getElementById('pauseOverlay');
+  if (po) po.style.display = 'none';
+  if (!paused) return;
+  paused = false;
+  reRequestFullscreen();
+  running = true;
+}
+function exitToMenu() {
+  paused = false; running = false;
+  var po = document.getElementById('pauseOverlay');
+  if (po) po.style.display = 'none';
+  overlay.style.display = 'flex';
+  startBtn.textContent = '⚽ Start Game';
+}
+
 function doStart() {
   initAudio();
+  paused = false;
+  var po = document.getElementById('pauseOverlay');
+  if (po) po.style.display = 'none';
   // Véletlenszerű napszak
   isNight = Math.random() > 0.5;
   var el=document.documentElement;
@@ -94,6 +137,14 @@ bindBtn('mpCancelWaitBtn', mpCancel);
 document.getElementById('mpOverlay').addEventListener('pointerdown', function(e){
   if (e.target.tagName !== 'INPUT') e.stopPropagation();
 });
+
+// Szünet gomb + overlay gombok
+var pauseBtn = document.getElementById('pauseBtn');
+if (pauseBtn) pauseBtn.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); pauseGame(); });
+bindBtn('resumeBtn', resumeGame);
+bindBtn('exitBtn', exitToMenu);
+var pauseOv = document.getElementById('pauseOverlay');
+if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
 
 window.addEventListener('resize', function(){ if(running) setup(); });
 setup(); loop();
