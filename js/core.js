@@ -5,8 +5,8 @@ function setup() {
   c.width = W; c.height = H;
 
   // --- Keret-margók (dekor-sáv) — vizuálisan hangolható, később tier-enként ---
-  MARGIN_X = 0.06;
-  MARGIN_Y = 0.09;
+  MARGIN_X = 0.10;
+  MARGIN_Y = 0.08;
   PLX = W * MARGIN_X; PLW = W - 2*PLX;
   PLY = H * MARGIN_Y; PLH = H - 2*PLY;
 

@@ -16,40 +16,42 @@ function draw() {
   // Feszültség háttér
   drawTension();
 
-  // === Dekor-sáv háttér (a kereten kívül, sötét) ===
+  // === Dekor-sáv háttér (a kereten kívül, sötét — a kép betöltéséig) ===
   ctx.fillStyle = '#0c0c12';
   ctx.fillRect(0,0,W,H);
 
-  // === Pálya (behúzott téglalap) — a fűre vágva ===
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(PLX, PLY, PLW, PLH);
-  ctx.clip();
-  if (isNight) {
-    ctx.fillStyle='#0a1a0a'; ctx.fillRect(PLX,PLY,PLW,PLH);
-    ctx.fillStyle='rgba(255,255,255,0.03)';
-    var sw=PLW/8;
-    for(var i=0;i<8;i+=2) ctx.fillRect(PLX+i*sw,PLY,sw,PLH);
-    var corners=[[PLX,PLY],[PLX+PLW,PLY],[PLX,PLY+PLH],[PLX+PLW,PLY+PLH]];
-    for(var ci=0;ci<corners.length;ci++){
-      var cg=ctx.createRadialGradient(corners[ci][0],corners[ci][1],0,corners[ci][0],corners[ci][1],PLH*0.55);
-      cg.addColorStop(0,'rgba(220,255,180,0.32)');
-      cg.addColorStop(0.3,'rgba(180,255,150,0.12)');
-      cg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=cg; ctx.fillRect(PLX,PLY,PLW,PLH);
+  if (pitchImgReady) {
+    // === Valós stadion-kép: a zöld-téglalapja a keretre igazítva ===
+    var IW = pitchImg.naturalWidth, IH = pitchImg.naturalHeight;
+    var gl = PITCH_GL*IW, gt = PITCH_GT*IH;
+    var gw = (PITCH_GR-PITCH_GL)*IW, gh = (PITCH_GB-PITCH_GT)*IH;
+    var sx = PLW/gw, sy = PLH/gh;
+    var dw = IW*sx, dh = IH*sy;
+    var dx = PLX - gl*sx, dy = PLY - gt*sy;
+    ctx.drawImage(pitchImg, dx, dy, dw, dh);
+    if (isNight) {  // esti hangulat: enyhe sötétítés + reflektor a labdára
+      ctx.fillStyle='rgba(0,0,10,0.28)'; ctx.fillRect(0,0,W,H);
+      var rgrad = ctx.createRadialGradient(bx,by,0,bx,by,PLH*0.4);
+      rgrad.addColorStop(0,'rgba(255,255,220,0.16)');
+      rgrad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rgrad; ctx.fillRect(0,0,W,H);
     }
-    var rgrad = ctx.createRadialGradient(bx,by,0,bx,by,PLH*0.4);
-    rgrad.addColorStop(0,'rgba(255,255,220,0.22)');
-    rgrad.addColorStop(0.5,'rgba(255,255,180,0.06)');
-    rgrad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=rgrad; ctx.fillRect(PLX,PLY,PLW,PLH);
   } else {
-    ctx.fillStyle='#2e7d32'; ctx.fillRect(PLX,PLY,PLW,PLH);
-    ctx.fillStyle='rgba(0,0,0,0.05)';
-    var sw2=PLW/8;
-    for(var i2=0;i2<8;i2+=2) ctx.fillRect(PLX+i2*sw2,PLY,sw2,PLH);
+    // === Placeholder pálya (amíg a kép betölt) ===
+    ctx.save(); ctx.beginPath(); ctx.rect(PLX, PLY, PLW, PLH); ctx.clip();
+    if (isNight) {
+      ctx.fillStyle='#0a1a0a'; ctx.fillRect(PLX,PLY,PLW,PLH);
+      ctx.fillStyle='rgba(255,255,255,0.03)';
+      var sw=PLW/8;
+      for(var i=0;i<8;i+=2) ctx.fillRect(PLX+i*sw,PLY,sw,PLH);
+    } else {
+      ctx.fillStyle='#2e7d32'; ctx.fillRect(PLX,PLY,PLW,PLH);
+      ctx.fillStyle='rgba(0,0,0,0.05)';
+      var sw2=PLW/8;
+      for(var i2=0;i2<8;i2+=2) ctx.fillRect(PLX+i2*sw2,PLY,sw2,PLH);
+    }
+    ctx.restore();
   }
-  ctx.restore();
 
   // Power állapotok kiszámítása a rajzoláshoz - szinkronban a fizikával
   var dLGY=GY, dLGH=GH, dRGY=GY, dRGH=GH;

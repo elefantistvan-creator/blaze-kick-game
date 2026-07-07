@@ -42,3 +42,11 @@ function triggerShake(mag) { shakeMag=mag; shakeTime=Date.now(); }
 
 // --- Motion trail ---
 var ballTrail = [];  // [{x,y,age}]
+
+// --- Pálya háttérkép (tier-enként) + zöld-téglalap kalibráció (a kép arányában) ---
+// A kép úgy rajzolódik, hogy a zöld-téglalapja PONTOSAN a pálya-keretre essen.
+var pitchImg = new Image();
+var pitchImgReady = false;
+pitchImg.onload = function(){ pitchImgReady = true; };
+pitchImg.src = 'assets/pitch1.jpg';
+var PITCH_GL = 0.116, PITCH_GR = 0.87, PITCH_GT = 0.13, PITCH_GB = 0.86; // zöld szélek
