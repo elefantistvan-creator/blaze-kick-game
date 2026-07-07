@@ -1,13 +1,56 @@
-var CACHE = 'blazekick-v1';
+// Blaze Kick Service Worker - v2 (modularizált verzió)
+// FONTOS: minden deploy előtt növeld a verziószámot!
+var CACHE = 'blazekick-v2';
+
+var ASSETS = [
+  './',
+  './index.html',
+  './css/style.css',
+  './js/early.js',
+  './js/game.js',
+  './assets/logo.png',
+  './assets/play.png',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
+
 self.addEventListener('install', function(e) {
-  e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(['./', './index.html']); }));
+  e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(ASSETS); }));
   self.skipWaiting();
 });
+
+// Régi cache verziók törlése aktiváláskor
 self.addEventListener('activate', function(e) {
-  e.waitUntil(clients.claim());
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(keys.filter(function(k) { return k !== CACHE; })
+        .map(function(k) { return caches.delete(k); }));
+    }).then(function() { return clients.claim(); })
+  );
 });
+
+// index.html: network-first (friss verzió elsőbbsége), minden más: cache-first
 self.addEventListener('fetch', function(e) {
-  e.respondWith(caches.match(e.request).then(function(r) {
-    return r || fetch(e.request);
-  }));
+  var url = new URL(e.request.url);
+  var isIndex = e.request.mode === 'navigate' || url.pathname.endsWith('/index.html');
+  if (isIndex) {
+    e.respondWith(
+      fetch(e.request).then(function(resp) {
+        var copy = resp.clone();
+        caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+        return resp;
+      }).catch(function() { return caches.match(e.request); })
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(function(cached) {
+        return cached || fetch(e.request).then(function(resp) {
+          var copy = resp.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+          return resp;
+        });
+      })
+    );
+  }
 });
