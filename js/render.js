@@ -53,69 +53,53 @@ function draw() {
     ctx.restore();
   }
 
-  // Power állapotok kiszámítása a rajzoláshoz - szinkronban a fizikával
+  // Kapuk fix méret (a kapuméret-bónuszok törölve); csak a fal-kapuvédő (11/12) marad
   var dLGY=GY, dLGH=GH, dRGY=GY, dRGH=GH;
-  if (isPowerActive(powerLeft)) {
-    if (powerLeft.type===1) { dRGY=GY+GH/4; dRGH=GH/2; }
-    if (powerLeft.type===2) { dRGY=GY-GH/2; dRGH=GH*2; }
-    if (powerLeft.type===3) { dRGY=PLY; dRGH=PLH; }
-    if (powerLeft.type===4) { dLGY=PLY; dLGH=PLH; }
-  }
-  if (isPowerActive(powerRight)) {
-    if (powerRight.type===1) { dLGY=GY+GH/4; dLGH=GH/2; }
-    if (powerRight.type===2) { dLGY=GY-GH/2; dLGH=GH*2; }
-    if (powerRight.type===3) { dLGY=PLY; dLGH=PLH; }
-    if (powerRight.type===4) { dRGY=PLY; dRGH=PLH; }
-  }
   var leftWalled  = (isPowerActive(powerLeft)  && powerLeft.type===11) ||
                     (isPowerActive(powerRight) && powerRight.type===12);
   var rightWalled = (isPowerActive(powerRight) && powerRight.type===11) ||
                     (isPowerActive(powerLeft)  && powerLeft.type===12);
 
-  var RX = PLX + PLW;  // jobb gólvonal X
+  var RX = PLX + PLW;              // jobb gólvonal X
+  var LW = Math.max(2, WL*LINE_SCALE);          // vonalvastagság (fele)
+  var LC = 'rgba(255,255,255,'+LINE_ALPHA+')';  // áttetsző fehér
 
   // Gólhálók (a gólvonal mögött, kifelé) — ide gurul be és tűnik el a labda
   drawGoalNet(PLX, dLGY, dLGH, -1);
   drawGoalNet(RX,  dRGY, dRGH, +1);
 
   // Keret felső/alsó éle
-  ctx.fillStyle='white';
-  ctx.fillRect(PLX, PLY, PLW, WL);
-  ctx.fillRect(PLX, PLY+PLH-WL, PLW, WL);
+  ctx.fillStyle=LC;
+  ctx.fillRect(PLX, PLY, PLW, LW);
+  ctx.fillRect(PLX, PLY+PLH-LW, PLW, LW);
 
   // Bal oldali keret-él (kapuréssel)
   if (leftWalled) {
-    ctx.fillStyle='white'; ctx.fillRect(PLX, PLY, WL, PLH);
+    ctx.fillStyle=LC; ctx.fillRect(PLX, PLY, LW, PLH);
   } else {
-    ctx.fillStyle='white';
-    ctx.fillRect(PLX, PLY, WL, dLGY-PLY);
-    ctx.fillRect(PLX, dLGY+dLGH, WL, (PLY+PLH)-(dLGY+dLGH));
-    if (dLGH !== PLH && dLGH !== GH) { ctx.fillStyle='rgba(79,195,247,0.2)'; ctx.fillRect(PLX,dLGY,WL,dLGH); }
+    ctx.fillStyle=LC;
+    ctx.fillRect(PLX, PLY, LW, dLGY-PLY);
+    ctx.fillRect(PLX, dLGY+dLGH, LW, (PLY+PLH)-(dLGY+dLGH));
   }
 
   // Jobb oldali keret-él (kapuréssel)
   if (rightWalled) {
-    ctx.fillStyle='white'; ctx.fillRect(RX-WL, PLY, WL, PLH);
+    ctx.fillStyle=LC; ctx.fillRect(RX-LW, PLY, LW, PLH);
   } else {
-    ctx.fillStyle='white';
-    ctx.fillRect(RX-WL, PLY, WL, dRGY-PLY);
-    ctx.fillRect(RX-WL, dRGY+dRGH, WL, (PLY+PLH)-(dRGY+dRGH));
-    if (dRGH !== PLH && dRGH !== GH) { ctx.fillStyle='rgba(239,83,80,0.2)'; ctx.fillRect(RX-WL,dRGY,WL,dRGH); }
+    ctx.fillStyle=LC;
+    ctx.fillRect(RX-LW, PLY, LW, dRGY-PLY);
+    ctx.fillRect(RX-LW, dRGY+dRGH, LW, (PLY+PLH)-(dRGY+dRGH));
   }
-
-  // Kapu-terület színezés
-  ctx.fillStyle='rgba(79,195,247,0.18)';  ctx.fillRect(PLX,dLGY,WL*3,dLGH);
-  ctx.fillStyle='rgba(239,83,80,0.18)';   ctx.fillRect(RX-WL*3,dRGY,WL*3,dRGH);
 
   // Középvonal
   var CXm = PLX + PLW/2;
   ctx.save(); ctx.beginPath(); ctx.setLineDash([8,8]);
-  ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=2;
+  ctx.strokeStyle=LC; ctx.lineWidth=Math.max(1,LW*0.6);
   ctx.moveTo(CXm,PLY); ctx.lineTo(CXm,PLY+PLH); ctx.stroke(); ctx.restore();
 
   // Középkör
   ctx.save(); ctx.beginPath();
-  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=2;
+  ctx.strokeStyle=LC; ctx.lineWidth=Math.max(1,LW*0.6);
   ctx.arc(CXm,PLY+PLH/2,PLH*0.135,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 

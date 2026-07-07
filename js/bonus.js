@@ -9,7 +9,7 @@ function spawnPowerBall() {
   var dirY = Math.random() > 0.5 ? -1 : 1;
   var ySpd = spd2 * (0.5 + Math.random() * 0.5);
   pb = {
-    x: W/2, y: H/3 + Math.random()*H/3,
+    x: PLX+PLW/2, y: PLY+PLH/3 + Math.random()*PLH/3,
     vx: spd2 * dirX,
     vy: ySpd * dirY,
     r: BR * 0.85
@@ -26,10 +26,6 @@ function activatePower(type, forPlayer) {
 }
 
 function getPowerName(type) {
-  if (type===1)  return '🥅 Small goal';
-  if (type===2)  return '🥅 2x goal for them';
-  if (type===3)  return '🧱 Goal walled off';
-  if (type===4)  return '🌐 Full-court goal for them';
   if (type===5)  return '🐢 Slower ball';
   if (type===6)  return '⚡ Faster ball for them';
   if (type===11) return '🧱 Own goal walled off';
@@ -45,10 +41,10 @@ function updatePowerBall() {
   if (!pb) return;
   pb.x += pb.vx; pb.y += pb.vy;
 
-  if (pb.y - pb.r < WL)   { pb.y = WL+pb.r;   pb.vy = Math.abs(pb.vy); }
-  if (pb.y + pb.r > H-WL) { pb.y = H-WL-pb.r; pb.vy = -Math.abs(pb.vy); }
+  if (pb.y - pb.r < PLY)      { pb.y = PLY+pb.r;      pb.vy = Math.abs(pb.vy); }
+  if (pb.y + pb.r > PLY+PLH)  { pb.y = PLY+PLH-pb.r;  pb.vy = -Math.abs(pb.vy); }
 
-  if (pb.x < -pb.r*2 || pb.x > W+pb.r*2) {
+  if (pb.x < PLX-pb.r*2 || pb.x > PLX+PLW+pb.r*2) {
     pb = null; schedulePowerBall(); return;
   }
 
@@ -58,9 +54,10 @@ function updatePowerBall() {
              hitRect(amx-PW/2,amy-MR,PW,MR*2,pb.x,pb.y,pb.r);
 
   if (hitP || hitA) {
-    // 6 pár: 1-10 + 11/12 (falazott kapu)
-    var pairIdx = Math.floor(Math.random()*6); // 0-5
-    var pairs = [1,3,5,7,9,11];
+    // Párok: 5(labda seb.), 7(belső méret), 9(belső dupla/eltűnik), 11(falazott kapu)
+    // A kapuméret-párok (1,3) törölve
+    var pairs = [5,7,9,11];
+    var pairIdx = Math.floor(Math.random()*pairs.length);
     var pair = pairs[pairIdx];
     var favorable = Math.random() > 0.5;
     var type = favorable ? pair : (pair === 11 ? 12 : pair+1);

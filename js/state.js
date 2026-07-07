@@ -49,4 +49,9 @@ var pitchImg = new Image();
 var pitchImgReady = false;
 pitchImg.onload = function(){ pitchImgReady = true; };
 pitchImg.src = 'assets/pitch1.jpg';
-var PITCH_GL = 0.116, PITCH_GR = 0.87, PITCH_GT = 0.13, PITCH_GB = 0.86; // zöld szélek
+// zöld szélek (beljebb húzva ~5%, hogy a fehér keret a zöldön belülre essen)
+var PITCH_GL = 0.135, PITCH_GR = 0.851, PITCH_GT = 0.148, PITCH_GB = 0.842;
+
+// --- Pályavonal stílus (keret, felező, kör) ---
+var LINE_ALPHA = 0.6;   // átlátszóság (kevésbé "világítós", illik a valós képhez)
+var LINE_SCALE = 0.5;   // vonalvastagság a WL-hez képest (fele)

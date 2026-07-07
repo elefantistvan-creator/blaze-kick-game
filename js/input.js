@@ -50,7 +50,7 @@ function doPowerHit(side) {
 }
 
 // --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
-console.log('%cBlaze Kick build: MODULAR-V4', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V5', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||

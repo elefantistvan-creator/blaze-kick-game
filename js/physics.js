@@ -121,26 +121,9 @@ function updateBall() {
   bx += bvx * spdScale;
   by += bvy * spdScale;
 
-  // Kapu méretek (fizika)
-  // powerLeft = játékos aktív hatása, powerRight = gép aktív hatása
-  // Minden hatás az ellenfélre vonatkozik (elkapónak kedvező)
+  // Kapu méretek (fizika) — fix méret; a kapuméret-bónuszok (type 1-4) törölve
   var leftGY = GY, leftGH = GH;   // bal (játékos) kapu
   var rightGY = GY, rightGH = GH; // jobb (gép) kapu
-
-  // Játékos aktív hatása → gép kapuját érinti:
-  if (isPowerActive(powerLeft)) {
-    if (powerLeft.type===1) { rightGY=GY+GH/4; rightGH=GH/2; }  // ellenfél kapuja feleződik
-    if (powerLeft.type===2) { rightGY=GY-GH/2; rightGH=GH*2; }  // ellenfél kapuja duplázódik
-    if (powerLeft.type===3) { rightGY=PLY; rightGH=PLH; }        // ellenfél kapuja teljes pálya
-    if (powerLeft.type===4) { leftGY=PLY;  leftGH=PLH; }         // saját kapu teljes pálya (nehezítő)
-  }
-  // Gép aktív hatása → játékos kapuját érinti:
-  if (isPowerActive(powerRight)) {
-    if (powerRight.type===1) { leftGY=GY+GH/4;  leftGH=GH/2; }  // ellenfél kapuja feleződik
-    if (powerRight.type===2) { leftGY=GY-GH/2;  leftGH=GH*2; }  // ellenfél kapuja duplázódik
-    if (powerRight.type===3) { leftGY=PLY;  leftGH=PLH; }        // ellenfél kapuja teljes pálya
-    if (powerRight.type===4) { rightGY=PLY; rightGH=PLH; }       // saját kapu teljes pálya (nehezítő)
-  }
 
   // Falak fel/le - a keret felső/alsó éle (PLY, PLY+PLH)
   if (by-BR < PLY)     { by=PLY+BR;     bvy=Math.abs(bvy);  soundWall(); spawnDust(bx, PLY, 0);     ballSquish=0.8; ballSquishDir=Math.PI/2; }

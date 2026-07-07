@@ -22,7 +22,7 @@ function setup() {
   spd = baseSpd;
 
   // Labda eltűnési mélység a gólvonal mögött (a dekor-sávba gurulva) — hangolható
-  BALL_VANISH = PLX * 0.6;
+  BALL_VANISH = PLX * 0.15;
 
   // --- Játékos pozíciók: a CSATÁR a túloldalra cserélve (ellenfél kapuja elé) ---
   px = PLX + PW/2;           py = PLY + PLH/2;   // kapus (bal keret-él)
@@ -60,7 +60,7 @@ function resetBall(dir) {
   var currentSpd = baseSpd * goalSpeedMult;
   bvx = currentSpd * (dir>0?1:-1);
   bvy = currentSpd * (Math.random()*0.4-0.2);
-  BR = H * 0.022;
+  BR = H * 0.01925;   // labda sugár (−12,5%)
   spd = currentSpd;
   ballSpin = 0;
   ballSquish = 0;
