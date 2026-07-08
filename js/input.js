@@ -63,7 +63,7 @@ function uiBlocking() {
   return false;
 }
 
-console.log('%cBlaze Kick build: MODULAR-V13', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V14', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || uiBlocking()) return;

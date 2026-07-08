@@ -85,6 +85,7 @@ var Progress = (function() {
       return data.losses[stage];
     },
     lossStreak: function(stage) { return data.losses[stage] || 0; },
+    unlockAll:  function() { data.unlocked = MAX_STAGE; save(); },   // TESZT
     reset: function() {
       data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false };
       try { localStorage.removeItem('bk_stage'); } catch(e) {}

@@ -144,6 +144,10 @@ bindBtn('miExit',         exitGame);
 bindBtn('stagesBackBtn',  function(){ Screens.show('menu'); });
 bindBtn('settingsBackBtn',function(){ Screens.show('menu'); });
 bindBtn('resetProgressBtn', resetProgress);
+// TESZT ESZKÖZÖK — kiadás előtt törlendő
+bindBtn('testCoinsBtn',  testAddCoins);
+bindBtn('testStockBtn',  testStockAll);
+bindBtn('testUnlockBtn', testUnlockAll);
 bindBtn('resultRetryBtn', retryStage);
 bindBtn('resultNextBtn',  nextStage);
 bindBtn('resultMenuBtn',  backToMenu);
