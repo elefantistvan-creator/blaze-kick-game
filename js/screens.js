@@ -122,7 +122,28 @@ var Screens = (function() {
   }
 
   // ---------- Meccs közbeni aktiváló sáv ----------
+  // A gombok állapota magától frissül: lejáró hatás / gól után újra aktiválható.
+  var itemBarTimer = null;
+  function startItemBarTicker() {
+    if (itemBarTimer) return;
+    itemBarTimer = setInterval(function(){
+      var bar = el('itemBar');
+      if (!bar || bar.style.display === 'none') return;
+      var btns = bar.querySelectorAll('button[data-item]');
+      for (var i=0;i<btns.length;i++) {
+        var id = btns[i].getAttribute('data-item');
+        var ok = Shop.canActivate(id);
+        if (ok) btns[i].removeAttribute('disabled');
+        else    btns[i].setAttribute('disabled','');
+        // aktív hatás jelzése + hátralévő idő
+        if (Shop.isActive(id)) { btns[i].classList.add('on'); btns[i].setAttribute('data-left', Shop.timeLeft(id)); }
+        else                   { btns[i].classList.remove('on'); btns[i].removeAttribute('data-left'); }
+      }
+    }, 400);
+  }
+
   function buildItemBar() {
+    startItemBarTicker();
     var bar = el('itemBar');
     if (!bar) return;
     bar.innerHTML = '';
