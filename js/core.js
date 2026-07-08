@@ -46,7 +46,7 @@ var goalSpeedMult = 1.0;
 var lastGoalDir = 1;   // ki kapott gólt - ő kapja a bedobást
 
 // --- Stage rendszer: minden meccs végén nő, labda + gép erősebb lesz ---
-var stage = parseInt(localStorage.getItem('bk_stage'), 10) || 1;
+var stage = Progress.unlockedMax();  // a Stage rács állítja be indításkor
 function stageMult() { return 1 + (stage - 1) * 0.025; } // Stage1=1.0, Stage2=1.025, Stage3=1.05, ...
 
 function updateBallRotation() {

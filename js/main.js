@@ -14,17 +14,13 @@ function loop() {
 }
 
 function endGame(won) {
-  running=false;
-  // Stage only increases on a win - stays the same on a loss
-  if (won) {
-    stage++;
-    try { localStorage.setItem('bk_stage', stage); } catch(e) {}
+  running = false;
+  var earned = 0;
+  if (bkMode === 'stage') {
+    if (won) earned = Progress.recordWin(currentStage, sc2);   // sc2 = kapott gólok
+    else     Progress.recordLoss(currentStage);
   }
-  overlay.querySelector('h2').textContent = won?'🏆 You won!':'💻 CPU wins!';
-  overlay.querySelectorAll('p')[0].textContent = won?'Congratulations!':'Try again!';
-  overlay.querySelectorAll('p')[1].textContent='Stage: ' + stage;
-  startBtn.textContent='▶ Continue';
-  overlay.style.display='flex';
+  Screens.showResult(won, sc1, sc2, earned);
 }
 
 // --- Immerzív: teljes képernyő visszakérése, ha a rendszer elvette ---
@@ -63,8 +59,7 @@ function exitToMenu() {
   paused = false; running = false;
   var po = document.getElementById('pauseOverlay');
   if (po) po.style.display = 'none';
-  overlay.style.display = 'flex';
-  startBtn.textContent = '⚽ Start Game';
+  Screens.show('menu');
 }
 
 function doStart() {
@@ -84,6 +79,9 @@ function doStart() {
   fireTrail=[]; burnMarks=[];
   setup();
   overlay.style.display='none';
+  var ms = document.getElementById('menuScreen');    if (ms) ms.style.display='none';
+  var ss = document.getElementById('stagesScreen');  if (ss) ss.style.display='none';
+  var rs = document.getElementById('resultScreen');  if (rs) rs.style.display='none';
 
   // Visszaszámlálás 3-2-1
   countdown = 3; countdownStart = Date.now();
@@ -145,6 +143,19 @@ bindBtn('resumeBtn', resumeGame);
 bindBtn('exitBtn', exitToMenu);
 var pauseOv = document.getElementById('pauseOverlay');
 if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+
+// --- Új képernyők bekötése ---
+bindBtn('miStage',        openStages);
+bindBtn('miQuick',        startQuick);
+bindBtn('miSettings',     function(){ Screens.show('settings'); });
+bindBtn('miHow',          function(){ document.getElementById('howToOverlay').style.display='flex'; });
+bindBtn('miExit',         exitGame);
+bindBtn('stagesBackBtn',  function(){ Screens.show('menu'); });
+bindBtn('settingsBackBtn',function(){ Screens.show('menu'); });
+bindBtn('resetProgressBtn', resetProgress);
+bindBtn('resultRetryBtn', retryStage);
+bindBtn('resultNextBtn',  nextStage);
+bindBtn('resultMenuBtn',  backToMenu);
 
 window.addEventListener('resize', function(){ if(running) setup(); });
 setup(); loop();

@@ -149,7 +149,10 @@ function startIntroExit() {
   var intro = document.getElementById('intro');
   intro.style.transition = 'opacity 0.5s';
   intro.style.opacity = '0';
-  setTimeout(function(){ intro.style.display='none'; }, 500);
+  setTimeout(function(){
+    intro.style.display='none';
+    if (typeof Screens !== 'undefined') Screens.show('menu');
+  }, 500);
 }
 
 // ============================================================

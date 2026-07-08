@@ -52,12 +52,21 @@ function doPowerHit(side) {
 }
 
 // --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
-console.log('%cBlaze Kick build: MODULAR-V8', 'color:#ff6600;font-weight:bold');
+// Nyitva van-e bármelyik UI réteg? (akkor a pointer a UI-é, nem a játéké)
+function uiBlocking() {
+  if (typeof Screens !== 'undefined' && Screens.anyOpen()) return true;
+  var ids = ['mpOverlay','howToOverlay','pauseOverlay'];
+  for (var i=0;i<ids.length;i++) {
+    var e = document.getElementById(ids[i]);
+    if (e && e.style.display && e.style.display !== 'none') return true;
+  }
+  return false;
+}
+
+console.log('%cBlaze Kick build: MODULAR-V10', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
-      document.getElementById('mpOverlay').style.display === 'flex' ||
-      document.getElementById('howToOverlay').style.display === 'flex') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || uiBlocking()) return;
   e.preventDefault();
   var side = getTouchSide(e.clientX);
   if (side==='left'  && touchLeft===null)  {
@@ -75,9 +84,7 @@ document.addEventListener('pointerdown', function(e) {
 });
 
 document.addEventListener('pointermove', function(e) {
-  if (e.target.tagName === 'INPUT' ||
-      document.getElementById('mpOverlay').style.display === 'flex' ||
-      document.getElementById('howToOverlay').style.display === 'flex') return;
+  if (e.target.tagName === 'INPUT' || uiBlocking()) return;
   if (e.pointerId===touchLeft && lastLeftY!==null) {
     e.preventDefault();
     var d = (e.clientY - lastLeftY) * 1.5;
