@@ -37,6 +37,7 @@
 <div id="mid">
   <canvas id="c"></canvas>
   <button id="pauseBtn" title="Pause">⏸</button>
+  <div id="itemBar" style="display:none;"></div>
 </div>
 
 <!-- How to Play overlay -->
@@ -86,7 +87,7 @@
       <div class="menu-item" id="miStage"><span class="ico">🏟</span> Stage</div>
       <div class="menu-item" id="miQuick"><span class="ico">⚽</span> 1 Player</div>
       <div class="menu-item soon"><span class="ico">👥</span> 2 Player</div>
-      <div class="menu-item soon"><span class="ico">🛒</span> Shop</div>
+      <div class="menu-item" id="miShop"><span class="ico">🛒</span> Shop</div>
       <div class="menu-item" id="miSettings"><span class="ico">⚙</span> Settings</div>
       <div class="menu-item" id="miHow"><span class="ico">📖</span> How to Play</div>
       <div class="menu-item exit" id="miExit" style="display:none;"><span class="ico">⏻</span> Exit game</div>
@@ -111,11 +112,23 @@
   <div id="resultSub">Stage 1</div>
   <div id="resultScore">0 : 0</div>
   <div id="resultStars"></div>
+  <div id="resultCoins" style="display:none;"></div>
   <div class="result-btns">
     <button class="btn primary" id="resultNextBtn">Next stage ▶</button>
     <button class="btn" id="resultRetryBtn">↻ Retry</button>
     <button class="btn ghost" id="resultMenuBtn">Menu</button>
   </div>
+</div>
+
+<!-- ===== SHOP ===== -->
+<div id="shopScreen" class="screen">
+  <div class="screen-head">
+    <button class="btn small ghost" id="shopBackBtn">← Back</button>
+    <div class="screen-title">Shop</div>
+    <div class="screen-spacer"></div>
+    <div style="font-size:13px;color:var(--gold);">◎ <b id="shopCoins">0</b></div>
+  </div>
+  <div class="screen-body" id="shopList"></div>
 </div>
 
 <!-- ===== BEÁLLÍTÁSOK (placeholder) ===== -->
@@ -148,11 +161,11 @@
 <script src="js/progress.js"></script>
 <script src="js/difficulty.js"></script>
 <script src="js/state.js"></script>
+<script src="js/shop.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/core.js"></script>
 <script src="js/input.js"></script>
 <script src="js/ai.js"></script>
-<script src="js/bonus.js"></script>
 <script src="js/physics.js"></script>
 <script src="js/render.js"></script>
 <script src="js/effects2.js"></script>
