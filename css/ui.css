@@ -248,3 +248,18 @@
 /* A gomb belsejére koppintás is a gombot célozza (ne az ütőt mozgassa) */
 .item-btn span, .item-btn em { pointer-events: none; }
 .menu-item .ico, .shop-buys .btn b, .shop-buys .btn i { pointer-events: none; }
+
+/* Aktív bónusz jelzése az ikonsávban + hátralévő másodperc */
+.item-btn.on {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(255,213,79,0.35);
+  opacity: 1 !important;
+}
+.item-btn.on::after {
+  content: attr(data-left) 's';
+  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: #111;
+  font-size: 9px; font-weight: 800;
+  border-radius: 7px; padding: 0 4px; line-height: 13px;
+  pointer-events: none;
+}
