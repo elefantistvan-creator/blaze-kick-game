@@ -18,20 +18,22 @@ function setup() {
   MR  = H * 0.042;         // mezőnyjátékos fél-magasság
   GH  = H * 0.36;          // kapunyílás
   GY  = PLY + (PLH - GH) / 2;   // kapu a pálya közepére igazítva
-  baseSpd = H * 0.006 * stageMult();
+  baseSpd = H * DIFF.BALL_BASE * Difficulty.ballMult(stage);
   spd = baseSpd;
 
   // Labda eltűnési mélység a gólvonal mögött (a dekor-sávba gurulva) — hangolható
   BALL_VANISH = PLX * 0.15;
 
-  // --- Játékos pozíciók: a CSATÁR a túloldalra cserélve (ellenfél kapuja elé) ---
+  // --- Játékos pozíciók: a CSATÁR a túloldalon (ellenfél kapuja elé) ---
+  // A csatár–kapus távolság 0.38 → 0.27 pályahossz (30%-kal közelebb)
   px = PLX + PW/2;           py = PLY + PLH/2;   // kapus (bal keret-él)
-  mx = PLX + PLW*0.62;       my = PLY + PLH/2;   // csatár (jobb térfél, GÉP kapuja előtt)
+  mx = PLX + PLW*0.73;       my = PLY + PLH/2;   // csatár (GÉP kapuja előtt, mélyebben)
 
   // --- Gép pozíciók: a gép csatára a JÁTÉKOS kapuja elé ---
   ax  = PLX + PLW - PW/2;    ay  = PLY + PLH/2;  // gép kapus (jobb keret-él)
-  amx = PLX + PLW*0.38;      amy = PLY + PLH/2;  // gép csatár (bal térfél, JÁTÉKOS kapuja előtt)
+  amx = PLX + PLW*0.27;      amy = PLY + PLH/2;  // gép csatár (JÁTÉKOS kapuja előtt, mélyebben)
 
+  ballHistory = [];   // reakciókésés-puffer ürítése új pályánál
   resetBall(1);
 }
 
@@ -47,7 +49,8 @@ var lastGoalDir = 1;   // ki kapott gólt - ő kapja a bedobást
 
 // --- Stage rendszer: minden meccs végén nő, labda + gép erősebb lesz ---
 var stage = Progress.unlockedMax();  // a Stage rács állítja be indításkor
-function stageMult() { return 1 + (stage - 1) * 0.025; } // Stage1=1.0, Stage2=1.025, Stage3=1.05, ...
+// A nehézségi görbe a difficulty.js-ben van. Ez csak visszafelé kompatibilitás.
+function stageMult() { return Difficulty.ballMult(stage); }
 
 function updateBallRotation() {
   ballSpin *= 0.96;
