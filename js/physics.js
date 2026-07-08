@@ -5,7 +5,7 @@ function hitRect(rx,ry,rw,rh,cx,cy,cr) {
   return dx*dx+dy*dy < cr*cr;
 }
 
-function bounceRect(padX, padY, isLeft, velY, isPad) {
+function bounceRect(padX, padY, isLeft, velY, isPad, aimAng) {
   // 1) SEBESSÉG-NAGYSÁG: megmarad. (Tap-ütés után az eredeti sebesség áll vissza.)
   var speed;
   if (powerHitActive) {
@@ -23,8 +23,14 @@ function bounceRect(padX, padY, isLeft, velY, isPad) {
   else        { dirX = -1; bx = padX - PW/2 - BR - 1; }
 
   // 3) Az ütő húzása a SZÖGET módosítja (nem a sebességet)
-  var refVX = Math.abs(bvx) > 0.01 ? Math.abs(bvx) : speed;
-  var ang = Math.atan2(bvy + velY * PADDLE_DRAG, refVX);
+  //    Auto csatárnál a célzott szög felülírja.
+  var ang;
+  if (typeof aimAng === 'number') {
+    ang = aimAng;
+  } else {
+    var refVX = Math.abs(bvx) > 0.01 ? Math.abs(bvx) : speed;
+    ang = Math.atan2(bvy + velY * PADDLE_DRAG, refVX);
+  }
 
   // 4) Szög-korlát: nincs fel-le pattogás
   var maxA = MAX_BOUNCE_ANGLE_DEG * Math.PI / 180;
@@ -171,7 +177,7 @@ function updateBall() {
                       (isPowerActive(powerRight) && powerRight.type===12);
     // GÓL csak ha a labda TELJESEN a nyíláson belül van (különben kapufa/fal)
     if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
-      sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left';
+      sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left'; Shop.onGoal();
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('left'); triggerGoalEffect('right');
       triggerGoalFlash(); triggerScoreAnim('right'); triggerShake(10);
@@ -186,7 +192,7 @@ function updateBall() {
     var rightBlocked = (isPowerActive(powerRight) && powerRight.type===11) ||
                        (isPowerActive(powerLeft)  && powerLeft.type===12);
     if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
-      sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right';
+      sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right'; Shop.onGoal();
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('right'); triggerGoalEffect('left');
       triggerGoalFlash(); triggerScoreAnim('left'); triggerShake(10);
@@ -197,55 +203,30 @@ function updateBall() {
   }
 
   // Kapusok ütközés
-  if (hitRect(px-PW/2, py-PR, PW, PR*2, bx,by,BR)) {
+  var pPR = effPR();
+  if (hitRect(px-PW/2, py-pPR, PW, pPR*2, bx,by,BR)) {
     bounceRect(px, py, true, padVY, true);
     soundHit(); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p');
   }
-  if (hitRect(ax-PW/2, ay-PR, PW, PR*2, bx,by,BR)) {
+  // Gép kapusa: eltüntethető, és a "Power shot" átüt rajta
+  var tapThrough = Shop.isActive('powerTap') && powerHitActive;
+  if (!cpuGoalieGone() && !tapThrough &&
+      hitRect(ax-PW/2, ay-PR, PW, PR*2, bx,by,BR)) {
     bounceRect(ax, ay, false, aiVY, true);
     soundHit(); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a');
   }
 
-  // Mezőnyjátékosok méret logika
-  // Kedvező: 7=saját belső nagy, 9=saját belső dupla
-  // Nehezítő: 8=ellenfél belső kicsi, 10=ellenfél belső eltűnik
-  var playerMidBig    = isPowerActive(powerLeft)  && powerLeft.type===7;   // játékos kedvező
-  var playerMidDouble = isPowerActive(powerLeft)  && powerLeft.type===9;   // játékos kedvező
-  var playerMidHalf   = isPowerActive(powerRight) && powerRight.type===8;  // gép nehezítő → játékos szenved
-  var playerMidGone   = isPowerActive(powerRight) && powerRight.type===10; // gép nehezítő → játékos eltűnik
+  // Csatárok (a Shop-hatások szerint)
+  var effPlayerMR = effMR();
+  var effAiMR     = cpuStrikerGone() ? 0 : MR;
 
-  var aiMidBig        = isPowerActive(powerRight) && powerRight.type===7;  // gép kedvező
-  var aiMidDouble     = isPowerActive(powerRight) && powerRight.type===9;  // gép kedvező
-  var aiMidHalf       = isPowerActive(powerLeft)  && powerLeft.type===8;   // játékos nehezítő → gép szenved
-  var aiMidGone       = isPowerActive(powerLeft)  && powerLeft.type===10;  // játékos nehezítő → gép eltűnik
-
-  var effPlayerMR = playerMidGone ? 0 : (playerMidBig ? MR*2 : (playerMidHalf ? MR*0.5 : MR));
-  var effAiMR     = aiMidGone     ? 0 : (aiMidBig     ? MR*2 : (aiMidHalf     ? MR*0.5 : MR));
-
-  if (!playerMidGone) {
-    if (playerMidDouble) {
-      var gap = PR;
-      var m1y = my - gap - effPlayerMR;
-      var m2y = my + gap + effPlayerMR;
-      if (hitRect(mx-PW/2, m1y-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) { bounceRect(mx, m1y, true, midVY, false); soundHit(); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m'); }
-      if (hitRect(mx-PW/2, m2y-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) { bounceRect(mx, m2y, true, midVY, false); soundHit(); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m'); }
-    } else if (effPlayerMR > 0) {
-      if (hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
-        bounceRect(mx, my, true, midVY, false);
-        soundHit(); hitEffect={pad:'m', time:Date.now()};
-      }
-    }
+  if (effPlayerMR > 0 && hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
+    bounceRect(mx, my, true, midVY, false, autoStrikerAim());
+    soundHit(); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m');
   }
-  if (!aiMidGone) {
-    if (aiMidDouble) {
-      var gap2 = PR;
-      var a1y = amy - gap2 - effAiMR;
-      var a2y = amy + gap2 + effAiMR;
-      if (hitRect(amx-PW/2, a1y-effAiMR, PW, effAiMR*2, bx,by,BR)) { bounceRect(amx, a1y, false, aiMidVY, false); soundHit(); hitEffect={pad:'am', time:Date.now()}; }
-      if (hitRect(amx-PW/2, a2y-effAiMR, PW, effAiMR*2, bx,by,BR)) { bounceRect(amx, a2y, false, aiMidVY, false); soundHit(); hitEffect={pad:'am', time:Date.now()}; }
-    } else if (effAiMR > 0) {
-      if (hitRect(amx-PW/2, amy-effAiMR, PW, effAiMR*2, bx,by,BR)) { bounceRect(amx, amy, false, aiMidVY, false); soundHit(); hitEffect={pad:'am', time:Date.now()}; }
-    }
+  if (effAiMR > 0 && hitRect(amx-PW/2, amy-effAiMR, PW, effAiMR*2, bx,by,BR)) {
+    bounceRect(amx, amy, false, aiMidVY, false);
+    soundHit(); hitEffect={pad:'am', time:Date.now()};
   }
 }
 

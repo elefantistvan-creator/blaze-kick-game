@@ -5,6 +5,7 @@
 
 var bkMode = 'stage';        // 'stage' = progresszió, 'quick' = gyors meccs
 var currentStage = 1;        // épp játszott pálya
+var lastCoinReward = 0;      // az utolsó meccs érme-jutalma
 
 // Telepített appként fut? (TWA a Play Store-ból, vagy PWA a kezdőképernyőről)
 // Csak ekkor van értelme a "Exit game" gombnak — böngészőfülön a window.close() nem működik.
@@ -27,7 +28,7 @@ function exitGame() {
 
 var Screens = (function() {
 
-  var NAMES = ['menuScreen','stagesScreen','resultScreen','settingsScreen'];
+  var NAMES = ['menuScreen','stagesScreen','resultScreen','settingsScreen','shopScreen'];
   function el(id) { return document.getElementById(id); }
 
   function hideAll() {
@@ -52,6 +53,100 @@ var Screens = (function() {
     e.style.display = 'flex';
     if (name === 'menu')   refreshMenu();
     if (name === 'stages') buildGrid();
+    if (name === 'shop')   buildShop();
+  }
+
+  // ---------- Shop ----------
+  function buildShop() {
+    // Nyitóajándék: egyszer, az első látogatáskor
+    var gift = Progress.claimWelcome(ECON.WELCOME);
+    var wrap = el('shopList');
+    var cn = el('shopCoins');
+    if (cn) cn.textContent = Progress.coins();
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    if (gift > 0) {
+      var g = document.createElement('div');
+      g.className = 'shop-gift';
+      g.textContent = '🎁 Welcome gift: ' + gift + ' coins';
+      wrap.appendChild(g);
+    }
+
+    var note = document.createElement('div');
+    note.className = 'shop-note';
+    note.textContent = 'A boost lasts until the next goal (max 30s). Up to ' +
+                       Shop.maxActivations + ' per match.';
+    wrap.appendChild(note);
+
+    for (var i=0;i<SHOP_ITEMS.length;i++) {
+      wrap.appendChild(makeShopRow(SHOP_ITEMS[i]));
+    }
+  }
+
+  function makeShopRow(it) {
+    var row = document.createElement('div');
+    row.className = 'shop-row tier-' + it.tier;
+
+    var head = document.createElement('div');
+    head.className = 'shop-head';
+    head.innerHTML = '<span class="shop-ico">' + it.icon + '</span>' +
+                     '<span class="shop-name">' + it.name + '</span>' +
+                     '<span class="shop-own">×' + Progress.invCount(it.id) + '</span>';
+    row.appendChild(head);
+
+    var d = document.createElement('div');
+    d.className = 'shop-desc';
+    d.textContent = it.desc;
+    row.appendChild(d);
+
+    var buys = document.createElement('div');
+    buys.className = 'shop-buys';
+    for (var p=0;p<SHOP_PACKS.length;p++) {
+      (function(pack){
+        var cost = packPrice(it.price, pack);
+        var b = document.createElement('button');
+        b.className = 'btn small' + (Progress.coins() >= cost ? ' primary' : '');
+        if (Progress.coins() < cost) b.setAttribute('disabled','');
+        b.innerHTML = '×' + pack.qty + ' <b>' + cost + '</b>' +
+                      (pack.discount ? ' <i>−' + Math.round(pack.discount*100) + '%</i>' : '');
+        b.addEventListener('pointerup', function(e){
+          e.stopPropagation(); e.preventDefault();
+          if (Shop.buy(it.id, pack.qty)) buildShop();
+        });
+        buys.appendChild(b);
+      })(SHOP_PACKS[p]);
+    }
+    row.appendChild(buys);
+    return row;
+  }
+
+  // ---------- Meccs közbeni aktiváló sáv ----------
+  function buildItemBar() {
+    var bar = el('itemBar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    if (bkMode !== 'stage') { bar.style.display = 'none'; return; }
+
+    var any = false;
+    for (var i=0;i<SHOP_ITEMS.length;i++) {
+      var it = SHOP_ITEMS[i];
+      if (Progress.invCount(it.id) <= 0) continue;
+      any = true;
+      (function(item){
+        var b = document.createElement('button');
+        b.className = 'item-btn';
+        b.innerHTML = '<span>' + item.icon + '</span><em>' + Progress.invCount(item.id) + '</em>';
+        b.setAttribute('data-item', item.id);
+        b.addEventListener('pointerup', function(e){
+          e.stopPropagation(); e.preventDefault();
+          if (Shop.activate(item.id)) buildItemBar();
+        });
+        if (!Shop.canActivate(item.id)) b.setAttribute('disabled','');
+        bar.appendChild(b);
+      })(it);
+    }
+    bar.style.display = any ? 'flex' : 'none';
   }
 
   // ---------- Főmenü ----------
@@ -171,6 +266,11 @@ var Screens = (function() {
         }
       }
     }
+    var cw = el('resultCoins');
+    if (cw) {
+      cw.textContent = lastCoinReward > 0 ? ('+' + lastCoinReward + ' ◎') : '';
+      cw.style.display = lastCoinReward > 0 ? 'block' : 'none';
+    }
     var sub = el('resultSub');
     if (sub) {
       sub.textContent = (bkMode==='stage')
@@ -185,30 +285,38 @@ var Screens = (function() {
     show('result');
   }
 
-  return { show:show, showResult:showResult, anyOpen:anyOpen, refreshMenu:refreshMenu, buildGrid:buildGrid };
+  return { show:show, showResult:showResult, anyOpen:anyOpen, refreshMenu:refreshMenu,
+           buildGrid:buildGrid, buildShop:buildShop, buildItemBar:buildItemBar };
 })();
 
 // ---------- Indítók ----------
 function startStage(n) {
   bkMode = 'stage';
   currentStage = n;
-  stage = n;                 // a fizika/AI ebből számol (stageMult)
+  stage = n;                 // a fizika/AI ebből számol
+  Shop.reset();
   Screens.show('game');
   doStart();
+  Screens.buildItemBar();
 }
 
 function startQuick() {
   bkMode = 'quick';
   currentStage = 1;
   stage = 1;
+  Shop.reset();
   Screens.show('game');
   doStart();
+  Screens.buildItemBar();
 }
 
 function retryStage()  { startStage(currentStage); }
 function nextStage()   { if (currentStage < MAX_STAGE) startStage(currentStage + 1); }
-function backToMenu()  { running = false; paused = false; Screens.show('menu'); }
+function backToMenu()  { running = false; paused = false; Shop.reset();
+  var ib = document.getElementById('itemBar'); if (ib) ib.style.display='none';
+  Screens.show('menu'); }
 function openStages()  { Screens.show('stages'); }
+function openShop()    { Screens.show('shop'); }
 
 function resetProgress() {
   if (!window.confirm('Delete all progress? This cannot be undone.')) return;

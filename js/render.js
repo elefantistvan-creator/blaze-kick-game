@@ -103,41 +103,13 @@ function draw() {
   ctx.arc(CXm,PLY+PLH/2,PLH*0.135,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // Kapusok
-  drawPad(px, py, PR, '#4fc3f7', 'p');
-  drawPad(ax, ay, PR, '#ef5350', 'a');
+  // Kapusok (a Shop hatásai szerint)
+  drawPad(px, py, effPR(), '#4fc3f7', 'p');
+  if (!cpuGoalieGone()) drawPad(ax, ay, PR, '#ef5350', 'a');
 
-  // Mezőnyjátékosok - szinkronban a fizikával
-  var dPlayerMidBig    = isPowerActive(powerLeft)  && powerLeft.type===7;
-  var dPlayerMidDouble = isPowerActive(powerLeft)  && powerLeft.type===9;
-  var dPlayerMidHalf   = isPowerActive(powerRight) && powerRight.type===8;
-  var dPlayerMidGone   = isPowerActive(powerRight) && powerRight.type===10;
-  var dAiMidBig        = isPowerActive(powerRight) && powerRight.type===7;
-  var dAiMidDouble     = isPowerActive(powerRight) && powerRight.type===9;
-  var dAiMidHalf       = isPowerActive(powerLeft)  && powerLeft.type===8;
-  var dAiMidGone       = isPowerActive(powerLeft)  && powerLeft.type===10;
-
-  var effPMR = dPlayerMidGone ? 0 : (dPlayerMidBig ? MR*2 : (dPlayerMidHalf ? MR*0.5 : MR));
-  var effAMR = dAiMidGone     ? 0 : (dAiMidBig     ? MR*2 : (dAiMidHalf     ? MR*0.5 : MR));
-
-  if (!dPlayerMidGone) {
-    if (dPlayerMidDouble) {
-      var gap = PR;
-      drawPad(mx, my - gap - effPMR, effPMR, '#29b6f6', 'm');
-      drawPad(mx, my + gap + effPMR, effPMR, '#29b6f6', 'm');
-    } else {
-      drawPad(mx, my, effPMR, '#29b6f6', 'm');
-    }
-  }
-  if (!dAiMidGone) {
-    if (dAiMidDouble) {
-      var gap2 = PR;
-      drawPad(amx, amy - gap2 - effAMR, effAMR, '#e53935', 'am');
-      drawPad(amx, amy + gap2 + effAMR, effAMR, '#e53935', 'am');
-    } else {
-      drawPad(amx, amy, effAMR, '#e53935', 'am');
-    }
-  }
+  // Csatárok
+  drawPad(mx, my, effMR(), '#29b6f6', 'm');
+  if (!cpuStrikerGone()) drawPad(amx, amy, MR, '#e53935', 'am');
 
   // Motion trail
   if (running) { updateTrail(); coolPads(); }

@@ -63,7 +63,7 @@ function uiBlocking() {
   return false;
 }
 
-console.log('%cBlaze Kick build: MODULAR-V12', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V13', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || uiBlocking()) return;
@@ -90,7 +90,8 @@ document.addEventListener('pointermove', function(e) {
     var d = (e.clientY - lastLeftY) * 1.5;
     lastLeftVY = e.clientY - lastLeftY;  // csavar sebessége
     py += d;
-    py = Math.max(PLY+PR, Math.min(PLY+PLH-PR, py));
+    var _pr = effPR();
+    py = Math.max(PLY+_pr, Math.min(PLY+PLH-_pr, py));
     lastLeftY = e.clientY;
   }
   if (e.pointerId===touchRight && lastRightY!==null) {
@@ -98,7 +99,8 @@ document.addEventListener('pointermove', function(e) {
     var d = (e.clientY - lastRightY) * 1.5;
     lastRightVY = e.clientY - lastRightY;  // csavar sebessége
     my += d;
-    my = Math.max(PLY+MR, Math.min(PLY+PLH-MR, my));
+    var _mr = effMR();
+    my = Math.max(PLY+_mr, Math.min(PLY+PLH-_mr, my));
     lastRightY = e.clientY;
   }
 });

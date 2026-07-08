@@ -8,10 +8,20 @@ function loop() {
 function endGame(won) {
   running = false;
   var earned = 0;
+  lastCoinReward = 0;
   if (bkMode === 'stage') {
-    if (won) earned = Progress.recordWin(currentStage, sc2);   // sc2 = kapott gólok
-    else     Progress.recordLoss(currentStage);
+    // FONTOS: az "első teljesítés" a recordWin ELŐTT dől el
+    var firstClear = (Progress.stars(currentStage) === 0);
+    if (won) {
+      earned = Progress.recordWin(currentStage, sc2);   // sc2 = kapott gólok
+      lastCoinReward = coinsForMatch(true, currentStage, earned, firstClear);
+    } else {
+      Progress.recordLoss(currentStage);
+      lastCoinReward = coinsForMatch(false, currentStage, 0, false);
+    }
+    Progress.addCoins(lastCoinReward);
   }
+  Shop.reset();
   Screens.showResult(won, sc1, sc2, earned);
 }
 
@@ -49,8 +59,10 @@ function resumeGame() {
 }
 function exitToMenu() {
   paused = false; running = false;
+  Shop.reset();
   var po = document.getElementById('pauseOverlay');
   if (po) po.style.display = 'none';
+  var ib = document.getElementById('itemBar'); if (ib) ib.style.display='none';
   Screens.show('menu');
 }
 
@@ -73,6 +85,7 @@ function doStart() {
   var ms = document.getElementById('menuScreen');    if (ms) ms.style.display='none';
   var ss = document.getElementById('stagesScreen');  if (ss) ss.style.display='none';
   var rs = document.getElementById('resultScreen');  if (rs) rs.style.display='none';
+  var sh = document.getElementById('shopScreen');    if (sh) sh.style.display='none';
 
   // Visszaszámlálás 3-2-1
   countdown = 3; countdownStart = Date.now();
@@ -123,6 +136,8 @@ if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagat
 // --- Új képernyők bekötése ---
 bindBtn('miStage',        openStages);
 bindBtn('miQuick',        startQuick);
+bindBtn('miShop',         openShop);
+bindBtn('shopBackBtn',    function(){ Screens.show('menu'); });
 bindBtn('miSettings',     function(){ Screens.show('settings'); });
 bindBtn('miHow',          showHowTo);
 bindBtn('miExit',         exitGame);

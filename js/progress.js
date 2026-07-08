@@ -12,7 +12,7 @@ function isSeasonStart(stage) { return (stage-1) % SEASON_LEN === 0; }
 
 var Progress = (function() {
   var KEY = 'bk_progress_v1';
-  var data = { unlocked:1, stars:{}, coins:0, losses:{} };
+  var data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false };
 
   function load() {
     try {
@@ -27,6 +27,8 @@ var Progress = (function() {
     } catch(e) {}
     if (!data.stars)  data.stars  = {};
     if (!data.losses) data.losses = {};
+    if (!data.inv)    data.inv    = {};
+    if (typeof data.welcomed !== 'boolean') data.welcomed = false;
     if (!data.unlocked) data.unlocked = 1;
     if (typeof data.coins !== 'number') data.coins = 0;
     return data;
@@ -51,7 +53,17 @@ var Progress = (function() {
     isUnlocked:  function(stage) { return stage <= data.unlocked; },
     stars:       function(stage) { return data.stars[stage] || 0; },
     coins:       function()      { return data.coins; },
-    addCoins:    function(n)     { data.coins += n; save(); },
+    addCoins:    function(n)     { data.coins += n; if (data.coins<0) data.coins=0; save(); },
+
+    // --- Készlet (Shop) ---
+    invCount:    function(id)    { return data.inv[id] || 0; },
+    addInv:      function(id,n)  { data.inv[id] = (data.inv[id]||0) + n; save(); },
+    useInv:      function(id)    { if (data.inv[id]>0) { data.inv[id]--; save(); return true; } return false; },
+    inventory:   function()      { return data.inv; },
+
+    // --- Nyitóajándék (egyszer, az első Shop-látogatáskor) ---
+    welcomed:    function()      { return data.welcomed; },
+    claimWelcome:function(n)     { if (data.welcomed) return 0; data.welcomed = true; data.coins += n; save(); return n; },
     totalStars:  function() {
       var t = 0;
       for (var k in data.stars) t += data.stars[k];
@@ -74,7 +86,7 @@ var Progress = (function() {
     },
     lossStreak: function(stage) { return data.losses[stage] || 0; },
     reset: function() {
-      data = { unlocked:1, stars:{}, coins:0, losses:{} };
+      data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false };
       try { localStorage.removeItem('bk_stage'); } catch(e) {}
       save();
     }

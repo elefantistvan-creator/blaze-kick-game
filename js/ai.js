@@ -49,8 +49,27 @@ function updateAI() {
   pushBallHistory();
 
   var spdMult = spd / baseSpd;
-  var kSpd = H * DIFF.GOALIE_SPD  * spdMult;
-  var mSpd = H * DIFF.STRIKER_SPD * spdMult;
+  var slow  = cpuSlowFactor();                       // Shop: ellenfél lassítása
+  var kSpd = H * DIFF.GOALIE_SPD  * spdMult * slow;
+  var mSpd = H * DIFF.STRIKER_SPD * spdMult * slow;
+
+  // === Shop: AUTO pálcikák a JÁTÉKOS oldalán (god mód, 30 mp) ===
+  // Nulla hiba, nulla késés, teljes előrejelzés — a szezon-görbén kívül.
+  var godSpd = H * 0.030;
+  if (Shop.isActive('autoGoalie')) {
+    var tPY = predictY({x:bx,y:by,vx:bvx,vy:bvy}, px);
+    var dPY = tPY - py;
+    py += Math.sign(dPY) * Math.min(Math.abs(dPY), godSpd);
+    var gpr = effPR();
+    py = Math.max(PLY+gpr, Math.min(PLY+PLH-gpr, py));
+  }
+  if (Shop.isActive('autoStriker')) {
+    var tMY = predictY({x:bx,y:by,vx:bvx,vy:bvy}, mx);
+    var dMY = tMY - my;
+    my += Math.sign(dMY) * Math.min(Math.abs(dMY), godSpd);
+    var gmr = effMR();
+    my = Math.max(PLY+gmr, Math.min(PLY+PLH-gmr, my));
+  }
 
   var delay = Difficulty.reactionDelay(stage);
   var errK  = Difficulty.aimError(stage);
