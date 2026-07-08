@@ -1,14 +1,6 @@
 
 function loop() {
-  if (running) {
-    if (!mpMode) {
-      // Normál mód: AI + fizika fut lokálisan
-      updateAI(); updateBall(); updateBallRotation();
-    } else {
-      // Multiplayer: csak forgás animáció, fizika a szerveren fut
-      updateBallRotation();
-    }
-  }
+  if (running) { updateAI(); updateBall(); updateBallRotation(); }
   draw();
   requestAnimationFrame(loop);
 }
@@ -78,7 +70,6 @@ function doStart() {
   pb=null; powerLeft=null; powerRight=null; goalBalls=[];
   fireTrail=[]; burnMarks=[];
   setup();
-  overlay.style.display='none';
   var ms = document.getElementById('menuScreen');    if (ms) ms.style.display='none';
   var ss = document.getElementById('stagesScreen');  if (ss) ss.style.display='none';
   var rs = document.getElementById('resultScreen');  if (rs) rs.style.display='none';
@@ -99,19 +90,11 @@ function doStart() {
   }, 1000);
 }
 
-startBtn.addEventListener('pointerup', function(e) {
-  e.stopPropagation(); e.preventDefault(); doStart();
-});
-
 function showHowTo() {
   document.getElementById('howToOverlay').style.display = 'flex';
 }
 function hideHowTo() {
   document.getElementById('howToOverlay').style.display = 'none';
-}
-var howToBtn = document.getElementById('howToBtn');
-if (howToBtn) {
-  howToBtn.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); showHowTo(); });
 }
 var howToBackBtn = document.getElementById('howToBackBtn');
 if (howToBackBtn) {
@@ -127,14 +110,7 @@ function bindBtn(id, fn) {
   el.addEventListener('pointerup', function(e){ e.stopPropagation(); e.preventDefault(); fn(); });
 }
 
-bindBtn('mpCreateBtn', mpCreateRoom);
-bindBtn('mpJoinBtn', mpJoinRoom);
-bindBtn('mpCancelBtn', mpCancel);
-bindBtn('mpCancelWaitBtn', mpCancel);
 
-document.getElementById('mpOverlay').addEventListener('pointerdown', function(e){
-  if (e.target.tagName !== 'INPUT') e.stopPropagation();
-});
 
 // Szünet gomb + overlay gombok
 var pauseBtn = document.getElementById('pauseBtn');
@@ -148,7 +124,7 @@ if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagat
 bindBtn('miStage',        openStages);
 bindBtn('miQuick',        startQuick);
 bindBtn('miSettings',     function(){ Screens.show('settings'); });
-bindBtn('miHow',          function(){ document.getElementById('howToOverlay').style.display='flex'; });
+bindBtn('miHow',          showHowTo);
 bindBtn('miExit',         exitGame);
 bindBtn('stagesBackBtn',  function(){ Screens.show('menu'); });
 bindBtn('settingsBackBtn',function(){ Screens.show('menu'); });

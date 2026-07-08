@@ -36,7 +36,7 @@ var Screens = (function() {
 
   // Van-e nyitva bármelyik UI réteg? (az input.js ebből tudja, hogy ne vegye el a görgetést)
   function anyOpen() {
-    var ids = NAMES.concat(['pauseOverlay','howToOverlay','mpOverlay']);
+    var ids = NAMES.concat(['pauseOverlay','howToOverlay']);
     for (var i=0;i<ids.length;i++) {
       var e = el(ids[i]);
       if (e && e.style.display && e.style.display !== 'none') return true;

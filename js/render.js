@@ -234,7 +234,6 @@ function draw() {
   ctx.restore();
 
   // Multiplayer state küldés (host)
-  if (mpMode && mpRole === 'host' && mpConnected) mpSendState();
 }
 
 // --- Gólháló rajzolás (a gólvonal mögött, kifelé) ---

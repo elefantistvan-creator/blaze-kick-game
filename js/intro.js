@@ -1,9 +1,7 @@
 var c = document.getElementById('c');
 var ctx = c.getContext('2d');
-var overlay = document.getElementById('overlay');
 var s1El = document.getElementById('s1');
 var s2El = document.getElementById('s2');
-var startBtn = document.getElementById('startBtn');
 
 // --- INTRO ANIMÁCIÓ ---
 var LOGO_SRC = 'assets/logo.png';
