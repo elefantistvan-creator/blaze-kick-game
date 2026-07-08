@@ -1,0 +1,183 @@
+/* ============================================================
+   BLAZE KICK — UI design tokenek
+   Minden szín / méret / betű ITT. A design cseréje = ezt írjuk át.
+   Stílus: visszafogott, anyagszerű; illeszkedik a fotorealisztikus pályaképhez.
+   ============================================================ */
+:root {
+  --bg:        #0b0e13;
+  --bg-2:      #11151c;
+  --panel:     rgba(17,21,28,0.94);
+  --line:      rgba(255,255,255,0.09);
+  --text:      #e7edf3;
+  --text-dim:  #8a94a2;
+  --accent:    #4fc3f7;   /* játékos kék */
+  --accent-2:  #ef5350;   /* gép piros */
+  --gold:      #ffd54f;   /* csillag / érme */
+  --ok:        #66bb6a;
+
+  --radius:    10px;
+  --radius-lg: 16px;
+  --tile:      68px;      /* stage csempe mérete */
+  --gap:       8px;
+  --font:      system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ---------- közös képernyő-váz ---------- */
+.screen {
+  position: fixed; inset: 0; z-index: 300;
+  display: none;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overscroll-behavior: contain;
+}
+.screen-head {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.screen-title { font-size: 15px; font-weight: 700; letter-spacing: .04em; }
+.screen-spacer { flex: 1; }
+.screen-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  touch-action: pan-y;          /* a görgetés működjön a globális touch-action:none ellenére */
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 16px 22px;
+}
+
+/* ---------- gombok ---------- */
+.btn {
+  font-family: var(--font);
+  font-size: 14px; font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #1a1f27;
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { background: #232a34; }
+.btn.primary { background: var(--accent); color: #0b0e13; border-color: transparent; }
+.btn.ghost   { background: transparent; color: var(--text-dim); }
+.btn.danger  { background: transparent; color: var(--accent-2); border-color: var(--accent-2); }
+.btn.small   { font-size: 12px; padding: 8px 14px; }
+.btn[disabled] { opacity: .38; pointer-events: none; }
+
+/* ---------- Főmenü ---------- */
+#menuScreen .brand {
+  font-size: 22px; font-weight: 800; letter-spacing: .06em;
+  padding: 18px 0 4px; text-align: center;
+}
+#menuScreen .brand small { display:block; font-size:11px; font-weight:500; color:var(--text-dim); letter-spacing:.18em; margin-top:4px; }
+.menu-stats {
+  display: flex; justify-content: center; gap: 22px;
+  font-size: 12px; color: var(--text-dim); padding-bottom: 12px;
+}
+.menu-stats b { color: var(--gold); font-weight: 700; }
+.menu-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--gap);
+  max-width: 620px; margin: 0 auto; width: 100%;
+}
+.menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-item:active { background: #1b212a; }
+.menu-item .ico { font-size: 17px; width: 22px; text-align: center; }
+.menu-item.soon { opacity: .42; pointer-events: none; }
+.menu-item.soon::after { content: 'soon'; margin-left:auto; font-size:10px; color:var(--text-dim); letter-spacing:.1em; }
+
+/* Kilépés — teljes szélességű sor a lista alján (csak telepített appban látszik) */
+.menu-item.exit {
+  grid-column: 1 / -1;
+  justify-content: center;
+  color: var(--accent-2);
+  background: transparent;
+  border-color: rgba(239,83,80,0.35);
+  margin-top: 4px;
+}
+.menu-item.exit:active { background: rgba(239,83,80,0.08); }
+
+/* ---------- Stage rács ---------- */
+.season { margin-bottom: 18px; }
+.season-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 0 2px 7px;
+}
+.season-name { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.season-sub  { font-size: 11px; color: #5b6472; }
+.season-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--tile), 1fr));
+  gap: var(--gap);
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: var(--tile);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.tile.open   { border-color: rgba(79,195,247,0.35); }
+.tile.open:active { background: #1b212a; }
+.tile.locked { cursor: default; }
+
+/* szezonnyitó csempe: lelakatolt bélyegkép (csali) */
+.tile-thumb {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: .55;
+}
+.tile.locked .tile-thumb { opacity: .3; }
+.tile.teaser::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.72));
+}
+.tile-num {
+  position: relative; z-index: 2;
+  font-size: 15px; font-weight: 700;
+}
+.tile.locked .tile-num { color: #5b6472; }
+.tile-lock {
+  position: relative; z-index: 2;
+  font-size: 13px; margin-top: 2px; opacity: .75;
+}
+.tile-stars {
+  position: relative; z-index: 2;
+  display: flex; gap: 1px; margin-top: 3px;
+}
+.tile-stars .st { font-size: 9px; color: #39414d; line-height: 1; }
+.tile-stars .st.on { color: var(--gold); }
+
+/* ---------- Eredményképernyő ---------- */
+#resultScreen { align-items: center; justify-content: center; gap: 12px; background: rgba(6,8,12,0.96); }
+#resultTitle { font-size: 24px; font-weight: 800; letter-spacing: .03em; }
+#resultTitle.won  { color: var(--ok); }
+#resultTitle.lost { color: var(--accent-2); }
+#resultSub   { font-size: 12px; color: var(--text-dim); letter-spacing: .06em; }
+#resultScore { font-size: 40px; font-weight: 800; letter-spacing: .06em; }
+#resultStars { display: flex; gap: 8px; min-height: 26px; }
+#resultStars .rst { font-size: 24px; color: #39414d; }
+#resultStars .rst.on { color: var(--gold); }
+.result-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
