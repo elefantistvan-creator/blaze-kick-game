@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="js/early.js"></script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
 
@@ -58,7 +59,7 @@
 <div id="mid">
   <canvas id="c"></canvas>
   <button id="pauseBtn" title="Pause">⏸</button>
-  <div id="overlay">
+  <div id="overlay" style="display:none;">
     <h2>🔥 Blaze Kick</h2>
     <p>
       <b style="color:#4fc3f7">Left lane</b> – move the goalkeeper<br>
@@ -98,6 +99,66 @@
   <button id="exitBtn" style="padding:11px 34px;background:#222;color:#ef5350;border:2px solid #ef5350;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;">✕ Exit to Menu</button>
 </div>
 
+<!-- ===== FŐMENÜ ===== -->
+<div id="menuScreen" class="screen">
+  <div class="screen-body" style="display:flex;flex-direction:column;justify-content:center;">
+    <div class="brand">BLAZE KICK<small>BLAZE STUDIO</small></div>
+    <div class="menu-stats">
+      <span>★ <b id="menuStars">0</b></span>
+      <span>◎ <b id="menuCoins">0</b></span>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item" id="miStage"><span class="ico">🏟</span> Stage</div>
+      <div class="menu-item" id="miQuick"><span class="ico">⚽</span> 1 Player</div>
+      <div class="menu-item soon"><span class="ico">👥</span> 2 Player</div>
+      <div class="menu-item soon"><span class="ico">🛒</span> Shop</div>
+      <div class="menu-item" id="miSettings"><span class="ico">⚙</span> Settings</div>
+      <div class="menu-item" id="miHow"><span class="ico">📖</span> How to Play</div>
+      <div class="menu-item exit" id="miExit" style="display:none;"><span class="ico">⏻</span> Exit game</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STAGE RÁCS ===== -->
+<div id="stagesScreen" class="screen">
+  <div class="screen-head">
+    <button class="btn small ghost" id="stagesBackBtn">← Back</button>
+    <div class="screen-title">Stages</div>
+    <div class="screen-spacer"></div>
+    <div style="font-size:12px;color:var(--gold);" id="stagesStars">★ 0</div>
+  </div>
+  <div class="screen-body" id="stagesGrid"></div>
+</div>
+
+<!-- ===== EREDMÉNY ===== -->
+<div id="resultScreen" class="screen">
+  <div id="resultTitle">Match won</div>
+  <div id="resultSub">Stage 1</div>
+  <div id="resultScore">0 : 0</div>
+  <div id="resultStars"></div>
+  <div class="result-btns">
+    <button class="btn primary" id="resultNextBtn">Next stage ▶</button>
+    <button class="btn" id="resultRetryBtn">↻ Retry</button>
+    <button class="btn ghost" id="resultMenuBtn">Menu</button>
+  </div>
+</div>
+
+<!-- ===== BEÁLLÍTÁSOK (placeholder) ===== -->
+<div id="settingsScreen" class="screen">
+  <div class="screen-head">
+    <button class="btn small ghost" id="settingsBackBtn">← Back</button>
+    <div class="screen-title">Settings</div>
+  </div>
+  <div class="screen-body">
+    <div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+      <div class="menu-item soon"><span class="ico">🔊</span> Sound</div>
+      <div class="menu-item soon"><span class="ico">📳</span> Vibration</div>
+      <div class="menu-item soon"><span class="ico">⏱</span> Play-time reminder</div>
+      <button class="btn danger" id="resetProgressBtn" style="margin-top:10px;">Reset progress</button>
+    </div>
+  </div>
+</div>
+
 <!-- RIGHT lane: field player control + score -->
 <div id="rsav" class="sav">
   <div class="sav-score">
@@ -110,6 +171,7 @@
 <script src="js/intro.js"></script>
 <script src="js/multiplayer.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/progress.js"></script>
 <script src="js/state.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/core.js"></script>
@@ -120,6 +182,7 @@
 <script src="js/render.js"></script>
 <script src="js/effects2.js"></script>
 <script src="js/helpers.js"></script>
+<script src="js/screens.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
