@@ -26,6 +26,7 @@ function doPowerHit(side) {
     var dP = distToPad(px, py, PR);
     if (dP < threshold) {
       prePowerHitVX = bvx;
+      prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
       bvx = Math.abs(bvx) * 2.5;
       powerHitActive = true;
       fireTrailActive = true;
@@ -38,6 +39,7 @@ function doPowerHit(side) {
     var dM = distToPad(mx, my, MR);
     if (dM < threshold) {
       prePowerHitVX = bvx;
+      prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
       bvx = Math.abs(bvx) * 2.5;
       powerHitActive = true;
       fireTrailActive = true;
@@ -50,7 +52,7 @@ function doPowerHit(side) {
 }
 
 // --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
-console.log('%cBlaze Kick build: MODULAR-V5', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V8', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||

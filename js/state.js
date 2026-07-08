@@ -40,6 +40,11 @@ var lastLeftY=null, lastRightY=null;
 var shakeTime=0, shakeMag=0;
 function triggerShake(mag) { shakeMag=mag; shakeTime=Date.now(); }
 
+// --- Pattanás-fizika (hangolható) ---
+var MAX_BOUNCE_ANGLE_DEG = 45;   // max eltérés a vízszintestől (fokban) - nincs fel-le pattogás
+var PADDLE_DRAG = 0.75;          // az ütő húzásának ereje (a SZÖGRE hat, nem a sebességre)
+var prePowerHitSpeed = 0;        // tap-ütés előtti sebesség (visszaállításhoz)
+
 // --- Motion trail ---
 var ballTrail = [];  // [{x,y,age}]
 

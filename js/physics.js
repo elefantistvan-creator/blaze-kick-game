@@ -6,24 +6,36 @@ function hitRect(rx,ry,rw,rh,cx,cy,cr) {
 }
 
 function bounceRect(padX, padY, isLeft, velY, isPad) {
+  // 1) SEBESSÉG-NAGYSÁG: megmarad. (Tap-ütés után az eredeti sebesség áll vissza.)
+  var speed;
   if (powerHitActive) {
-    bvx = isLeft ? Math.abs(prePowerHitVX) : -Math.abs(prePowerHitVX);
+    speed = prePowerHitSpeed > 0 ? prePowerHitSpeed : Math.abs(prePowerHitVX);
     powerHitActive = false;
     fireTrailActive = false;
-  }
-  if (isLeft) {
-    bvx = Math.abs(bvx);
-    bx  = padX + PW/2 + BR + 1;
   } else {
-    bvx = -Math.abs(bvx);
-    bx  = padX - PW/2 - BR - 1;
+    speed = Math.sqrt(bvx*bvx + bvy*bvy);
   }
-  // Ütő húzás erősítve
-  bvy += velY * 0.75;
-  var maxVY = Math.abs(bvx)*1.4;
-  if (bvy> maxVY) bvy= maxVY;
-  if (bvy<-maxVY) bvy=-maxVY;
-  // Spin az ütő mozgásából
+  if (speed < 0.01) speed = spd;
+
+  // 2) Irány + pozíció-korrekció (ne ragadjon bele az ütőbe)
+  var dirX;
+  if (isLeft) { dirX = 1;  bx = padX + PW/2 + BR + 1; }
+  else        { dirX = -1; bx = padX - PW/2 - BR - 1; }
+
+  // 3) Az ütő húzása a SZÖGET módosítja (nem a sebességet)
+  var refVX = Math.abs(bvx) > 0.01 ? Math.abs(bvx) : speed;
+  var ang = Math.atan2(bvy + velY * PADDLE_DRAG, refVX);
+
+  // 4) Szög-korlát: nincs fel-le pattogás
+  var maxA = MAX_BOUNCE_ANGLE_DEG * Math.PI / 180;
+  if (ang >  maxA) ang =  maxA;
+  if (ang < -maxA) ang = -maxA;
+
+  // 5) Új sebességvektor — a nagyság VÁLTOZATLAN, csak az irány más
+  bvx = dirX * speed * Math.cos(ang);
+  bvy =        speed * Math.sin(ang);
+
+  // Spin (csak vizuális forgás)
   ballSpin += velY * 0.06;
   // Squish deformáció
   ballSquish = 1.0;
@@ -87,19 +99,8 @@ function updateBall() {
   }
   if (Date.now()-goalTime < 1200) return;
 
-  // 3 perc után gyorsulás - pontszámtól független
-  if (gameStartTime > 0) {
-    var elapsed = (Date.now() - gameStartTime) / 1000;
-    if (elapsed > 180) {
-      var extraSecs = Math.floor(elapsed - 180);
-      var extraMult = 1 + extraSecs * 0.01;
-      var targetSpd = baseSpd * goalSpeedMult * extraMult;
-      if (Math.abs(bvx) < targetSpd) {
-        bvx *= 1.0005;
-        bvy *= 1.0005;
-      }
-    }
-  }
+  // (A játszmán belüli gyorsulás törölve — a labda sebessége állandó marad.
+  //  A pályánkénti alapsebességet a stageMult() adja, a setup()-ban.)
 
   // Power-up timer check
   if (pb===null && Date.now() > pbTimer) spawnPowerBall();
@@ -171,7 +172,6 @@ function updateBall() {
     // GÓL csak ha a labda TELJESEN a nyíláson belül van (különben kapufa/fal)
     if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
       sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left';
-      goalSpeedMult = Math.min(goalSpeedMult + 0.05, 3.0);
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('left'); triggerGoalEffect('right');
       triggerGoalFlash(); triggerScoreAnim('right'); triggerShake(10);
@@ -187,7 +187,6 @@ function updateBall() {
                        (isPowerActive(powerLeft)  && powerLeft.type===12);
     if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
       sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right';
-      goalSpeedMult = Math.min(goalSpeedMult + 0.05, 3.0);
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('right'); triggerGoalEffect('left');
       triggerGoalFlash(); triggerScoreAnim('left'); triggerShake(10);
@@ -200,9 +199,6 @@ function updateBall() {
   // Kapusok ütközés
   if (hitRect(px-PW/2, py-PR, PW, PR*2, bx,by,BR)) {
     bounceRect(px, py, true, padVY, true);
-    // Csavar - bal kapus
-    var spin = lastLeftVY * 0.3;
-    bvy += spin;
     soundHit(); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p');
   }
   if (hitRect(ax-PW/2, ay-PR, PW, PR*2, bx,by,BR)) {
@@ -236,8 +232,6 @@ function updateBall() {
     } else if (effPlayerMR > 0) {
       if (hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
         bounceRect(mx, my, true, midVY, false);
-        var spin2 = lastRightVY * 0.3;
-        bvy += spin2;
         soundHit(); hitEffect={pad:'m', time:Date.now()};
       }
     }
