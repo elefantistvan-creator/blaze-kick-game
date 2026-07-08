@@ -11,6 +11,7 @@
 <meta name="theme-color" content="#1a1a2e">
 <title>Blaze Kick</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="js/early.js"></script>
 <link rel="stylesheet" href="css/style.css">
@@ -24,29 +25,6 @@
   <button id="playBtn" onclick="startIntroExit()">▶ PLAY</button>
 </div>
 
-<!-- Multiplayer overlay -->
-<div id="mpOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:white;">
-  <div style="font-size:24px;font-weight:900;color:#4fc3f7;">🌐 Multiplayer</div>
-  <div id="mpStatus" style="font-size:13px;color:#aaa;text-align:center;padding:0 20px;"></div>
-
-  <div id="mpCreate" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-    <button id="mpCreateBtn" style="padding:13px 36px;background:#4fc3f7;color:#111;border:none;border-radius:30px;font-size:17px;font-weight:700;cursor:pointer;touch-action:manipulation;">Create room</button>
-    <div style="color:#666;font-size:12px;">— or —</div>
-    <button id="mpJoinBtn" style="padding:13px 36px;background:#69f0ae;color:#111;border:none;border-radius:30px;font-size:17px;font-weight:700;cursor:pointer;touch-action:manipulation;">📲 Enter code and join</button>
-  </div>
-
-  <div id="mpWaiting" style="display:none;flex-direction:column;align-items:center;gap:16px;">
-    <div style="font-size:14px;color:#aaa;">Room code:</div>
-    <div id="mpRoomCode" style="font-size:52px;font-weight:900;color:#ffd700;letter-spacing:12px;"></div>
-    <div style="font-size:13px;color:#aaa;">Waiting for the other player...</div>
-    <div style="font-size:30px;">⏳</div>
-    <button id="mpCancelWaitBtn" style="padding:10px 28px;background:#555;color:#fff;border:none;border-radius:20px;font-size:14px;cursor:pointer;touch-action:manipulation;">Cancel</button>
-  </div>
-
-  <button id="mpCancelBtn" style="padding:10px 28px;background:#333;color:#aaa;border:none;border-radius:20px;font-size:13px;cursor:pointer;touch-action:manipulation;margin-top:8px;">← Back</button>
-</div>
-
-
 <!-- LEFT lane: goalkeeper control + score -->
 <div id="lsav" class="sav">
   <div class="sav-score">
@@ -59,17 +37,6 @@
 <div id="mid">
   <canvas id="c"></canvas>
   <button id="pauseBtn" title="Pause">⏸</button>
-  <div id="overlay" style="display:none;">
-    <h2>🔥 Blaze Kick</h2>
-    <p>
-      <b style="color:#4fc3f7">Left lane</b> – move the goalkeeper<br>
-      <b style="color:#4fc3f7">Right lane</b> – move the field player<br>
-      Two fingers at once = control both!
-    </p>
-    <p>First to 7 goals wins</p>
-    <button id="startBtn">⚽ Start Game</button>
-    <button id="howToBtn" style="padding:10px 28px;background:#333;color:#4fc3f7;border:2px solid #4fc3f7;border-radius:30px;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0.2);">📖 How to Play</button>
-  </div>
 </div>
 
 <!-- How to Play overlay -->
@@ -77,17 +44,25 @@
   <div style="font-size:22px;font-weight:900;color:#4fc3f7;">📖 How to Play</div>
   <div style="max-width:520px;max-height:70vh;overflow-y:auto;font-size:13px;line-height:1.7;color:#ddd;padding:0 22px;text-align:left;">
     <b style="color:#4fc3f7">🎯 Gameplay</b><br>
-    Blaze Kick is an air hockey game against the computer. Whoever reaches the goal count needed to win first (see the start screen) wins the match. The ball speeds up a little after every goal.<br><br>
+    Top-down football against the computer. First to 7 goals wins the match. Your ball speed stays the same for the whole match.<br><br>
     <b style="color:#4fc3f7">🕹️ Controls</b><br>
-    <b>Left lane</b> – drag up/down to move the goalkeeper.<br>
-    <b>Right lane</b> – drag up/down to move the field player.<br>
+    <b>Left lane</b> – drag up/down to move your goalkeeper.<br>
+    <b>Right lane</b> – drag up/down to move your striker.<br>
     Use two fingers at once to control both.<br>
-    <b>Tap</b> near the ball with your paddle for a power shot.<br>
-    Hitting the ball while moving fast with a quick flick adds spin.<br><br>
+    <b>Tap</b> near the ball to hit a power shot.<br>
+    Flick the paddle as it meets the ball to change the angle – the ball keeps its speed, only its direction changes.<br><br>
+    <b style="color:#4fc3f7">⚽ Formation</b><br>
+    Your striker plays in the opponent's half, in front of their goal. Their striker sits in front of yours. Goalkeepers stay on the goal line.<br><br>
     <b style="color:#4fc3f7">✨ Bonus ball</b><br>
-    A small extra ball occasionally appears on the field. Hit it to trigger a random effect for a few seconds – it can be helpful (e.g. bigger opponent goal, faster shots, bigger field player) or harmful (e.g. your own goal grows, or your field player shrinks) – react fast!<br><br>
-    <b style="color:#4fc3f7">📈 Stage progression</b><br>
-    Every match you win raises the stage by one – the ball and the CPU both get a bit stronger (+2.5% per stage). Your progress is saved, so you continue right where you left off next time.
+    A small extra ball sometimes crosses the pitch. Hit it for a random effect lasting a few seconds – it may help you or favour the CPU. This will be replaced by the Shop later.<br><br>
+    <b style="color:#4fc3f7">📈 Stages &amp; seasons</b><br>
+    100 stages, grouped into 10 seasons of 10 matches.<br>
+    Inside a season the ball gets faster with every stage. At the start of a new season it slows back down – but the CPU gets sharper: it aims better, reacts faster, and starts reading where the ball will land.<br><br>
+    <b style="color:#4fc3f7">⭐ Stars</b><br>
+    Concede 0–1 goals: ★★★<br>
+    Concede 2–4 goals: ★★☆<br>
+    Concede 5–6 goals: ★☆☆<br>
+    Your best result per stage is kept.
   </div>
   <button id="howToBackBtn" style="padding:12px 32px;background:#4fc3f7;color:#111;border:none;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-top:4px;">← Back</button>
 </div>
@@ -169,7 +144,6 @@
 </div>
 
 <script src="js/intro.js"></script>
-<script src="js/multiplayer.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/progress.js"></script>
 <script src="js/difficulty.js"></script>
