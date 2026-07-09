@@ -21,7 +21,9 @@
 
 <!-- INTRO képernyő -->
 <div id="intro">
-  <canvas id="introCanvas"></canvas>
+  <video id="introVideo" src="assets/intro.mp4" poster="assets/intro-poster.jpg"
+         muted playsinline autoplay preload="auto"
+         disablepictureinpicture disableremoteplayback></video>
   <button id="playBtn" onclick="startIntroExit()">▶ PLAY</button>
 </div>
 
@@ -77,19 +79,18 @@
 
 <!-- ===== FŐMENÜ ===== -->
 <div id="menuScreen" class="screen">
-  <div class="screen-body" style="display:flex;flex-direction:column;justify-content:center;">
-    <div class="brand">BLAZE KICK<small>BLAZE STUDIO</small></div>
+  <div class="screen-body menu-wrap">
     <div class="menu-stats">
       <span>★ <b id="menuStars">0</b></span>
       <span>◎ <b id="menuCoins">0</b></span>
     </div>
     <div class="menu-list">
-      <div class="menu-item" id="miStage"><span class="ico">🏟</span> Stage</div>
-      <div class="menu-item" id="miQuick"><span class="ico">⚽</span> 1 Player</div>
-      <div class="menu-item soon"><span class="ico">👥</span> 2 Player</div>
-      <div class="menu-item" id="miShop"><span class="ico">🛒</span> Shop</div>
-      <div class="menu-item" id="miSettings"><span class="ico">⚙</span> Settings</div>
-      <div class="menu-item" id="miHow"><span class="ico">📖</span> How to Play</div>
+      <div class="menu-item fire" id="miStage"><span class="ico">🏟</span> Stage</div>
+      <div class="menu-item fire" id="miQuick"><span class="ico">⚽</span> 1 Player</div>
+      <div class="menu-item fire soon"><span class="ico">👥</span> 2 Player</div>
+      <div class="menu-item ice"  id="miShop"><span class="ico">🛒</span> Shop</div>
+      <div class="menu-item ice"  id="miSettings"><span class="ico">⚙</span> Settings</div>
+      <div class="menu-item ice"  id="miHow"><span class="ico">📖</span> How to Play</div>
       <div class="menu-item exit" id="miExit" style="display:none;"><span class="ico">⏻</span> Exit game</div>
     </div>
   </div>
