@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v24';
+var CACHE = 'blazekick-v25';
 
 var ASSETS = [
   './',
@@ -14,6 +14,7 @@ var ASSETS = [
   './js/difficulty.js',
   './js/state.js',
   './js/shop.js',
+  './js/twoplayer.js',
   './js/effects.js',
   './js/core.js',
   './js/input.js',
