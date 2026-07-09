@@ -12,14 +12,15 @@ var s2El = document.getElementById('s2');
 (function() {
   var intro = document.getElementById('intro');
   var vid   = document.getElementById('introVideo');
-  var btn   = document.getElementById('playBtn');
   if (!intro) return;
 
   var shown = false;
   function showButton() {
-    if (shown || !btn) return;
+    if (shown) return;
     shown = true;
-    btn.classList.add('ready');
+    intro.classList.add('ready');       // az egész intro kattinthatóvá válik
+    var hint = document.getElementById('playHint');
+    if (hint) hint.classList.add('ready');
   }
 
   if (!vid) { showButton(); return; }
@@ -33,11 +34,8 @@ var s2El = document.getElementById('s2');
     if (vid.duration && vid.currentTime >= vid.duration - 0.15) showButton();
   });
 
-  // Koppintás a videóra = átugrás (a gombra koppintás nem ide tartozik)
-  intro.addEventListener('pointerup', function(e) {
-    if (btn && (e.target === btn || btn.contains(e.target))) return;
-    showButton();
-  });
+  // Bárhova koppintva belépünk — a videót nem kötelező végignézni.
+  intro.addEventListener('pointerup', function() { startIntroExit(); });
 
   if (typeof vid.play !== 'function') { showButton(); return; }
   var p = vid.play();
