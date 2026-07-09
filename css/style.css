@@ -82,12 +82,16 @@ html, body {
   justify-content:center;
   overflow:hidden;
 }
-#introCanvas {
+#introVideo {
   position:absolute; inset:0;
   width:100%; height:100%;
+  object-fit:cover;          /* kitölti a képernyőt, a széleit levágja */
+  pointer-events:none;
 }
 #playBtn {
   position:absolute;
+  opacity:0; pointer-events:none;
+  transition:opacity .45s ease;
   bottom:15%;
   left:50%;
   transform:translateX(-50%);
@@ -146,3 +150,6 @@ canvas { display:block; position:absolute; top:0; left:0; }
   display:flex; align-items:center; justify-content:center;
 }
 #pauseBtn:active { background:rgba(0,0,0,0.65); }
+
+/* A PLAY gomb csak a videó végén (vagy koppintásra) jelenik meg */
+#playBtn.ready { opacity:1; pointer-events:auto; }
