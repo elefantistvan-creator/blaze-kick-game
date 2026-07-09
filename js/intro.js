@@ -27,7 +27,11 @@ var s2El = document.getElementById('s2');
   vid.addEventListener('ended', showButton);
   vid.addEventListener('error', showButton);
   // Biztonsági háló: lassú hálózaton se ragadjon be az intro
-  setTimeout(showButton, 6500);
+  setTimeout(showButton, 5200);
+  // Ha a lejátszás a végéhez közelít, már mutassuk a gombot (ended elmaradhat)
+  vid.addEventListener('timeupdate', function() {
+    if (vid.duration && vid.currentTime >= vid.duration - 0.15) showButton();
+  });
 
   // Koppintás a videóra = átugrás (a gombra koppintás nem ide tartozik)
   intro.addEventListener('pointerup', function(e) {
