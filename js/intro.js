@@ -14,28 +14,24 @@ var s2El = document.getElementById('s2');
   var vid   = document.getElementById('introVideo');
   if (!intro) return;
 
-  var shown = false;
-  function showButton() {
-    if (shown) return;
-    shown = true;
-    intro.classList.add('ready');       // az egész intro kattinthatóvá válik
-    var hint = document.getElementById('playHint');
-    if (hint) hint.classList.add('ready');
+  var done = false;
+  function enterMenu() {
+    if (done) return;
+    done = true;
+    startIntroExit();          // a videó végén (vagy koppintásra) egyből a menübe
   }
 
-  if (!vid) { showButton(); return; }
+  if (!vid) { enterMenu(); return; }
 
-  vid.addEventListener('ended', showButton);
-  vid.addEventListener('error', showButton);
-  // Biztonsági háló: lassú hálózaton se ragadjon be az intro
-  setTimeout(showButton, 5200);
-  // Ha a lejátszás a végéhez közelít, már mutassuk a gombot (ended elmaradhat)
-  vid.addEventListener('timeupdate', function() {
-    if (vid.duration && vid.currentTime >= vid.duration - 0.15) showButton();
+  vid.addEventListener('ended', enterMenu);
+  vid.addEventListener('error', enterMenu);
+  setTimeout(enterMenu, 6000);                    // biztonsági háló
+  vid.addEventListener('timeupdate', function() { // a vége elmaradhat -> figyeljük
+    if (vid.duration && vid.currentTime >= vid.duration - 0.1) enterMenu();
   });
 
-  // Bárhova koppintva belépünk — a videót nem kötelező végignézni.
-  intro.addEventListener('pointerup', function() { startIntroExit(); });
+  // Koppintás bárhol = azonnali belépés (nem kötelező végignézni)
+  intro.addEventListener('pointerup', enterMenu);
 
   if (typeof vid.play !== 'function') { showButton(); return; }
   var p = vid.play();
