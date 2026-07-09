@@ -177,7 +177,7 @@ function updateBall() {
                       (isPowerActive(powerRight) && powerRight.type===12);
     // GÓL csak ha a labda TELJESEN a nyíláson belül van (különben kapufa/fal)
     if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
-      sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left'; Shop.onGoal();
+      sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left'; Shop.onGoal(); if(is2P) onGoal2P();
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('left'); triggerGoalEffect('right');
       triggerGoalFlash(); triggerScoreAnim('right'); triggerShake(10);
@@ -192,7 +192,7 @@ function updateBall() {
     var rightBlocked = (isPowerActive(powerRight) && powerRight.type===11) ||
                        (isPowerActive(powerLeft)  && powerLeft.type===12);
     if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
-      sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right'; Shop.onGoal();
+      sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right'; Shop.onGoal(); if(is2P) onGoal2P();
       powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
       soundGoal(); spawnConfetti('right'); triggerGoalEffect('left');
       triggerGoalFlash(); triggerScoreAnim('left'); triggerShake(10);
@@ -202,26 +202,26 @@ function updateBall() {
     } else { bx=PLX+PLW-BR; bvx=-Math.abs(bvx); soundWall(); spawnDust(PLX+PLW, by, -1); ballSquish=0.8; ballSquishDir=0; }
   }
 
-  // Kapusok ütközés
-  var pPR = effPR();
-  if (hitRect(px-PW/2, py-pPR, PW, pPR*2, bx,by,BR)) {
+  // Kapusok ütközés (1P: effPR/PR ; 2P: MR + bónusz)
+  var szGL = szGoalieLeft();
+  if (hitRect(px-PW/2, py-szGL, PW, szGL*2, bx,by,BR)) {
     bounceRect(px, py, true, padVY, true);
     soundHit(); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p');
   }
-  // Gép kapusa: eltüntethető, és a "Power shot" átüt rajta
+  var szGR = szGoalieRight();
   var tapThrough = Shop.isActive('powerTap') && powerHitActive;
-  if (!cpuGoalieGone() && !tapThrough &&
-      hitRect(ax-PW/2, ay-PR, PW, PR*2, bx,by,BR)) {
+  if (!rGoalieGone() && !tapThrough &&
+      hitRect(ax-PW/2, ay-szGR, PW, szGR*2, bx,by,BR)) {
     bounceRect(ax, ay, false, aiVY, true);
     soundHit(); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a');
   }
 
-  // Csatárok (a Shop-hatások szerint)
-  var effPlayerMR = effMR();
-  var effAiMR     = cpuStrikerGone() ? 0 : MR;
+  // Csatárok
+  var effPlayerMR = szStrikerLeft();
+  var effAiMR     = rStrikerGone() ? 0 : szStrikerRight();
 
   if (effPlayerMR > 0 && hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
-    bounceRect(mx, my, true, midVY, false, autoStrikerAim());
+    bounceRect(mx, my, true, midVY, false, is2P ? undefined : autoStrikerAim());
     soundHit(); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m');
   }
   if (effAiMR > 0 && hitRect(amx-PW/2, amy-effAiMR, PW, effAiMR*2, bx,by,BR)) {

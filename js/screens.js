@@ -306,13 +306,27 @@ var Screens = (function() {
     show('result');
   }
 
-  return { show:show, showResult:showResult, anyOpen:anyOpen, refreshMenu:refreshMenu,
+  function showResult2P(winner, p1score, p2score) {
+    var title = el('resultTitle');
+    if (title) { title.textContent = 'Player ' + winner + ' wins'; title.className = 'won'; }
+    var sc = el('resultScore');
+    if (sc) sc.textContent = 'P1 ' + p1score + ' : ' + p2score + ' P2';
+    var sw = el('resultStars'); if (sw) sw.innerHTML = '';
+    var cw = el('resultCoins'); if (cw) cw.style.display = 'none';
+    var sub = el('resultSub'); if (sub) sub.textContent = '2 Player';
+    var next = el('resultNextBtn'); if (next) next.style.display = 'none';
+    var retry = el('resultRetryBtn'); if (retry) retry.textContent = '↻ Rematch';
+    show('result');
+  }
+
+  return { show:show, showResult:showResult, showResult2P:showResult2P, anyOpen:anyOpen, refreshMenu:refreshMenu,
            buildGrid:buildGrid, buildShop:buildShop, buildItemBar:buildItemBar };
 })();
 
 // ---------- Indítók ----------
 function startStage(n) {
   bkMode = 'stage';
+  is2P = false;
   currentStage = n;
   stage = n;                 // a fizika/AI ebből számol
   Shop.reset();
@@ -323,6 +337,7 @@ function startStage(n) {
 
 function startQuick() {
   bkMode = 'quick';
+  is2P = false;
   currentStage = 1;
   stage = 1;
   Shop.reset();
@@ -331,9 +346,9 @@ function startQuick() {
   Screens.buildItemBar();
 }
 
-function retryStage()  { startStage(currentStage); }
+function retryStage()  { if (typeof is2P!=='undefined' && is2P) { start2Player(); } else { startStage(currentStage); } }
 function nextStage()   { if (currentStage < MAX_STAGE) startStage(currentStage + 1); }
-function backToMenu()  { running = false; paused = false; Shop.reset();
+function backToMenu()  { running = false; paused = false; if (typeof is2P!=='undefined') is2P=false; Shop.reset();
   var ib = document.getElementById('itemBar'); if (ib) ib.style.display='none';
   Screens.show('menu'); }
 function openStages()  { Screens.show('stages'); }

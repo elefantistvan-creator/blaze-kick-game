@@ -63,7 +63,7 @@ function uiBlocking() {
   return false;
 }
 
-console.log('%cBlaze Kick build: MODULAR-V23', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V24', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || uiBlocking()) return;
@@ -89,18 +89,34 @@ document.addEventListener('pointermove', function(e) {
     e.preventDefault();
     var d = (e.clientY - lastLeftY) * 1.5;
     lastLeftVY = e.clientY - lastLeftY;  // csavar sebessége
-    py += d;
-    var _pr = effPR();
-    py = Math.max(PLY+_pr, Math.min(PLY+PLH-_pr, py));
+    if (is2P) {
+      // Bal fél = 2. játékos: kapus (py, bal szél) + csatár (my) EGYÜTT
+      var lo = MR;
+      var sd2 = d * slowP2();
+      py = Math.max(PLY+lo, Math.min(PLY+PLH-lo, py + sd2));
+      my = Math.max(PLY+lo, Math.min(PLY+PLH-lo, my + sd2));
+    } else {
+      py += d;
+      var _pr = effPR();
+      py = Math.max(PLY+_pr, Math.min(PLY+PLH-_pr, py));
+    }
     lastLeftY = e.clientY;
   }
   if (e.pointerId===touchRight && lastRightY!==null) {
     e.preventDefault();
     var d = (e.clientY - lastRightY) * 1.5;
     lastRightVY = e.clientY - lastRightY;  // csavar sebessége
-    my += d;
-    var _mr = effMR();
-    my = Math.max(PLY+_mr, Math.min(PLY+PLH-_mr, my));
+    if (is2P) {
+      // Jobb fél = 1. játékos: kapus (ay, jobb szél) + csatár (amy) EGYÜTT
+      var ro = MR;
+      var sd1 = d * slowP1();
+      ay  = Math.max(PLY+ro, Math.min(PLY+PLH-ro, ay  + sd1));
+      amy = Math.max(PLY+ro, Math.min(PLY+PLH-ro, amy + sd1));
+    } else {
+      my += d;
+      var _mr = effMR();
+      my = Math.max(PLY+_mr, Math.min(PLY+PLH-_mr, my));
+    }
     lastRightY = e.clientY;
   }
 });

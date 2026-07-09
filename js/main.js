@@ -1,12 +1,21 @@
 
 function loop() {
-  if (running) { updateAI(); updateBall(); updateBallRotation(); }
+  if (running) {
+    if (is2P) { updateBonus2P(); updateBall(); updateBallRotation(); }
+    else      { updateAI(); updateBall(); updateBallRotation(); }
+  }
   draw();
   requestAnimationFrame(loop);
 }
 
 function endGame(won) {
   running = false;
+  if (is2P) {
+    is2P = false; pb = null;
+    // 2P: won=true -> a JOBB oldal (1. játékos) nyert (sc2>=7), won=false -> 2. játékos
+    Screens.showResult2P(won ? 1 : 2, sc2, sc1);
+    return;
+  }
   var earned = 0;
   lastCoinReward = 0;
   if (bkMode === 'stage') {
@@ -58,7 +67,7 @@ function resumeGame() {
   running = true;
 }
 function exitToMenu() {
-  paused = false; running = false;
+  paused = false; running = false; is2P = false; pb = null;
   Shop.reset();
   var po = document.getElementById('pauseOverlay');
   if (po) po.style.display = 'none';
@@ -136,6 +145,7 @@ if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagat
 // --- Új képernyők bekötése ---
 bindBtn('miStage',        openStages);
 bindBtn('miQuick',        startQuick);
+bindBtn('miTwo',          start2Player);
 bindBtn('miShop',         openShop);
 bindBtn('shopBackBtn',    function(){ Screens.show('menu'); });
 bindBtn('miSettings',     function(){ Screens.show('settings'); });

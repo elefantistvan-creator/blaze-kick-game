@@ -103,13 +103,22 @@ function draw() {
   ctx.arc(CXm,PLY+PLH/2,PLH*0.135,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // Kapusok (a Shop hatásai szerint)
-  drawPad(px, py, effPR(), '#4fc3f7', 'p');
-  if (!cpuGoalieGone()) drawPad(ax, ay, PR, '#ef5350', 'a');
+  // Kapusok + csatárok (1P: Shop-méret ; 2P: MR + bónusz)
+  drawPad(px, py, szGoalieLeft(),  '#4fc3f7', 'p');
+  if (!rGoalieGone())  drawPad(ax, ay, szGoalieRight(), '#ef5350', 'a');
+  drawPad(mx, my, szStrikerLeft(),  '#29b6f6', 'm');
+  if (!rStrikerGone()) drawPad(amx, amy, szStrikerRight(), '#e53935', 'am');
 
-  // Csatárok
-  drawPad(mx, my, effMR(), '#29b6f6', 'm');
-  if (!cpuStrikerGone()) drawPad(amx, amy, MR, '#e53935', 'am');
+  // Bónuszlabda (2P) — arany gömb
+  if (is2P && pb) {
+    ctx.save();
+    var pg = ctx.createRadialGradient(pb.x-pb.r*0.3, pb.y-pb.r*0.3, pb.r*0.1, pb.x, pb.y, pb.r);
+    pg.addColorStop(0, '#fff6c8'); pg.addColorStop(0.5, '#ffd54f'); pg.addColorStop(1, '#ff9800');
+    ctx.fillStyle = pg;
+    ctx.shadowColor = 'rgba(255,180,40,0.8)'; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(pb.x, pb.y, pb.r, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
 
   // Motion trail
   if (running) { updateTrail(); coolPads(); }
