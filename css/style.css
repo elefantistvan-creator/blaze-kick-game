@@ -88,30 +88,24 @@ html, body {
   object-fit:cover;          /* kitölti a képernyőt, a széleit levágja */
   pointer-events:none;
 }
-#playBtn {
+#playHint {
   position:absolute;
-  opacity:0; pointer-events:none;
-  transition:opacity .45s ease;
-  bottom:15%;
-  left:50%;
+  bottom:11%; left:50%;
   transform:translateX(-50%);
-  padding:16px 52px;
-  font-size:22px;
-  font-weight:900;
-  color:#fff;
-  background:linear-gradient(135deg,#ff6600,#ff2200);
-  border:3px solid #ff9900;
-  border-radius:50px;
-  cursor:pointer;
-  letter-spacing:2px;
-  box-shadow:0 0 30px rgba(255,100,0,0.8), 0 0 60px rgba(255,60,0,0.4);
-  animation:playPulse 1.2s ease-in-out infinite;
-  touch-action:manipulation;
-  z-index:101;
+  opacity:0; transition:opacity .5s ease;
+  color:#fff; font-size:clamp(16px,3.2vh,24px); font-weight:900;
+  letter-spacing:3px;
+  text-shadow:0 0 18px rgba(255,110,20,0.9), 0 2px 6px rgba(0,0,0,0.9);
+  animation:playPulse 1.4s ease-in-out infinite;
+  pointer-events:none; z-index:101;
 }
+#playHint.ready { opacity:1; }
+#intro.ready { cursor:pointer; }
 @keyframes playPulse {
-  0%,100% { box-shadow:0 0 30px rgba(255,100,0,0.8),0 0 60px rgba(255,60,0,0.4); }
-  50%      { box-shadow:0 0 50px rgba(255,150,0,1),0 0 100px rgba(255,80,0,0.7); }
+  0%,100% { transform:translateX(-50%) scale(1);    opacity:1;   }
+  50%      { transform:translateX(-50%) scale(1.05); opacity:0.7; }
+}
+  50%      { transform:translateX(-50%) scale(1.06); }
 }
 
 #overlay {
@@ -151,4 +145,3 @@ canvas { display:block; position:absolute; top:0; left:0; }
 #pauseBtn:active { background:rgba(0,0,0,0.65); }
 
 /* A PLAY gomb csak a videó végén (vagy koppintásra) jelenik meg */
-#playBtn.ready { opacity:1; pointer-events:auto; }
