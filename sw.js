@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v26';
+var CACHE = 'blazekick-v27';
 
 var ASSETS = [
   './',
@@ -58,8 +58,10 @@ self.addEventListener('fetch', function(e) {
   if (isIndex) {
     e.respondWith(
       fetch(e.request).then(function(resp) {
-        var copy = resp.clone();
-        caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+        if (resp && resp.status === 200 && e.request.method === 'GET') {
+          var copy = resp.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+        }
         return resp;
       }).catch(function() { return caches.match(e.request); })
     );
@@ -67,8 +69,12 @@ self.addEventListener('fetch', function(e) {
     e.respondWith(
       caches.match(e.request).then(function(cached) {
         return cached || fetch(e.request).then(function(resp) {
-          var copy = resp.clone();
-          caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+          // Csak teljes (200) GET válaszokat cache-elünk. A videó Range-kérése
+          // 206-ot ad vissza, azt a Cache API nem engedi put-olni -> kihagyjuk.
+          if (resp && resp.status === 200 && e.request.method === 'GET') {
+            var copy = resp.clone();
+            caches.open(CACHE).then(function(c) { c.put(e.request, copy); });
+          }
           return resp;
         });
       })
