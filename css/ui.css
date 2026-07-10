@@ -71,7 +71,7 @@
 
 /* ---------- Főmenü ---------- */
 #menuScreen {
-  background: #05070a url(assets/menu-bg.jpg) center/cover no-repeat;
+  background: #05070a url(../assets/menu-bg.jpg) center/cover no-repeat;
 }
 .menu-wrap {
   display: flex; flex-direction: column;
@@ -103,7 +103,7 @@
   min-height: 58px;
   padding: 6px 12px;
   border: 18px solid transparent;
-  border-image: url(assets/btn-ice.png) 34 fill stretch;
+  border-image: url(../assets/btn-ice.png) 34 fill stretch;
   color: #fff;
   font-size: 14px; font-weight: 800;
   letter-spacing: .09em; text-transform: uppercase;
@@ -116,7 +116,7 @@
 .menu-item .ico { font-size: 17px; }
 
 /* tüzes keret — jobb oszlop + How to Play */
-.menu-item.fire { border-image: url(assets/btn-fire.png) 34 fill stretch; }
+.menu-item.fire { border-image: url(../assets/btn-fire.png) 34 fill stretch; }
 
 .menu-item.soon { opacity: .45; pointer-events: none; }
 .menu-item.soon::after {
@@ -127,7 +127,7 @@
 /* Kilépés — teljes szélességű, tüzes keret piros felirattal */
 .menu-item.exit {
   grid-column: 1 / -1;
-  border-image: url(assets/btn-fire.png) 34 fill stretch;
+  border-image: url(../assets/btn-fire.png) 34 fill stretch;
   color: #ff5a3c;
   text-shadow: 0 2px 6px rgba(0,0,0,0.95);
 }
