@@ -33,9 +33,9 @@ var s2El = document.getElementById('s2');
   // Koppintás bárhol = azonnali belépés (nem kötelező végignézni)
   intro.addEventListener('pointerup', enterMenu);
 
-  if (typeof vid.play !== 'function') { showButton(); return; }
+  if (typeof vid.play !== 'function') { enterMenu(); return; }
   var p = vid.play();
-  if (p && p.catch) p.catch(showButton);   // autoplay tiltva -> gomb azonnal
+  if (p && p.catch) p.catch(enterMenu);   // autoplay tiltva -> egyből a menübe
 })();
 
 function startIntroExit() {
