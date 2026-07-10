@@ -73,6 +73,43 @@
 #menuScreen {
   background: #05070a url(../assets/menu-bg.jpg) center/cover no-repeat;
 }
+
+/* ---- Cím (logó): vízszintesen középen, a labda alatt, a gombok fölött ----
+   Finomhangoláshoz elég ezt a 2 értéket állítani:
+   --title-y = függőleges pozíció,  --logo-w = a logó szélessége */
+#menuTitle {
+  --title-y: 40%;
+  --logo-w: 42%;
+  position: absolute;
+  left: 50%; top: var(--title-y);
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  pointer-events: none;      /* soha ne fogja el a koppintást */
+  z-index: 2;
+  user-select: none;
+}
+.mt-logo {
+  display: block;
+  margin: 0 auto;
+  width: var(--logo-w);
+  max-width: 620px;
+  height: auto;
+  filter:
+    drop-shadow(0 4px 14px rgba(0,0,0,0.85))
+    drop-shadow(0 0 34px rgba(255,120,20,0.26));
+}
+.mt-studio {
+  display: block;
+  margin-top: 0.55em;
+  font-family: "Arial Black", "Segoe UI", Impact, sans-serif;
+  font-size: clamp(12px, 2.1vw, 22px);
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  padding-left: 0.24em;               /* a betűköz optikai kiegyenlítése */
+  color: #ff7a1a;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 16px rgba(255,110,20,0.6);
+}
 .menu-wrap {
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-end;
@@ -103,7 +140,7 @@
   min-height: 58px;
   padding: 6px 12px;
   border: 18px solid transparent;
-  border-image: url(../assets/btn-ice.png) 34 fill stretch;
+  border-image: url(../assets/btn-ice.png) 24 fill stretch;
   color: #fff;
   font-size: 14px; font-weight: 800;
   letter-spacing: .09em; text-transform: uppercase;
@@ -116,7 +153,7 @@
 .menu-item .ico { font-size: 17px; }
 
 /* tüzes keret — jobb oszlop + How to Play */
-.menu-item.fire { border-image: url(../assets/btn-fire.png) 34 fill stretch; }
+.menu-item.fire { border-image: url(../assets/btn-fire.png) 24 fill stretch; }
 
 .menu-item.soon { opacity: .45; pointer-events: none; }
 .menu-item.soon::after {
@@ -127,7 +164,7 @@
 /* Kilépés — teljes szélességű, tüzes keret piros felirattal */
 .menu-item.exit {
   grid-column: 1 / -1;
-  border-image: url(../assets/btn-fire.png) 34 fill stretch;
+  border-image: url(../assets/btn-fire.png) 24 fill stretch;
   color: #ff5a3c;
   text-shadow: 0 2px 6px rgba(0,0,0,0.95);
 }
