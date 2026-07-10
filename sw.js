@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v27';
+var CACHE = 'blazekick-v30';
 
 var ASSETS = [
   './',
@@ -30,6 +30,7 @@ var ASSETS = [
   './assets/menu-bg.jpg',
   './assets/btn-ice.png',
   './assets/btn-fire.png',
+  './assets/logo.png',
   './assets/pitch1.jpg',
   './manifest.json',
   './icon-192.png',
