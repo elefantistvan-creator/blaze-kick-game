@@ -19,10 +19,19 @@
 </head>
 <body>
 
+<!-- INDÍTÓ képernyő: logó + Play. A koppintás feloldja a hangot, majd indul az intró. -->
+<div id="startScreen">
+  <img class="start-logo" src="assets/logo.png" alt="Blaze Kick">
+  <button id="startBtn" class="start-play" aria-label="Play">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="40,27 40,73 76,50"></polygon></svg>
+  </button>
+  <div class="start-hint">TAP TO START</div>
+</div>
+
 <!-- INTRO képernyő -->
 <div id="intro">
   <video id="introVideo" src="assets/intro.mp4" poster="assets/intro-poster.jpg"
-         muted playsinline autoplay preload="auto"
+         muted playsinline preload="auto"
          disablepictureinpicture disableremoteplayback></video>
   </div>
 
