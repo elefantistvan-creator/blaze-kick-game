@@ -103,8 +103,9 @@ var Sound = (function () {
   var VOL = { music: 0.55, ambience: 0.45, goal: 0.8, paddle: 0.7, intro: 0.7 };
 
   var pools = {};          // egyszerre szólható SFX-ekhez kis pool
-  var musicEl = null;      // aktuális zene/aláfestő elem
-  var musicKey = null;     // 'menu' | 'intro' | 'match' — hogy ne induljon feleslegesen újra
+  var musicEl = null;      // menü/intró zene
+  var musicKey = null;     // 'menu' | 'intro' — hogy ne induljon feleslegesen újra
+  var ambEl = null;        // meccs-aláfestő (külön, újrahasznált elem)
   var ambTimer = null, ambGroup = 0;
 
   function has(src) { return true; } // (később: betöltés-ellenőrzés)
@@ -133,9 +134,8 @@ var Sound = (function () {
     } catch (e) { if (fallback) fallback(); }
   }
 
-  function stopMusic() {
-    if (ambTimer) { clearTimeout(ambTimer); ambTimer = null; }
-    ambGroup = 0; musicKey = null;
+  function stopMusic() {          // csak a menü/intró zene
+    musicKey = null;
     if (musicEl) { try { musicEl.pause(); } catch (e) {} musicEl = null; }
   }
 
@@ -150,18 +150,33 @@ var Sound = (function () {
     return musicEl;
   }
 
-  // Aláfestő ütemező: lejátszik egyet -> 'ended' -> véletlen szünet -> random másik
-  function ambienceLoop(group) {
-    if (!enabled || !unlocked) return;
-    var src = pick(FILES.ambience[group]);
+  // ---- Meccs-aláfestő: KÜLÖN, újrahasznált elem (nem keveredik a menü-zenével) ----
+  // Egyszer indul a meccs indításakor (gesztusból), majd 'ended' -> véletlen szünet -> újra.
+  function ambStop() {
+    ambGroup = 0;
+    if (ambTimer) { clearTimeout(ambTimer); ambTimer = null; }
+    if (ambEl) { try { ambEl.pause(); } catch (e) {} }
+  }
+  function ambPlay() {
+    if (!enabled || !unlocked || !ambGroup) return;
+    var src = pick(FILES.ambience[ambGroup]);
     if (!src) return;
-    musicEl = make(src, VOL.ambience, false);
-    musicEl.addEventListener('ended', function () {
-      if (ambGroup !== group) return;
-      var gap = GAP_MIN + Math.random() * (GAP_MAX - GAP_MIN);
-      ambTimer = setTimeout(function () { if (ambGroup === group) ambienceLoop(group); }, gap);
-    });
-    var p = musicEl.play(); if (p && p.catch) p.catch(function(){});
+    ambEl.src = DIR + src;
+    ambEl.loop = false;
+    ambEl.volume = VOL.ambience;
+    try { ambEl.currentTime = 0; } catch (e) {}
+    var p = ambEl.play(); if (p && p.catch) p.catch(function(){});
+  }
+  function ambNext() {   // az 'ended' hívja: véletlen szünet után újra
+    if (!ambGroup) return;
+    var gap = GAP_MIN + Math.random() * (GAP_MAX - GAP_MIN);
+    ambTimer = setTimeout(function () { if (ambGroup) ambPlay(); }, gap);
+  }
+  function ambStart(group) {
+    ambStop();
+    ambGroup = group;
+    if (!ambEl) { ambEl = new Audio(); ambEl.addEventListener('ended', ambNext); }
+    ambPlay();
   }
 
   return {
@@ -171,16 +186,16 @@ var Sound = (function () {
       unlocked = true;
       try { if (typeof initAudio === 'function') initAudio(); } catch (e) {}
     },
-    setEnabled: function (v) { enabled = !!v; if (!enabled) stopMusic(); },
+    setEnabled: function (v) { enabled = !!v; if (!enabled) { stopMusic(); ambStop(); } },
     isEnabled: function () { return enabled; },
 
     intro:     function () { playMusic('intro', pick(FILES.intro), VOL.intro, false); },
     menu:      function () { playMusic('menu',  pick(FILES.menu),  VOL.music, true); },
     stopMusic: stopMusic,
 
-    // Meccs kezdetén: az adott season aláfestő-csoportja indul
-    matchStart: function (season) { stopMusic(); ambGroup = groupForSeason(season); musicKey = 'match'; ambienceLoop(ambGroup); },
-    matchStop:  stopMusic,
+    // Meccs kezdetén: leáll a menü-zene, indul az adott season aláfestő-csoportja
+    matchStart: function (season) { stopMusic(); ambStart(groupForSeason(season)); },
+    matchStop:  ambStop,
 
     // Ütő: who = 'me' | 'cpu'  (fallback: szinti soundHit)
     paddle: function (who) {
