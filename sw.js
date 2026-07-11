@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v30';
+var CACHE = 'blazekick-v33';
 
 var ASSETS = [
   './',
@@ -38,7 +38,20 @@ var ASSETS = [
 ];
 
 self.addEventListener('install', function(e) {
-  e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(ASSETS); }));
+  e.waitUntil(
+    caches.open(CACHE).then(function(c) {
+      // cache:'reload' -> a böngésző HTTP-gyorsítótárának megkerülése,
+      // így mindig FRISS bájtokat teszünk a cache-be, nem a régieket.
+      // (Ez volt a beragadt régi kép/gomb oka.)
+      return Promise.all(ASSETS.map(function(u) {
+        return fetch(new Request(u, { cache: 'reload' }))
+          .then(function(resp) {
+            if (resp && (resp.ok || resp.type === 'opaque')) { return c.put(u, resp); }
+          })
+          .catch(function() { /* egy hiányzó asset ne buktassa el a telepítést */ });
+      }));
+    })
+  );
   self.skipWaiting();
 });
 
