@@ -21,25 +21,29 @@ var s2El = document.getElementById('s2');
     startIntroExit();          // a videó végén (vagy koppintásra) egyből a menübe
   }
 
-  if (!vid) { enterMenu(); return; }
+  if (vid) {
+    try { vid.pause(); vid.currentTime = 0; } catch (e) {}   // a Play gombra vár
+    vid.addEventListener('ended', enterMenu);
+    vid.addEventListener('error', enterMenu);
+    vid.addEventListener('timeupdate', function() {           // a vége elmaradhat -> figyeljük
+      if (vid.duration && vid.currentTime >= vid.duration - 0.1) enterMenu();
+    });
+  }
 
-  vid.addEventListener('ended', enterMenu);
-  vid.addEventListener('error', enterMenu);
-  setTimeout(enterMenu, 6000);                    // biztonsági háló
-  vid.addEventListener('timeupdate', function() { // a vége elmaradhat -> figyeljük
-    if (vid.duration && vid.currentTime >= vid.duration - 0.1) enterMenu();
-  });
-
-  // Koppintás bárhol = azonnali belépés (nem kötelező végignézni)
+  // Koppintás az intró alatt = azonnali belépés (nem kötelező végignézni)
   intro.addEventListener('pointerup', function () {
-    if (typeof Sound !== 'undefined') Sound.unlock();   // első koppintás feloldja a hangot
+    if (typeof Sound !== 'undefined') Sound.unlock();
     enterMenu();
   });
 
-  if (typeof vid.play !== 'function') { enterMenu(); return; }
-  var p = vid.play();
-  if (p && p.catch) p.catch(enterMenu);   // autoplay tiltva -> egyből a menübe
-  if (typeof Sound !== 'undefined') Sound.intro();   // intró hang (ahol az autoplay engedi)
+  // A Play gomb hívja: feloldja a hangot, elindítja az intró hangot + videót
+  window.startBlazeIntro = function () {
+    if (typeof Sound !== 'undefined') { Sound.unlock(); Sound.intro(); }
+    if (!vid || typeof vid.play !== 'function') { enterMenu(); return; }
+    var p = vid.play();
+    if (p && p.catch) p.catch(enterMenu);   // ha valamiért nem indul -> egyből menü
+    setTimeout(enterMenu, 6000);            // biztonsági háló
+  };
 })();
 
 function startIntroExit() {

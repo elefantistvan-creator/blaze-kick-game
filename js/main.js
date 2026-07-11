@@ -167,8 +167,12 @@ var pauseOv = document.getElementById('pauseOverlay');
 if (pauseOv) pauseOv.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
 
 // --- Új képernyők bekötése ---
-bindBtn('miStage',        openStages);
-bindBtn('miQuick',        startQuick);
+bindBtn('startBtn', function () {
+  var ss = document.getElementById('startScreen');
+  if (ss) ss.style.display = 'none';
+  if (typeof startBlazeIntro === 'function') startBlazeIntro();
+});
+bindBtn('miStage',        openStages);bindBtn('miQuick',        startQuick);
 bindBtn('miTwo',          start2Player);
 bindBtn('miShop',         openShop);
 bindBtn('shopBackBtn',    function(){ Screens.show('menu'); });
