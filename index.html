@@ -86,11 +86,11 @@
     <div class="menu-bottom">
     <div class="menu-stats">
       <span>★ <b id="menuStars">0</b></span>
-      <span>◎ <b id="menuCoins">0</b></span>
+      <span><img class="coin" src="assets/coin.svg" alt=""> <b id="menuCoins">0</b></span>
     </div>
     <div class="menu-list">
       <div class="menu-item fire" id="miStage"><span class="ico">🏟</span> Stage</div>
-      <div class="menu-item fire" id="miQuick"><span class="ico">⚽</span> 1 Player</div>
+      <div class="menu-item fire" id="miQuick"><span class="ico">👤</span> 1 Player</div>
       <div class="menu-item fire" id="miTwo"><span class="ico">👥</span> 2 Player</div>
       <div class="menu-item ice"  id="miShop"><span class="ico">🛒</span> Shop</div>
       <div class="menu-item ice"  id="miSettings"><span class="ico">⚙</span> Settings</div>
@@ -132,7 +132,7 @@
     <button class="btn small ghost" id="shopBackBtn">← Back</button>
     <div class="screen-title">Shop</div>
     <div class="screen-spacer"></div>
-    <div style="font-size:13px;color:var(--gold);">◎ <b id="shopCoins">0</b></div>
+    <div style="font-size:13px;color:var(--gold);"><img class="coin" src="assets/coin.svg" alt=""> <b id="shopCoins">0</b></div>
   </div>
   <div class="screen-body" id="shopList"></div>
 </div>
@@ -154,7 +154,7 @@
       <div id="testTools" style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);">
         <div style="font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Test tools</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn small" id="testCoinsBtn">+1000 ◎</button>
+          <button class="btn small" id="testCoinsBtn">+1000 <img class="coin" src="assets/coin.svg" alt=""></button>
           <button class="btn small" id="testStockBtn">Stock all items ×5</button>
           <button class="btn small" id="testUnlockBtn">Unlock all stages</button>
         </div>
@@ -173,6 +173,9 @@
   </div>
   <div class="sav-hint">▶ Field</div>
 </div>
+
+<!-- Fekete átúszó réteg: intró -> menü váltás (elrejti a pályavillanást is) -->
+<div id="fadeCover"></div>
 
 <!-- Teszt-kijelző: az aktuális AI-skill. Rejtett; a "#debug" URL-lel jelenik meg. -->
 <div id="skillDebug"></div>
