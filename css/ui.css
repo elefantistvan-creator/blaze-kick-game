@@ -186,17 +186,18 @@
   padding: 0 2px 7px;
 }
 .season-name { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.season-head.started .season-name { color: #4fc3f7; }   /* megkezdett season: kék */
 .season-sub  { font-size: 11px; color: #5b6472; }
 .season-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--tile), 1fr));
+  grid-template-columns: repeat(10, 1fr);   /* mindig 10 stage egy sorban */
   gap: var(--gap);
 }
 
 .tile {
   position: relative;
   aspect-ratio: 1 / 1;
-  min-height: var(--tile);
+  min-height: 0;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--bg-2);
@@ -210,31 +211,38 @@
 .tile.open:active { background: #1b212a; }
 .tile.locked { cursor: default; }
 
-/* szezonnyitó csempe: lelakatolt bélyegkép (csali) */
+/* stadion-bélyegkép: nyitott = világos/éles, zárolt szezonnyitó = halvány csali */
 .tile-thumb {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  opacity: .55;
+  opacity: .5;
 }
-.tile.locked .tile-thumb { opacity: .3; }
-.tile.teaser::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.72));
+.tile.open   .tile-thumb { opacity: .95; }
+.tile.locked .tile-thumb { opacity: .28; }
+/* olvashatósági fátyol a szám alá */
+.tile.open::before {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.5));
+}
+.tile.locked.teaser::before {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.75));
 }
 .tile-num {
   position: relative; z-index: 2;
-  font-size: 15px; font-weight: 700;
+  font-size: clamp(9px, 2.3vw, 15px); font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
 }
-.tile.locked .tile-num { color: #5b6472; }
+.tile.locked .tile-num { color: #cfd6df; }
 .tile-lock {
   position: relative; z-index: 2;
-  font-size: 13px; margin-top: 2px; opacity: .75;
+  font-size: clamp(8px, 1.8vw, 13px); margin-top: 2px; opacity: .75;
 }
 .tile-stars {
   position: relative; z-index: 2;
   display: flex; gap: 1px; margin-top: 3px;
 }
-.tile-stars .st { font-size: 9px; color: #39414d; line-height: 1; }
+.tile-stars .st { font-size: clamp(6px, 1.5vw, 9px); color: #39414d; line-height: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .tile-stars .st.on { color: var(--gold); }
 
 /* ---------- Eredményképernyő ---------- */
@@ -277,10 +285,22 @@
 .shop-ico  { font-size: 17px; }
 .shop-name { font-size: 14px; font-weight: 700; }
 .shop-own  { margin-left: auto; font-size: 12px; color: var(--text-dim); }
+.shop-own.has { color: #ff5a3c; font-weight: 800; }         /* van belőle -> piros */
 .shop-desc { font-size: 11.5px; color: var(--text-dim); margin: 5px 0 9px; }
 .shop-buys { display: flex; gap: 7px; flex-wrap: wrap; }
-.shop-buys .btn b { font-weight: 800; }
-.shop-buys .btn i { font-style: normal; opacity: .7; font-size: 10px; }
+.shop-buys .btn {
+  display: inline-flex; align-items: center; gap: 7px;      /* széthúzott, átlátható */
+  padding: 6px 10px;
+}
+.shop-buys .btn .p-qty  { opacity: .8; }
+.shop-buys .btn .p-cost { display: inline-flex; align-items: center; gap: 3px; }
+.shop-buys .btn .p-cost b { font-weight: 800; }
+.shop-buys .btn .p-disc { color: #ff5a3c; font-weight: 800; font-size: 10px; }  /* akció -> piros */
+
+/* BK-érme ikon (a régi ◎ helyett) */
+.coin { height: 1em; width: auto; vertical-align: -0.14em; }
+.menu-stats .coin { height: 1.15em; vertical-align: -0.2em; }
+.shop-buys .btn .coin { height: 0.95em; }
 
 /* ---------- Meccs közbeni aktiváló sáv ---------- */
 #itemBar {
@@ -329,6 +349,17 @@
   font-size: 9px; font-weight: 800;
   border-radius: 7px; padding: 0 4px; line-height: 13px;
   pointer-events: none;
+}
+
+/* ===== Fekete átúszó réteg (intró -> menü) ===== */
+#fadeCover {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  z-index: 500;                 /* a menü (300) és az intró (100) fölött */
+  pointer-events: none;
+  transition: opacity 0.28s ease;
 }
 
 /* ===== Teszt: AI-skill kijelző (alapból rejtett, csak #debug URL-lel) ===== */
