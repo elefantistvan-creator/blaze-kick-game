@@ -75,35 +75,32 @@
 }
 
 /* ---- Cím (logó): vízszintesen középen, a labda alatt, a gombok fölött ----
-   Finomhangoláshoz elég ezt a 2 értéket állítani:
-   --title-y = függőleges pozíció,  --logo-w = a logó szélessége */
+   Magasság-alapú méret, hogy fekvő telefonon (alacsony képernyő) is elférjen.
+   Finomhangoláshoz: --title-y = függőleges pozíció, --logo-max = max. logóméret */
 #menuTitle {
-  --title-y: 40%;
-  --logo-w: 42%;
-  position: absolute;
-  left: 50%; top: var(--title-y);
-  transform: translate(-50%, -50%);
+  --title-top: 18vh;          /* a cím függőleges helye (a labda alá) — ezt állítsd, ha kell */
   width: 100%;
   text-align: center;
-  pointer-events: none;      /* soha ne fogja el a koppintást */
-  z-index: 2;
+  margin: var(--title-top) auto 0;
+  pointer-events: none;
   user-select: none;
+  flex: 0 0 auto;
 }
 .mt-logo {
   display: block;
   margin: 0 auto;
-  width: var(--logo-w);
-  max-width: 620px;
-  height: auto;
+  height: clamp(42px, 13vh, 128px);   /* magasság szerint méretezünk -> nem lóg a gombokra */
+  width: auto;
+  max-width: 88vw;
   filter:
     drop-shadow(0 4px 14px rgba(0,0,0,0.85))
     drop-shadow(0 0 34px rgba(255,120,20,0.26));
 }
 .mt-studio {
   display: block;
-  margin-top: 0.55em;
+  margin-top: 0.5em;
   font-family: "Arial Black", "Segoe UI", Impact, sans-serif;
-  font-size: clamp(12px, 2.1vw, 22px);
+  font-size: clamp(11px, 1.7vh, 22px);
   font-weight: 900;
   letter-spacing: 0.24em;
   padding-left: 0.24em;               /* a betűköz optikai kiegyenlítése */
@@ -112,16 +109,22 @@
 }
 .menu-wrap {
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-end;
-  padding: 0 16px 22px !important;
-  gap: 12px;
+  align-items: center; justify-content: space-between;
+  padding: 0 16px clamp(10px, 3vh, 22px) !important;
+  gap: clamp(6px, 1.6vh, 12px);
+}
+.menu-bottom {
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(6px, 1.6vh, 12px);
+  width: 100%;
+  flex: 0 0 auto;
 }
 .menu-stats {
-  display: flex; gap: 26px;
-  font-size: 14px; color: #cdd4dd;
+  display: flex; gap: clamp(14px, 3vw, 26px);
+  font-size: clamp(11px, 1.6vh, 14px); color: #cdd4dd;
   letter-spacing: .06em;
   text-shadow: 0 1px 4px rgba(0,0,0,0.9);
-  padding: 6px 16px; border-radius: 20px;
+  padding: clamp(3px, 0.8vh, 6px) 16px; border-radius: 20px;
   background: rgba(0,0,0,0.35);
 }
 .menu-stats b { color: var(--gold); font-weight: 800; }
@@ -129,7 +132,7 @@
 .menu-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
+  gap: clamp(5px, 1.3vh, 9px);
   width: 100%; max-width: 820px;
 }
 @media (max-width: 560px) { .menu-list { grid-template-columns: repeat(2, 1fr); } }
@@ -137,12 +140,12 @@
 .menu-item {
   position: relative;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  min-height: 58px;
+  min-height: clamp(30px, 6.2vh, 58px);
   padding: 6px 12px;
-  border: 18px solid transparent;
+  border: clamp(9px, 2.2vh, 18px) solid transparent;
   border-image: url(../assets/btn-ice.png) 24 fill stretch;
   color: #fff;
-  font-size: 14px; font-weight: 800;
+  font-size: clamp(11px, 1.7vh, 14px); font-weight: 800;
   letter-spacing: .09em; text-transform: uppercase;
   text-shadow: 0 2px 5px rgba(0,0,0,0.9);
   cursor: pointer; touch-action: manipulation;
@@ -167,6 +170,13 @@
   border-image: url(../assets/btn-fire.png) 24 fill stretch;
   color: #ff5a3c;
   text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+}
+
+/* Nagyon alacsony (fekvő telefon) képernyő: a cím feljebb + kisebb,
+   hogy biztosan a gombok fölött maradjon és ne csússzon rájuk */
+@media (max-height: 460px) {
+  #menuTitle { --title-y: 30%; --logo-max: 32vh; }
+  .mt-studio { margin-top: 0.3em; }
 }
 
 /* ---------- Stage rács ---------- */
