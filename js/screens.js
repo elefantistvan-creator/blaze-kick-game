@@ -90,9 +90,10 @@ var Screens = (function() {
 
     var head = document.createElement('div');
     head.className = 'shop-head';
+    var own = Progress.invCount(it.id);
     head.innerHTML = '<span class="shop-ico">' + it.icon + '</span>' +
                      '<span class="shop-name">' + it.name + '</span>' +
-                     '<span class="shop-own">×' + Progress.invCount(it.id) + '</span>';
+                     '<span class="shop-own' + (own > 0 ? ' has' : '') + '">×' + own + '</span>';
     row.appendChild(head);
 
     var d = document.createElement('div');
@@ -108,8 +109,9 @@ var Screens = (function() {
         var b = document.createElement('button');
         b.className = 'btn small' + (Progress.coins() >= cost ? ' primary' : '');
         if (Progress.coins() < cost) b.setAttribute('disabled','');
-        b.innerHTML = '×' + pack.qty + ' <b>' + cost + '</b>' +
-                      (pack.discount ? ' <i>−' + Math.round(pack.discount*100) + '%</i>' : '');
+        b.innerHTML = '<span class="p-qty">×' + pack.qty + '</span>' +
+                      '<span class="p-cost"><b>' + cost + '</b><img class="coin" src="assets/coin.svg" alt=""></span>' +
+                      (pack.discount ? '<span class="p-disc">−' + Math.round(pack.discount*100) + '%</span>' : '');
         b.addEventListener('pointerup', function(e){
           e.stopPropagation(); e.preventDefault();
           if (Shop.buy(it.id, pack.qty)) buildShop();
@@ -195,8 +197,8 @@ var Screens = (function() {
       sec.className = 'season';
 
       var h = document.createElement('div');
-      h.className = 'season-head';
       var firstStage = (s-1)*SEASON_LEN + 1;
+      h.className = 'season-head' + (Progress.isUnlocked(firstStage) ? ' started' : '');
       h.innerHTML = '<span class="season-name">Season ' + s + '</span>' +
                     '<span class="season-sub">' + firstStage + '–' + (firstStage+SEASON_LEN-1) + '</span>';
       sec.appendChild(h);
@@ -227,13 +229,14 @@ var Screens = (function() {
     t.className = 'tile' + (unlocked ? ' open' : ' locked') + (teaser ? ' teaser' : '');
     t.setAttribute('data-stage', stage);
 
-    // Szezonnyitó: lelakatolt bélyegkép (csali). Placeholder: pitch1 színárnyalattal.
-    if (teaser) {
+    // Stadionkép: minden FELOLDOTT csempén világosan (látszik a haladás),
+    // a zárolt szezonnyitón halványan (csali). A többi zárolt csempe sima.
+    if (unlocked || teaser) {
       var thumb = document.createElement('div');
       thumb.className = 'tile-thumb';
       var hue = (seasonOf(stage)-1) * 28;
       thumb.style.backgroundImage = 'url(assets/pitch1.jpg)';
-      thumb.style.filter = 'hue-rotate(' + hue + 'deg) saturate(0.85)';
+      thumb.style.filter = 'hue-rotate(' + hue + 'deg) saturate(' + (unlocked ? '1' : '0.85') + ')';
       t.appendChild(thumb);
     }
 
@@ -289,7 +292,7 @@ var Screens = (function() {
     }
     var cw = el('resultCoins');
     if (cw) {
-      cw.textContent = lastCoinReward > 0 ? ('+' + lastCoinReward + ' ◎') : '';
+      cw.innerHTML = lastCoinReward > 0 ? ('+' + lastCoinReward + ' <img class="coin" src="assets/coin.svg" alt="">') : '';
       cw.style.display = lastCoinReward > 0 ? 'block' : 'none';
     }
     var sub = el('resultSub');
