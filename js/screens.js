@@ -54,6 +54,7 @@ var Screens = (function() {
     if (name === 'menu')   refreshMenu();
     if (name === 'stages') buildGrid();
     if (name === 'shop')   buildShop();
+    if (typeof Sound !== 'undefined') Sound.menu();   // menü-zene a menü-képernyőkön (nem indul újra, ha már szól)
   }
 
   // ---------- Shop ----------
@@ -270,6 +271,7 @@ var Screens = (function() {
 
   // ---------- Eredményképernyő ----------
   function showResult(won, myGoals, cpuGoals, earnedStars) {
+    if (typeof Sound !== 'undefined') Sound.matchStop();   // aláfestő leáll, menü-zene jön a result képernyőn
     var title = el('resultTitle');
     if (title) {
       title.textContent = won ? 'Match won' : 'Match lost';
@@ -310,6 +312,7 @@ var Screens = (function() {
   }
 
   function showResult2P(winner, p1score, p2score) {
+    if (typeof Sound !== 'undefined') Sound.matchStop();
     var title = el('resultTitle');
     if (title) { title.textContent = 'Player ' + winner + ' wins'; title.className = 'won'; }
     var sc = el('resultScore');
@@ -334,6 +337,7 @@ function startStage(n) {
   stage = n;                 // a fizika/AI ebből számol
   Shop.reset();
   Screens.show('game');
+  Sound.matchStart(seasonOf(n));   // season-hez igazított aláfestő
   doStart();
   Screens.buildItemBar();
 }
@@ -345,6 +349,7 @@ function startQuick() {
   stage = 1;
   Shop.reset();
   Screens.show('game');
+  Sound.matchStart(1);             // gyors meccs: teszt-csoport
   doStart();
   Screens.buildItemBar();
 }

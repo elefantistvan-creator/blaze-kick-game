@@ -31,11 +31,15 @@ var s2El = document.getElementById('s2');
   });
 
   // Koppintás bárhol = azonnali belépés (nem kötelező végignézni)
-  intro.addEventListener('pointerup', enterMenu);
+  intro.addEventListener('pointerup', function () {
+    if (typeof Sound !== 'undefined') Sound.unlock();   // első koppintás feloldja a hangot
+    enterMenu();
+  });
 
   if (typeof vid.play !== 'function') { enterMenu(); return; }
   var p = vid.play();
   if (p && p.catch) p.catch(enterMenu);   // autoplay tiltva -> egyből a menübe
+  if (typeof Sound !== 'undefined') Sound.intro();   // intró hang (ahol az autoplay engedi)
 })();
 
 function startIntroExit() {

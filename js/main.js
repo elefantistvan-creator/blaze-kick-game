@@ -178,6 +178,32 @@ bindBtn('miExit',         exitGame);
 bindBtn('stagesBackBtn',  function(){ Screens.show('menu'); });
 bindBtn('settingsBackBtn',function(){ Screens.show('menu'); });
 bindBtn('resetProgressBtn', resetProgress);
+
+// --- Hang ki/be kapcsoló (Settings) ---
+function updateSoundLabel() {
+  var b = document.getElementById('miSound');
+  if (!b || typeof Sound === 'undefined') return;
+  var on = Sound.isEnabled();
+  b.innerHTML = '<span class="ico">' + (on ? '🔊' : '🔇') + '</span> Sound: ' + (on ? 'ON' : 'OFF');
+}
+function toggleSound() {
+  if (typeof Sound === 'undefined') return;
+  var on = !Sound.isEnabled();
+  Sound.setEnabled(on);
+  try { localStorage.setItem('bk_sound', on ? '1' : '0'); } catch (e) {}
+  if (on) {
+    Sound.unlock();
+    var m = document.getElementById('menuScreen');
+    if (m && m.style.display !== 'none') Sound.menu();
+  }
+  updateSoundLabel();
+}
+(function () {   // induláskor a mentett állapot
+  if (typeof Sound === 'undefined') return;
+  try { if (localStorage.getItem('bk_sound') === '0') Sound.setEnabled(false); } catch (e) {}
+  updateSoundLabel();
+})();
+bindBtn('miSound', toggleSound);
 // TESZT ESZKÖZÖK — kiadás előtt törlendő
 bindBtn('testCoinsBtn',  testAddCoins);
 bindBtn('testStockBtn',  testStockAll);
@@ -187,4 +213,20 @@ bindBtn('resultNextBtn',  nextStage);
 bindBtn('resultMenuBtn',  backToMenu);
 
 window.addEventListener('resize', function(){ if(running) setup(); });
+
+// Hang-feloldás az első felhasználói interakcióra (mobil autoplay-tiltás).
+// Ha a menü már látszik (a videó tap nélkül ért véget), itt indul a menü-zene.
+(function () {
+  function unlockOnce() {
+    if (typeof Sound === 'undefined') return;
+    Sound.unlock();
+    var m = document.getElementById('menuScreen');
+    if (m && m.style.display !== 'none') Sound.menu();
+    document.removeEventListener('pointerdown', unlockOnce);
+    document.removeEventListener('keydown', unlockOnce);
+  }
+  document.addEventListener('pointerdown', unlockOnce);
+  document.addEventListener('keydown', unlockOnce);
+})();
+
 setup(); loop();

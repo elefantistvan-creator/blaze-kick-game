@@ -20,6 +20,7 @@ function start2Player() {
   currentStage = 1; stage = 1;
   bonus2P = { p1:null, p2:null }; pb = null;
   Screens.show('game');
+  Sound.matchStart(1);       // 2P: teszt-csoport (Season 1 hangulat)
   doStart();                 // közös indítás (countdown, setup); a 2P ágakat a mód kapcsolja
   scheduleBonus2P();
 }
@@ -67,7 +68,7 @@ function padHit2P(padX, padY, ball) {
 function grantBonus2P(who) {
   var type = BONUS2P_TYPES[Math.floor(Math.random()*BONUS2P_TYPES.length)];
   bonus2P[who] = { type:type, until:Date.now()+BONUS2P_MS };
-  pb = null; soundGoal(); triggerShake(6);
+  pb = null; Sound.goal(); triggerShake(6);
 }
 function bonus2PActive(who, type) {
   return bonus2P[who] && bonus2P[who].type===type && Date.now() < bonus2P[who].until;
