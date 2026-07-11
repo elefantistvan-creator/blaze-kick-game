@@ -351,6 +351,43 @@
   pointer-events: none;
 }
 
+/* ===== Indító képernyő (logó + Play) ===== */
+#startScreen {
+  position: fixed; inset: 0; z-index: 600;
+  background: #05070a url(../assets/menu-bg.jpg) center/cover no-repeat;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(22px, 6vh, 54px);
+  user-select: none;
+}
+#startScreen .start-logo {
+  width: clamp(210px, 44%, 540px); height: auto;
+  filter: drop-shadow(0 4px 14px rgba(0,0,0,0.85)) drop-shadow(0 0 34px rgba(255,120,20,0.26));
+}
+#startScreen .start-play {
+  width: clamp(76px, 15vh, 112px); height: clamp(76px, 15vh, 112px);
+  border-radius: 50%;
+  border: 3px solid #ff8a2a;
+  background: radial-gradient(circle at 38% 32%, #3a2410, #140a04 78%);
+  box-shadow: 0 0 30px rgba(255,120,20,0.55), inset 0 0 18px rgba(255,140,40,0.35);
+  display: grid; place-items: center;
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  animation: startPulse 1.8s ease-in-out infinite;
+}
+#startScreen .start-play svg { width: 44%; height: 44%; margin-left: 8%; }
+#startScreen .start-play polygon { fill: #ffd9a8; }
+#startScreen .start-play:active { transform: scale(0.94); }
+#startScreen .start-hint {
+  color: #ffb060; font-weight: 800; letter-spacing: 0.34em; padding-left: 0.34em;
+  font-size: clamp(11px, 2vw, 16px);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+}
+@keyframes startPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 26px rgba(255,120,20,0.5),  inset 0 0 16px rgba(255,140,40,0.3); }
+  50%      { transform: scale(1.06); box-shadow: 0 0 42px rgba(255,140,30,0.85), inset 0 0 20px rgba(255,150,50,0.45); }
+}
+
 /* ===== Fekete átúszó réteg (intró -> menü) ===== */
 #fadeCover {
   position: fixed;
