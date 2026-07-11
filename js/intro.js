@@ -41,11 +41,18 @@ var s2El = document.getElementById('s2');
 function startIntroExit() {
   var intro = document.getElementById('intro');
   var vid   = document.getElementById('introVideo');
+  var cover = document.getElementById('fadeCover');
   if (vid) { try { vid.pause(); } catch(e) {} }
-  intro.style.transition = 'opacity 0.5s';
-  intro.style.opacity = '0';
-  setTimeout(function(){
-    intro.style.display = 'none';
+
+  // 1) gyors elsötétedés feketére (az intró VÉGIG átlátszatlan marad,
+  //    a fekete réteg úszik rá -> a pálya-canvas sosem bukkan elő)
+  if (cover) cover.style.opacity = '1';
+
+  // 2) a teljesen fekete pillanatban: intró el, menü be (a csere fekete alatt)
+  setTimeout(function() {
+    if (intro) intro.style.display = 'none';
     if (typeof Screens !== 'undefined') Screens.show('menu');
-  }, 500);
+    // 3) a fekete visszahalványul -> a menü tűnik elő
+    if (cover) cover.style.opacity = '0';
+  }, 300);
 }
