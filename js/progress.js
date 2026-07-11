@@ -10,9 +10,13 @@ var SEASON_COUNT = MAX_STAGE / SEASON_LEN;
 function seasonOf(stage)      { return Math.floor((stage-1)/SEASON_LEN) + 1; }
 function isSeasonStart(stage) { return (stage-1) % SEASON_LEN === 0; }
 
+// --- Adaptív skill konstansok (mind hangolható) ---
+var SKILL_MIN = 15, SKILL_MAX = 92, SKILL_START = 22, CALIB_MATCHES = 3;
+function skillToT(s){ return Math.max(0, Math.min(1, (s - SKILL_MIN) / (SKILL_MAX - SKILL_MIN))); }
+
 var Progress = (function() {
   var KEY = 'bk_progress_v1';
-  var data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false };
+  var data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false, skill:SKILL_START, skillMatches:0 };
 
   function load() {
     try {
@@ -31,6 +35,8 @@ var Progress = (function() {
     if (typeof data.welcomed !== 'boolean') data.welcomed = false;
     if (!data.unlocked) data.unlocked = 1;
     if (typeof data.coins !== 'number') data.coins = 0;
+    if (typeof data.skill !== 'number') data.skill = SKILL_START;
+    if (typeof data.skillMatches !== 'number') data.skillMatches = 0;
     return data;
   }
 
@@ -53,6 +59,9 @@ var Progress = (function() {
     isUnlocked:  function(stage) { return stage <= data.unlocked; },
     stars:       function(stage) { return data.stars[stage] || 0; },
     coins:       function()      { return data.coins; },
+    getSkill:    function()      { return data.skill; },
+    skillT:      function()      { return skillToT(data.skill); },
+    skillMatches:function()      { return data.skillMatches; },
     addCoins:    function(n)     { data.coins += n; if (data.coins<0) data.coins=0; save(); },
 
     // --- Készlet (Shop) ---
@@ -75,19 +84,34 @@ var Progress = (function() {
       if (st > (data.stars[stage] || 0)) data.stars[stage] = st;
       if (stage + 1 > data.unlocked && stage < MAX_STAGE) data.unlocked = stage + 1;
       data.losses[stage] = 0;
+      // --- Adaptív skill: győzelem (gólkülönbség = 7 - kapott gól) ---
+      var calibW = data.skillMatches < CALIB_MATCHES;
+      var diff   = 7 - conceded;
+      var dW     = calibW ? (diff >= 5 ? 8 : 3) : (diff >= 5 ? 3 : 0);
+      data.skill = Math.max(SKILL_MIN, Math.min(SKILL_MAX, data.skill + dW));
+      data.skillMatches++;
       save();
       return st;
     },
     // Vereség: sorozat számláló (a későbbi csendes AI-gyengítéshez)
     recordLoss: function(stage) {
-      data.losses[stage] = (data.losses[stage] || 0) + 1;
+      var prior = data.losses[stage] || 0;
+      var AA = (typeof DIFF !== 'undefined') ? DIFF.ASSIST_AFTER : 2;
+      var assistWasActive = prior >= AA;   // ha már beragadt, ne rántsuk le tovább a profilt
+      data.losses[stage] = prior + 1;
+      // --- Adaptív skill: vesztés (csak ha a helyi segítség még nem aktív) ---
+      if (!assistWasActive) {
+        var calibL = data.skillMatches < CALIB_MATCHES;
+        data.skill = Math.max(SKILL_MIN, Math.min(SKILL_MAX, data.skill + (calibL ? -5 : -3)));
+      }
+      data.skillMatches++;
       save();
       return data.losses[stage];
     },
     lossStreak: function(stage) { return data.losses[stage] || 0; },
     unlockAll:  function() { data.unlocked = MAX_STAGE; save(); },   // TESZT
     reset: function() {
-      data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false };
+      data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false, skill:SKILL_START, skillMatches:0 };
       try { localStorage.removeItem('bk_stage'); } catch(e) {}
       save();
     }

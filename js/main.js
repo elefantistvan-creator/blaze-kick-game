@@ -1,10 +1,34 @@
 
+// --- Teszt: AI-skill kijelző (rejtett; a "#debug" URL kapcsolja be) ---
+var BK_DEBUG = false;
+(function(){
+  try {
+    if (location.hash.indexOf('debug') >= 0 || localStorage.getItem('bk_debug') === '1') {
+      BK_DEBUG = true;
+      var el = document.getElementById('skillDebug');
+      if (el) el.style.display = 'block';
+    }
+  } catch(e){}
+})();
+function updateSkillDebug() {
+  if (!BK_DEBUG) return;
+  var el = document.getElementById('skillDebug');
+  if (!el || typeof Progress === 'undefined') return;
+  var line = 'SKILL ' + Progress.getSkill() + '  ·  AI ' + Math.round(Progress.skillT() * 100) + '%';
+  if (typeof bkMode !== 'undefined' && bkMode === 'stage' && typeof currentStage !== 'undefined') {
+    line += '  ·  stage ' + currentStage;
+    if (typeof assistActive === 'function' && assistActive(currentStage)) line += '  ·  ASSIST';
+  }
+  el.textContent = line;
+}
+
 function loop() {
   if (running) {
     if (is2P) { updateBonus2P(); updateBall(); updateBallRotation(); }
     else      { updateAI(); updateBall(); updateBallRotation(); }
   }
   draw();
+  updateSkillDebug();
   requestAnimationFrame(loop);
 }
 

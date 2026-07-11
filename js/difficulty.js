@@ -33,7 +33,7 @@ var DIFF = {
   STRIKER_SPD:      0.006,
 
   // --- Csendes segítség 3 vereség után ---
-  ASSIST_AFTER:     3,
+  ASSIST_AFTER:     2,
   ASSIST_ERR_MULT:  1.35,    // nagyobb célzási hiba
   ASSIST_DELAY_ADD: 1        // +1 képkocka késés
 };
@@ -41,9 +41,11 @@ var DIFF = {
 // Hányadik meccs a szezonon belül (1..10)
 function matchInSeason(stage) { return ((stage-1) % SEASON_LEN) + 1; }
 
-// Szezon-alapú "ügyességi" arány: 0 (1. szezon) .. 1 (utolsó szezon)
+// ADAPTÍV: az AI erejét a játékos skillje viszi (nem a szezon).
+// A skill 15..92 -> 0..1, a meglévő paraméter-görbék végpontjai közé.
 function skillT(stage) {
-  if (SEASON_COUNT <= 1) return 0;
+  if (typeof Progress !== 'undefined' && Progress.skillT) return Progress.skillT();
+  if (SEASON_COUNT <= 1) return 0;                        // fallback (régi szezon-alap)
   return (seasonOf(stage) - 1) / (SEASON_COUNT - 1);
 }
 
