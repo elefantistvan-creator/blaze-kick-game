@@ -25,6 +25,7 @@ var amx, amy; // gép mezőnyjátékos
 var bx, by, bvx, bvy, BR;
 var sc1=0, sc2=0;
 var spd, baseSpd;
+var rallyHits = 0, rallyMul = 1;   // passzolgatás-feloldó (gólig gyorsuló labda)
 var running=false, goalTime=0;
 var gameStartTime=0;
 

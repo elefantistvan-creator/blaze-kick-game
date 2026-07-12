@@ -115,7 +115,13 @@ var Screens = (function() {
                       (pack.discount ? '<span class="p-disc">−' + Math.round(pack.discount*100) + '%</span>' : '');
         b.addEventListener('pointerup', function(e){
           e.stopPropagation(); e.preventDefault();
-          if (Shop.buy(it.id, pack.qty)) buildShop();
+          if (Shop.buy(it.id, pack.qty)) {
+            b.classList.add('flash');           // garantált fehér villanás
+            setTimeout(buildShop, 160);         // csak utána épül újra a shop
+          } else {
+            b.classList.add('flash-deny');      // nincs elég érme -> piros villanás
+            setTimeout(function(){ b.classList.remove('flash-deny'); }, 220);
+          }
         });
         buys.appendChild(b);
       })(SHOP_PACKS[p]);

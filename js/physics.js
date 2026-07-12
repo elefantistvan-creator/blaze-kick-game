@@ -206,14 +206,14 @@ function updateBall() {
   var szGL = szGoalieLeft();
   if (hitRect(px-PW/2, py-szGL, PW, szGL*2, bx,by,BR)) {
     bounceRect(px, py, true, padVY, true);
-    Sound.paddle('me'); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p');
+    Sound.paddle('me'); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p'); rallyBoost();
   }
   var szGR = szGoalieRight();
   var tapThrough = Shop.isActive('powerTap') && powerHitActive;
   if (!rGoalieGone() && !tapThrough &&
       hitRect(ax-PW/2, ay-szGR, PW, szGR*2, bx,by,BR)) {
     bounceRect(ax, ay, false, aiVY, true);
-    Sound.paddle('cpu'); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a');
+    Sound.paddle('cpu'); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a'); rallyBoost();
   }
 
   // Csatárok
@@ -222,11 +222,11 @@ function updateBall() {
 
   if (effPlayerMR > 0 && hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
     bounceRect(mx, my, true, midVY, false, is2P ? undefined : autoStrikerAim());
-    Sound.paddle('me'); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m');
+    Sound.paddle('me'); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m'); rallyBoost();
   }
   if (effAiMR > 0 && hitRect(amx-PW/2, amy-effAiMR, PW, effAiMR*2, bx,by,BR)) {
     bounceRect(amx, amy, false, aiMidVY, false);
-    Sound.paddle('cpu'); hitEffect={pad:'am', time:Date.now()};
+    Sound.paddle('cpu'); hitEffect={pad:'am', time:Date.now()}; rallyBoost();
   }
 }
 

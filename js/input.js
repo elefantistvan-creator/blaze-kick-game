@@ -19,36 +19,61 @@ function distToPad(padX, padY, halfH) {
 var powerHitActive = false;
 var prePowerHitVX = 0;  // power hit előtti sebesség
 
+// A szuperütés a KÖZELI saját padot üti meg.
+// 1P: bármelyik oldalon tapelhetsz (így a szabad ujjaddal, a húzás zavarása nélkül).
+// 2P: mindenki a SAJÁT térfelén tapel.
+function padNearBall(padX, padY, halfH) {
+  return distToPad(padX, padY, halfH) < BR * 2.5;
+}
+
+function myPads(side) {
+  // visszaadja a tapelő játékos padjait: {x,y,h,dir,tag}
+  var out = [];
+  if (!is2P) {   // 1P: a játékos kapusa + csatára (mindkettő jobbra üt)
+    out.push({ x: px, y: py, h: szGoalieLeft(),  dir: 1, tag: 'p' });
+    var sh = szStrikerLeft();
+    if (sh > 0) out.push({ x: mx, y: my, h: sh, dir: 1, tag: 'm' });
+  } else if (side === 'left') {   // 2P bal fél = 2. játékos
+    out.push({ x: px, y: py, h: szGoalieLeft(),  dir: 1, tag: 'p' });
+    var sh2 = szStrikerLeft();
+    if (sh2 > 0) out.push({ x: mx, y: my, h: sh2, dir: 1, tag: 'm' });
+  } else {                        // 2P jobb fél = 1. játékos (balra üt)
+    out.push({ x: ax, y: ay, h: szGoalieRight(), dir: -1, tag: 'a' });
+    var sh3 = szStrikerRight();
+    if (sh3 > 0) out.push({ x: amx, y: amy, h: sh3, dir: -1, tag: 'am' });
+  }
+  return out;
+}
+
+function powerHitAvailable(side) {
+  if (!running) return false;
+  var pads = myPads(side);
+  for (var i = 0; i < pads.length; i++) {
+    if (pads[i].h > 0 && padNearBall(pads[i].x, pads[i].y, pads[i].h)) return true;
+  }
+  return false;
+}
+
 function doPowerHit(side) {
   if (!running) return;
-  var threshold = BR * 2.5;
-  if (side === 'left') {
-    var dP = distToPad(px, py, PR);
-    if (dP < threshold) {
-      prePowerHitVX = bvx;
-      prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
-      bvx = Math.abs(bvx) * 2.5;
-      powerHitActive = true;
-      fireTrailActive = true;
-      spawnSparks(bx, by, bvx, bvy);
-      triggerShake(8);
-      playBeep(440, 'square', 0.15, 0.1);
-      hitEffect = {pad: 'p', time: Date.now()};
-    }
-  } else {
-    var dM = distToPad(mx, my, MR);
-    if (dM < threshold) {
-      prePowerHitVX = bvx;
-      prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
-      bvx = Math.abs(bvx) * 2.5;
-      powerHitActive = true;
-      fireTrailActive = true;
-      spawnSparks(bx, by, bvx, bvy);
-      triggerShake(8);
-      playBeep(440, 'square', 0.15, 0.1);
-      hitEffect = {pad: 'm', time: Date.now()};
-    }
+  var pads = myPads(side), best = null, bestD = Infinity;
+  for (var i = 0; i < pads.length; i++) {
+    var p = pads[i];
+    if (p.h <= 0) continue;
+    var d = distToPad(p.x, p.y, p.h);
+    if (d < BR * 2.5 && d < bestD) { bestD = d; best = p; }
   }
+  if (!best) return;
+
+  prePowerHitVX = bvx;
+  prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
+  bvx = Math.abs(bvx) * 2.5 * best.dir;      // a pad oldala szabja az irányt
+  powerHitActive = true;
+  fireTrailActive = true;
+  spawnSparks(bx, by, bvx, bvy);
+  triggerShake(8);
+  playBeep(440, 'square', 0.15, 0.1);
+  hitEffect = { pad: best.tag, time: Date.now() };
 }
 
 // --- Pointer Events alapú vezérlés (touch + egér + touchpad + toll) ---
@@ -63,7 +88,7 @@ function uiBlocking() {
   return false;
 }
 
-console.log('%cBlaze Kick build: MODULAR-V25', 'color:#ff6600;font-weight:bold');
+console.log('%cBlaze Kick build: MODULAR-V43', 'color:#ff6600;font-weight:bold');
 document.addEventListener('pointerdown', function(e) {
   // Input mezőnél, gombnál, mp overlay-nél és a leírás panelnél ne akadályozzuk meg az alapértelmezett viselkedést
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || uiBlocking()) return;
@@ -146,4 +171,33 @@ document.addEventListener('pointerup', function(e) {
 document.addEventListener('pointercancel', function(e) {
   releasePointer(e, false);
 });
+
+/* --- Tap-jelzés: megmutatja, HOL kell koppintani a szuperütéshez ---
+   1P: a SZABAD oldalon (amit épp nem húzol) -> a húzás nem zavarodik meg.
+   2P: mindenki a saját térfelén. */
+var _hintL = null, _hintR = null;
+function updateTapHints() {
+  if (_hintL === null) {
+    _hintL = document.getElementById('tapHintL');
+    _hintR = document.getElementById('tapHintR');
+  }
+  if (!_hintL || !_hintR) return;
+
+  var showL = false, showR = false;
+  if (running && !uiBlocking()) {
+    if (!is2P) {
+      if (powerHitAvailable()) {
+        // a szabad oldalt ajánljuk; ha nem húzol semmit, mindkettő jó
+        if (touchLeft !== null)       showR = true;
+        else if (touchRight !== null) showL = true;
+        else { showL = true; showR = true; }
+      }
+    } else {
+      showL = powerHitAvailable('left');
+      showR = powerHitAvailable('right');
+    }
+  }
+  _hintL.classList.toggle('on', showL);
+  _hintR.classList.toggle('on', showR);
+}
 

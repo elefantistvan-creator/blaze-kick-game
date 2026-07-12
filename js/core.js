@@ -69,6 +69,23 @@ function resetBall(dir) {
   ballSquish = 0;
   ballVisible = true;
   goalScored = null;
+  rallyHits = 0; rallyMul = 1;   // gól után a labda újra alapsebességgel indul
+}
+
+/* --- Passzolgatás-feloldó: hosszú menetben a labda fokozatosan gyorsul ---
+   RALLY_START érintés után minden további ütés +2%-ot ad, RALLY_MAX-ig.
+   Mindkét játékos ütése számít. Gólnál nullázódik (resetBall). */
+var RALLY_START = 10;
+var RALLY_STEP  = 1.02;
+var RALLY_MAX   = 1.8;
+
+function rallyBoost() {
+  rallyHits++;
+  if (rallyHits <= RALLY_START || rallyMul >= RALLY_MAX) return;
+  var next = Math.min(RALLY_MAX, rallyMul * RALLY_STEP);
+  var f = next / rallyMul;
+  rallyMul = next;
+  bvx *= f; bvy *= f;      // a bounceRect megőrzi a nagyságot -> végig megmarad
 }
 
 // --- Multi-touch ---

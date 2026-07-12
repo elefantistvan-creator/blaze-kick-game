@@ -28,6 +28,7 @@ function loop() {
     else      { updateAI(); updateBall(); updateBallRotation(); }
   }
   draw();
+  updateTapHints();
   updateSkillDebug();
   requestAnimationFrame(loop);
 }
