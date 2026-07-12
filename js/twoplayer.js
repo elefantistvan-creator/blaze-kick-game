@@ -20,7 +20,8 @@ function start2Player() {
   currentStage = 1; stage = 1;
   bonus2P = { p1:null, p2:null }; pb = null;
   Screens.show('game');
-  Sound.matchStart(1);       // 2P: teszt-csoport (Season 1 hangulat)
+  loadSeasonPitch(1);        // 2P: Season 1 pálya
+  Sound.matchStart(1);       // 2P: Season 1 hangulat
   doStart();                 // közös indítás (countdown, setup); a 2P ágakat a mód kapcsolja
   scheduleBonus2P();
 }

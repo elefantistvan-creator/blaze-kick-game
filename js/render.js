@@ -21,13 +21,16 @@ function draw() {
   ctx.fillRect(0,0,W,H);
 
   if (pitchImgReady) {
-    // === Valós stadion-kép: a zöld-téglalapja a keretre igazítva ===
+    // === Pályakép: a HOMOGÉN FELÜLETE a játéktérre + a KAPUKRA feszül ===
+    // (a kapu a kereten kívülre nyúlik, de még a pálya felületén álljon, ne a lelátón)
     var IW = pitchImg.naturalWidth, IH = pitchImg.naturalHeight;
     var gl = PITCH_GL*IW, gt = PITCH_GT*IH;
     var gw = (PITCH_GR-PITCH_GL)*IW, gh = (PITCH_GB-PITCH_GT)*IH;
-    var sx = PLW/gw, sy = PLH/gh;
+    var GD = GOAL_DEPTH || 0;
+    var sx = (PLW + 2*GD)/gw;        // vízszintesen a kapuk is beleférnek
+    var sy = PLH/gh;                 // függőlegesen a keretig
     var dw = IW*sx, dh = IH*sy;
-    var dx = PLX - gl*sx, dy = PLY - gt*sy;
+    var dx = (PLX - GD) - gl*sx, dy = PLY - gt*sy;
     ctx.drawImage(pitchImg, dx, dy, dw, dh);
     if (isNight) {  // esti hangulat: enyhe sötétítés + reflektor a labdára
       ctx.fillStyle='rgba(0,0,10,0.28)'; ctx.fillRect(0,0,W,H);
@@ -225,22 +228,36 @@ function drawGoalNet(lineX, gy, gh, dir) {
   var depth = Math.min(want, avail);
   if (depth <= 0) return;
   var x1 = lineX + dir*depth;
+  var xL = Math.min(lineX, x1);
   ctx.save();
   // háttér (mélység érzet)
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.fillRect(Math.min(lineX,x1), gy, depth, gh);
-  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-  ctx.lineWidth = 1;
-  var step = Math.max(6, BR*0.55);
-  // függőleges szálak
-  for (var d=0; d<=depth; d+=step) {
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.fillRect(xL, gy, depth, gh);
+
+  // --- HÁLÓ: erős fehér, sűrű keresztfonás ---
+  var step = Math.max(4, BR*0.30);          // sűrűbb szemek
+  ctx.strokeStyle = 'rgba(255,255,255,0.78)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (var d=0; d<=depth; d+=step) {        // függőleges szálak
     var xx = lineX + dir*d;
-    ctx.beginPath(); ctx.moveTo(xx, gy); ctx.lineTo(xx, gy+gh); ctx.stroke();
+    ctx.moveTo(xx, gy); ctx.lineTo(xx, gy+gh);
   }
-  // vízszintes szálak
-  for (var yy=gy; yy<=gy+gh; yy+=step) {
-    ctx.beginPath(); ctx.moveTo(lineX, yy); ctx.lineTo(x1, yy); ctx.stroke();
+  for (var yy=gy; yy<=gy+gh; yy+=step) {    // vízszintes szálak
+    ctx.moveTo(lineX, yy); ctx.lineTo(x1, yy);
   }
+  ctx.stroke();
+
+  // --- KAPUFA: határozott fehér keret (felső, alsó, hátsó él) ---
+  var pw = Math.max(2.5, (typeof WL !== 'undefined' ? WL : 5) * 0.75);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = pw;
+  ctx.lineCap = 'square';
+  ctx.beginPath();
+  ctx.moveTo(lineX, gy);        ctx.lineTo(x1, gy);          // felső kapufa
+  ctx.moveTo(lineX, gy+gh);     ctx.lineTo(x1, gy+gh);       // alsó kapufa
+  ctx.moveTo(x1, gy);           ctx.lineTo(x1, gy+gh);       // hátsó él
+  ctx.stroke();
   ctx.restore();
 }
 

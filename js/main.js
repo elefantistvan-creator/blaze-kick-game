@@ -123,6 +123,7 @@ function doStart() {
 
   // Visszaszámlálás 3-2-1
   countdown = 3; countdownStart = Date.now();
+  if (typeof Sound !== 'undefined') Sound.whistle();   // bírói sípszó a "3"-nál (6. seasontől)
   var cdInterval = setInterval(function() {
     countdown--;
     if (countdown <= 0) {

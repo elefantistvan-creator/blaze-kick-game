@@ -8,6 +8,7 @@ var PW;   // pálcika szélesség
 var PLX, PLY, PLW, PLH;      // pálya bal-fent sarok + méret
 var MARGIN_X, MARGIN_Y;      // keret-margó (dekor-sáv) a W/H arányában
 var BALL_VANISH;             // labda eltűnési mélység a gólvonal mögött (px)
+var GOAL_DEPTH;              // a kapu mennyire lóg ki a pálya-kereten kívülre
 
 // --- Gól / szünet állapot ---
 var ballVisible = true;      // false = labda a hálóban eltűnt
@@ -49,14 +50,14 @@ var prePowerHitSpeed = 0;        // tap-ütés előtti sebesség (visszaállít�
 // --- Motion trail ---
 var ballTrail = [];  // [{x,y,age}]
 
-// --- Pálya háttérkép (tier-enként) + zöld-téglalap kalibráció (a kép arányában) ---
-// A kép úgy rajzolódik, hogy a zöld-téglalapja PONTOSAN a pálya-keretre essen.
+// --- Pálya háttérkép (season-önként) + keret-kalibráció (a kép arányában) ---
+// A kép úgy rajzolódik, hogy a JÁTÉKFELÜLETE pontosan a fix pálya-keretre essen.
+// A konkrét képet és a 4 keret-értéket a js/seasons.js adja (loadSeasonPitch).
 var pitchImg = new Image();
 var pitchImgReady = false;
 pitchImg.onload = function(){ pitchImgReady = true; };
-pitchImg.src = 'assets/pitch1.jpg';
-// zöld szélek (beljebb húzva ~5%, hogy a fehér keret a zöldön belülre essen)
-var PITCH_GL = 0.135, PITCH_GR = 0.851, PITCH_GT = 0.148, PITCH_GB = 0.842;
+// kezdőérték (Season 1); meccs indításakor a loadSeasonPitch() felülírja
+var PITCH_GL = 0.131, PITCH_GR = 0.870, PITCH_GT = 0.133, PITCH_GB = 0.858;
 
 // --- Pályavonal stílus (keret, felező, kör) ---
 var LINE_ALPHA = 0.6;   // átlátszóság (kevésbé "világítós", illik a valós képhez)

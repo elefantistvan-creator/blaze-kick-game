@@ -23,6 +23,9 @@ function setup() {
 
   // Labda eltűnési mélység a gólvonal mögött (a dekor-sávba gurulva) — hangolható
   BALL_VANISH = PLX * 0.15;
+  // Kapumélység: a kapu ennyivel nyúlik a pálya-kereten KÍVÜLRE.
+  // A háttérkép homogén felületének ezt is le kell fednie (a kapu ne a lelátón álljon).
+  GOAL_DEPTH = Math.min(BALL_VANISH + H * 0.01925, PLX - 2);
 
   // --- Játékos pozíciók: a CSATÁR a túloldalon (ellenfél kapuja elé) ---
   // A csatár–kapus távolság 0.38 → 0.27 pályahossz (30%-kal közelebb)

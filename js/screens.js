@@ -237,13 +237,11 @@ var Screens = (function() {
     t.setAttribute('data-stage', stage);
 
     // Stadionkép: minden FELOLDOTT csempén világosan (látszik a haladás),
-    // a zárolt szezonnyitón halványan (csali). A többi zárolt csempe sima.
+    // a zárolt szezonnyitón halványan (csali). A season SAJÁT pályaképe.
     if (unlocked || teaser) {
       var thumb = document.createElement('div');
       thumb.className = 'tile-thumb';
-      var hue = (seasonOf(stage)-1) * 28;
-      thumb.style.backgroundImage = 'url(assets/pitch1.jpg)';
-      thumb.style.filter = 'hue-rotate(' + hue + 'deg) saturate(' + (unlocked ? '1' : '0.85') + ')';
+      thumb.style.backgroundImage = 'url(' + seasonPitchSrc(seasonOf(stage)) + ')';
       t.appendChild(thumb);
     }
 
@@ -343,6 +341,7 @@ function startStage(n) {
   stage = n;                 // a fizika/AI ebből számol
   Shop.reset();
   Screens.show('game');
+  loadSeasonPitch(seasonOf(n));    // a season saját pályaképe
   Sound.matchStart(seasonOf(n));   // season-hez igazított aláfestő
   doStart();
   Screens.buildItemBar();
@@ -355,7 +354,8 @@ function startQuick() {
   stage = 1;
   Shop.reset();
   Screens.show('game');
-  Sound.matchStart(1);             // gyors meccs: teszt-csoport
+  loadSeasonPitch(1);              // gyors meccs: Season 1 pálya
+  Sound.matchStart(1);             // gyors meccs: Season 1 hangulat
   doStart();
   Screens.buildItemBar();
 }

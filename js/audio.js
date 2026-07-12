@@ -86,21 +86,28 @@ var Sound = (function () {
       3: ['nagytaps2.ogg'],
       4: ['nagytaps2.ogg']
     },
-    paddle: { me: ['passz2.ogg'], cpu: ['passz3.ogg'] }
+    paddle: { me: ['passz2.ogg'], cpu: ['passz3.ogg'] },
+    // Bírói sípszó — csak a 3. és 4. csoportban (Season 6-tól). Üres = nincs síp.
+    whistle: {
+      1: [],
+      2: [],
+      3: [],          // ide jön pl. 'sip1.ogg'
+      4: []           // ide jön pl. 'sip2.ogg'
+    }
   };
 
-  // Season (1..10) -> csoport (1..4). Szabadon szerkeszthető.
-  var SEASON_GROUP = [1, 1, 2, 2, 3, 3, 3, 4, 4, 4];
+  // Season (1..10) -> hangcsoport (1..4). A season-tábla (js/seasons.js) az igazságforrás:
+  //   Season 1-2 -> 1,  3-5 -> 2,  6-7 -> 3,  8-10 -> 4
   function groupForSeason(s) {
-    var i = Math.max(0, Math.min(9, (s | 0) - 1));
-    return SEASON_GROUP[i] || 1;
+    if (typeof seasonSoundGroup === 'function') return seasonSoundGroup(s);
+    return 1;
   }
 
   // ---- Aláfestő újraindítás: végigfut -> véletlen szünet -> random másik ----
   var GAP_MIN = 5000, GAP_MAX = 15000;   // ms
 
   // ---- Hangerők ----
-  var VOL = { music: 0.55, ambience: 0.45, goal: 0.8, paddle: 0.7, intro: 0.7 };
+  var VOL = { music: 0.55, ambience: 0.45, goal: 0.8, paddle: 0.7, intro: 0.7, whistle: 0.75 };
 
   var pools = {};          // egyszerre szólható SFX-ekhez kis pool
   var musicEl = null;      // menü/intró zene
@@ -206,6 +213,13 @@ var Sound = (function () {
     goal: function () {
       var arr = FILES.goal[ambGroup || 1];
       sfx(pick(arr), VOL.goal, (typeof soundGoal === 'function') ? soundGoal : null);
+    },
+    // Bírói sípszó a visszaszámlálás "3"-ánál. Csak ott szól, ahol van hozzá fájl
+    // (a manifest szerint a 3. és 4. csoportban -> Season 6-tól).
+    whistle: function () {
+      var arr = FILES.whistle[ambGroup || 1];
+      if (!arr || !arr.length) return;      // alsó seasonökben nincs síp — csendben marad
+      sfx(pick(arr), VOL.whistle, null);
     }
   };
 })();
