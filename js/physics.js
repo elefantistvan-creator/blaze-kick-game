@@ -98,6 +98,11 @@ function updateBall() {
   if (goalScored) {
     if (ballVisible) {
       bx += bvx; by += bvy;
+      // A labda a KAPUNYÍLÁSON BELÜL marad: éles szögből érkezve se csússzon
+      // a kapufán túlra. A kapufáról tompítva visszapattan (hálóba érkezés).
+      var gTop = GY + BR, gBot = GY + GH - BR;
+      if (by < gTop) { by = gTop; bvy =  Math.abs(bvy) * 0.45; }
+      if (by > gBot) { by = gBot; bvy = -Math.abs(bvy) * 0.45; }
       if (goalScored==='left'  && bx <= PLX - BALL_VANISH)      ballVisible = false;
       if (goalScored==='right' && bx >= PLX + PLW + BALL_VANISH) ballVisible = false;
     }
