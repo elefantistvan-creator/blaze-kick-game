@@ -60,5 +60,10 @@ pitchImg.onload = function(){ pitchImgReady = true; };
 var PITCH_GL = 0.131, PITCH_GR = 0.870, PITCH_GT = 0.133, PITCH_GB = 0.858;
 
 // --- Pályavonal stílus (keret, felező, kör) ---
-var LINE_ALPHA = 0.6;   // átlátszóság (kevésbé "világítós", illik a valós képhez)
+var LINE_ALPHA = 0.65;  // a JÁTÉKKERET erőssége (30%-kal erősebb, mint a többi felfestés)
+var MARK_ALPHA = 0.77;  // a többi felfestés a kerethez képest (0.65*0.77 = 0.5 -> marad 50%)
+var GOAL_ALPHA = 0.5;   // a kapu (háló + kapufa) áttetszősége: az erősből 50% levéve
 var LINE_SCALE = 0.5;   // vonalvastagság a WL-hez képest (fele)
+var CORNER_FADE = 0.20; // a felfestés a SARKOKBAN ennyire halványul (lineárisan a középponttól)
+// a felfestés külön rétegen készül (gyorsítótárazva — nem rajzoljuk újra képkockánként)
+var markCanvas = null, markCtx = null, markKey = '';

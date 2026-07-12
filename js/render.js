@@ -65,46 +65,19 @@ function draw() {
 
   var RX = PLX + PLW;              // jobb gólvonal X
   var LW = Math.max(2, WL*LINE_SCALE);          // vonalvastagság (fele)
-  var LC = 'rgba(255,255,255,'+LINE_ALPHA+')';  // áttetsző fehér
 
-  // Gólhálók (a gólvonal mögött, kifelé) — ide gurul be és tűnik el a labda
+  // Gólhálók (a gólvonal mögött, kifelé) — ERŐS fehér, NEM halványul
   drawGoalNet(PLX, dLGY, dLGH, -1);
   drawGoalNet(RX,  dRGY, dRGH, +1);
 
-  // Keret felső/alsó éle
-  ctx.fillStyle=LC;
-  ctx.fillRect(PLX, PLY, PLW, LW);
-  ctx.fillRect(PLX, PLY+PLH-LW, PLW, LW);
-
-  // Bal oldali keret-él (kapuréssel)
-  if (leftWalled) {
-    ctx.fillStyle=LC; ctx.fillRect(PLX, PLY, LW, PLH);
-  } else {
-    ctx.fillStyle=LC;
-    ctx.fillRect(PLX, PLY, LW, dLGY-PLY);
-    ctx.fillRect(PLX, dLGY+dLGH, LW, (PLY+PLH)-(dLGY+dLGH));
+  // --- FELFESTÉS: külön réteg, sarkok felé halványulva, 50%-ban ráúsztatva ---
+  buildMarkings(LW, dLGY, dLGH, dRGY, dRGH, leftWalled, rightWalled);
+  if (markCanvas) {
+    ctx.save();
+    ctx.globalAlpha = LINE_ALPHA;
+    ctx.drawImage(markCanvas, 0, 0);
+    ctx.restore();
   }
-
-  // Jobb oldali keret-él (kapuréssel)
-  if (rightWalled) {
-    ctx.fillStyle=LC; ctx.fillRect(RX-LW, PLY, LW, PLH);
-  } else {
-    ctx.fillStyle=LC;
-    ctx.fillRect(RX-LW, PLY, LW, dRGY-PLY);
-    ctx.fillRect(RX-LW, dRGY+dRGH, LW, (PLY+PLH)-(dRGY+dRGH));
-  }
-
-  // Középvonal
-  var CXm = PLX + PLW/2;
-  ctx.save(); ctx.beginPath(); ctx.setLineDash([8,8]);
-  ctx.strokeStyle=LC; ctx.lineWidth=Math.max(1,LW*0.6);
-  ctx.moveTo(CXm,PLY); ctx.lineTo(CXm,PLY+PLH); ctx.stroke(); ctx.restore();
-
-  // Középkör
-  ctx.save(); ctx.beginPath();
-  ctx.strokeStyle=LC; ctx.lineWidth=Math.max(1,LW*0.6);
-  ctx.arc(CXm,PLY+PLH/2,PLH*0.135,0,Math.PI*2); ctx.stroke();
-  ctx.restore();
 
   // Kapusok + csatárok (1P: Shop-méret ; 2P: MR + bónusz)
   drawPad(px, py, szGoalieLeft(),  '#4fc3f7', 'p');
@@ -230,6 +203,7 @@ function drawGoalNet(lineX, gy, gh, dir) {
   var x1 = lineX + dir*depth;
   var xL = Math.min(lineX, x1);
   ctx.save();
+  ctx.globalAlpha = GOAL_ALPHA;          // a kapuból 50% áttetszőség levéve
   // háttér (mélység érzet)
   ctx.fillStyle = 'rgba(0,0,0,0.38)';
   ctx.fillRect(xL, gy, depth, gh);
@@ -266,3 +240,108 @@ var fireTrailActive = false;
 var fireTrail = [];   // [{x,y,age,r}] - tűzcsóva
 var burnMarks = [];   // [{x,y,age}] - égett fű
 
+
+/* ============================================================
+   FELFESTÉS — külön rétegen, gyorsítótárazva.
+   - keret, középvonal, középkör
+   - KAPUTERÜLET (16-os) + kis kapuelőtér (5-ös) + 11-ES PONT + büntetőív
+   - a sarkok felé LINEÁRISAN halványul (középen 100% -> sarkokban CORNER_FADE)
+   A kész réteget a draw() LINE_ALPHA-val (50%) úsztatja a pályára.
+   ============================================================ */
+function buildMarkings(LW, dLGY, dLGH, dRGY, dRGH, leftWalled, rightWalled) {
+  var key = [W,H,PLX,PLY,PLW,PLH,LW,dLGY,dLGH,dRGY,dRGH,leftWalled,rightWalled].join('|');
+  if (markKey === key && markCanvas) return;      // változatlan -> marad a gyorsítótár
+  markKey = key;
+
+  if (!markCanvas) { markCanvas = document.createElement('canvas'); markCtx = markCanvas.getContext('2d'); }
+  if (markCanvas.width !== W || markCanvas.height !== H) { markCanvas.width = W; markCanvas.height = H; }
+  var m = markCtx;
+  m.clearRect(0,0,W,H);
+  m.strokeStyle = '#ffffff';
+  m.fillStyle   = '#ffffff';
+
+  var RX  = PLX + PLW;
+  var CXm = PLX + PLW/2, CYm = PLY + PLH/2;
+  var tw  = Math.max(1, LW*0.6);       // vékonyabb vonalak (kör, ív, dobozok)
+
+  // --- Keret: felső/alsó él (TELJES erő — ez a játékkeret) ---
+  m.globalAlpha = 1;
+  m.fillRect(PLX, PLY, PLW, LW);
+  m.fillRect(PLX, PLY+PLH-LW, PLW, LW);
+
+  // --- Oldalsó élek (kapuréssel, ha nincs fal-bónusz) — szintén a keret ---
+  if (leftWalled) { m.fillRect(PLX, PLY, LW, PLH); }
+  else {
+    m.fillRect(PLX, PLY, LW, dLGY-PLY);
+    m.fillRect(PLX, dLGY+dLGH, LW, (PLY+PLH)-(dLGY+dLGH));
+  }
+  if (rightWalled) { m.fillRect(RX-LW, PLY, LW, PLH); }
+  else {
+    m.fillRect(RX-LW, PLY, LW, dRGY-PLY);
+    m.fillRect(RX-LW, dRGY+dRGH, LW, (PLY+PLH)-(dRGY+dRGH));
+  }
+
+  // --- Innen a TÖBBI felfestés: halványabb (a kerethez képest MARK_ALPHA) ---
+  m.globalAlpha = MARK_ALPHA;
+
+  // --- Középvonal (szaggatott) + középkör ---
+  m.save();
+  m.setLineDash([8,8]); m.lineWidth = tw;
+  m.beginPath(); m.moveTo(CXm,PLY); m.lineTo(CXm,PLY+PLH); m.stroke();
+  m.restore();
+  m.lineWidth = tw;
+  m.beginPath(); m.arc(CXm, CYm, PLH*0.135, 0, Math.PI*2); m.stroke();
+  m.beginPath(); m.arc(CXm, CYm, Math.max(2, LW*0.9), 0, Math.PI*2); m.fill();  // kezdőpont
+
+  // --- KAPUTERÜLET (16-os), kapuelőtér (5-ös), 11-es pont, büntetőív ---
+  var PBW = PLW * 0.155;        // 16-os mélysége
+  var PBH = PLH * 0.60;         // 16-os magassága
+  var GBW = PLW * 0.055;        // 5-ös mélysége
+  var GBH = PLH * 0.30;         // 5-ös magassága
+  var SPOT = PLW * 0.105;       // 11-es pont távolsága a gólvonaltól
+  var ARC  = PLH * 0.135;       // büntetőív sugara
+
+  function box(x0, w, h) {   // téglalap a pálya közepére igazítva, függőlegesen
+    m.strokeRect(x0, CYm - h/2, w, h);
+  }
+  m.lineWidth = tw;
+  // bal oldal
+  box(PLX, PBW, PBH);                                  // 16-os
+  box(PLX, GBW, GBH);                                  // 5-ös
+  m.beginPath(); m.arc(PLX+SPOT, CYm, Math.max(2, LW*0.8), 0, Math.PI*2); m.fill();   // 11-es pont
+  // büntetőív: CSAK a 16-oson KÍVÜL látszik (a dobozon belüli része le van vágva)
+  m.save();
+  m.beginPath(); m.rect(PLX+PBW, PLY, PLW, PLH); m.clip();
+  m.beginPath(); m.arc(PLX+SPOT, CYm, ARC, -Math.PI/2, Math.PI/2); m.stroke();
+  m.restore();
+  // jobb oldal (tükrözve)
+  box(RX-PBW, PBW, PBH);
+  box(RX-GBW, GBW, GBH);
+  m.beginPath(); m.arc(RX-SPOT, CYm, Math.max(2, LW*0.8), 0, Math.PI*2); m.fill();
+  m.save();
+  m.beginPath(); m.rect(PLX, PLY, (RX-PBW)-PLX, PLH); m.clip();
+  m.beginPath(); m.arc(RX-SPOT, CYm, ARC, Math.PI/2, Math.PI*1.5); m.stroke();
+  m.restore();
+
+  // --- CSATÁR-SÁVOK: a két csatár fix pályája (szaggatott, függőleges) ---
+  m.save();
+  m.setLineDash([6, 7]);
+  m.lineWidth = Math.max(1, tw*0.85);
+  m.beginPath();
+  m.moveTo(PLX + PLW*0.27, PLY); m.lineTo(PLX + PLW*0.27, PLY+PLH);   // gép csatárja
+  m.moveTo(PLX + PLW*0.73, PLY); m.lineTo(PLX + PLW*0.73, PLY+PLH);   // a te csatárod
+  m.stroke();
+  m.restore();
+
+  // --- SAROK-HALVÁNYÍTÁS: középen teljes, a sarkok felé lineárisan CORNER_FADE-ig ---
+  m.globalAlpha = 1;                                          // a maszk teljes erővel dolgozzon
+  var maxR = Math.sqrt((PLW/2)*(PLW/2) + (PLH/2)*(PLH/2));   // középpont -> sarok
+  var g = m.createRadialGradient(CXm, CYm, 0, CXm, CYm, maxR);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(1, 'rgba(255,255,255,' + CORNER_FADE + ')');
+  m.save();
+  m.globalCompositeOperation = 'destination-in';   // a meglévő felfestést maszkolja
+  m.fillStyle = g;
+  m.fillRect(0, 0, W, H);
+  m.restore();
+}
