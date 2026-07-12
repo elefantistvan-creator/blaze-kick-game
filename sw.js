@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v43';
+var CACHE = 'blazekick-v50';
 
 var ASSETS = [
   './',
@@ -13,6 +13,7 @@ var ASSETS = [
   './js/progress.js',
   './js/difficulty.js',
   './js/state.js',
+  './js/seasons.js',
   './js/shop.js',
   './js/twoplayer.js',
   './js/effects.js',
@@ -38,7 +39,16 @@ var ASSETS = [
   './assets/audio/nagytaps2.ogg',
   './assets/audio/passz2.ogg',
   './assets/audio/passz3.ogg',
-  './assets/pitch1.jpg',
+  './assets/pitches/season1.jpg',
+  './assets/pitches/season2.jpg',
+  './assets/pitches/season3.jpg',
+  './assets/pitches/season4.jpg',
+  './assets/pitches/season5.jpg',
+  './assets/pitches/season6.jpg',
+  './assets/pitches/season7.jpg',
+  './assets/pitches/season8.jpg',
+  './assets/pitches/season9.jpg',
+  './assets/pitches/season10.jpg',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
