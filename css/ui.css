@@ -465,3 +465,77 @@
   pointer-events: none;
   white-space: nowrap;
 }
+
+/* ============================================================
+   2P PÁLYAVÁLASZTÓ
+   Mind a 10 pálya látszik. A zároltak sötétek — ők a kampány csalija.
+   A pálya egyben tempóválasztás is (⚡ / ⚡⚡ / ⚡⚡⚡).
+   ============================================================ */
+.pitch-hint {
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: .04em; text-align: center;
+  margin: 0 0 12px;
+}
+.pitch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);   /* fekvő képernyő: 5 × 2 */
+  gap: var(--gap);
+  max-width: 900px; margin: 0 auto;
+}
+.pcard {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding-bottom: 6px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pcard.open        { border-color: rgba(79,195,247,0.35); }
+.pcard.open:active { transform: scale(0.97); }
+.pcard.locked      { cursor: default; }
+
+.pcard-thumb {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+}
+.pcard.open   .pcard-thumb { opacity: .95; }
+.pcard.locked .pcard-thumb { opacity: .18; filter: grayscale(0.7); }
+
+/* olvashatósági fátyol a felirat alá */
+.pcard::before {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(0,0,0,.05) 35%, rgba(0,0,0,.78));
+}
+.pcard.locked::before {
+  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.8));
+}
+
+.pcard-name {
+  position: relative; z-index: 2;
+  font-size: clamp(10px, 1.6vw, 13px); font-weight: 700;
+  letter-spacing: .04em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+.pcard.locked .pcard-name { color: #9aa3ae; }
+
+/* tempó — a pálya EGYBEN sebességválasztás */
+.pcard-speed {
+  position: relative; z-index: 2;
+  font-size: clamp(8px, 1.2vw, 11px);
+  line-height: 1.2; margin-top: 1px;
+  letter-spacing: -1px;
+}
+.pcard-speed.b1 { filter: grayscale(0.55) brightness(0.85); }   /* nyugodt */
+.pcard-speed.b3 { text-shadow: 0 0 8px rgba(255,140,0,0.85); }  /* vad */
+
+.pcard-lock {
+  position: absolute; z-index: 2;
+  top: 50%; left: 50%; transform: translate(-50%,-60%);
+  font-size: clamp(13px, 2.2vw, 18px); opacity: .8;
+}
