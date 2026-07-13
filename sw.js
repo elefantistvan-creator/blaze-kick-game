@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v57';
+var CACHE = 'blazekick-v58';
 
 var ASSETS = [
   './',
@@ -33,12 +33,6 @@ var ASSETS = [
   './assets/btn-fire.png',
   './assets/logo.png',
   './assets/coin.svg',
-  './assets/audio/intro.ogg',
-  './assets/audio/menuhang2.ogg',
-  './assets/audio/stadionhang.ogg',
-  './assets/audio/nagytaps2.ogg',
-  './assets/audio/passz2.ogg',
-  './assets/audio/passz3.ogg',
   './assets/pitches/season1.jpg',
   './assets/pitches/season2.jpg',
   './assets/pitches/season3.jpg',
@@ -51,7 +45,27 @@ var ASSETS = [
   './assets/pitches/season10.jpg',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+
+  // --- Hang: a közönség megérkezik (1. csoport = csend, nincs fájl) ---
+  './assets/audio/intro.ogg',
+  './assets/audio/menuhang2.ogg',
+  './assets/audio/season3gol01.ogg',
+  './assets/audio/season3gol02.ogg',
+  './assets/audio/season3gol03.ogg',
+  './assets/audio/season5alaphang01.ogg',
+  './assets/audio/season5gol01.ogg',
+  './assets/audio/season5gol02.ogg',
+  './assets/audio/season5gol03.ogg',
+  './assets/audio/season8alaphang01.ogg',
+  './assets/audio/season8alaphang02.ogg',
+  './assets/audio/season8alaphang03.ogg',
+  './assets/audio/season8gol01.ogg',
+  './assets/audio/season8gol02.ogg',
+  './assets/audio/season8gol03.ogg',
+  './assets/audio/sipszokezdes.ogg',
+  './assets/audio/utohangellenfel.ogg',
+  './assets/audio/utohangsajat.ogg'
 ];
 
 self.addEventListener('install', function(e) {
