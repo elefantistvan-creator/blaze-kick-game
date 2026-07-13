@@ -1,0 +1,24 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bkFace" cx="38%" cy="30%" r="82%">
+      <stop offset="0%" stop-color="#fff4d2"/>
+      <stop offset="42%" stop-color="#f8d072"/>
+      <stop offset="78%" stop-color="#e7aa2f"/>
+      <stop offset="100%" stop-color="#bf7c15"/>
+    </radialGradient>
+    <linearGradient id="bkRim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe7a0"/>
+      <stop offset="100%" stop-color="#a5751a"/>
+    </linearGradient>
+    <linearGradient id="bkTxt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a5a10"/>
+      <stop offset="100%" stop-color="#b57e1f"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#bkRim)"/>
+  <circle cx="50" cy="50" r="41.5" fill="url(#bkFace)" stroke="#b98a24" stroke-width="1.4"/>
+  <circle cx="50" cy="50" r="41.5" fill="none" stroke="#fff3cc" stroke-width="1" opacity="0.45"/>
+  <text x="50" y="53.5" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="35"
+        text-anchor="middle" dominant-baseline="middle" fill="url(#bkTxt)"
+        stroke="#fff1c4" stroke-width="0.5">BK</text>
+</svg>
