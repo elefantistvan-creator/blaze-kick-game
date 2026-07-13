@@ -100,7 +100,7 @@
     </div>
     <div class="menu-list">
       <div class="menu-item fire" id="miStage"><span class="ico">🏟</span> Stage</div>
-      <div class="menu-item fire" id="miQuick"><span class="ico">👤</span> 1 Player</div>
+      <div class="menu-item fire soon" id="miQuick"><span class="ico">👤</span> 1 Player</div>
       <div class="menu-item fire" id="miTwo"><span class="ico">👥</span> 2 Player</div>
       <div class="menu-item ice"  id="miShop"><span class="ico">🛒</span> Shop</div>
       <div class="menu-item ice"  id="miSettings"><span class="ico">⚙</span> Settings</div>
@@ -120,6 +120,20 @@
     <div style="font-size:12px;color:var(--gold);" id="stagesStars">★ 0</div>
   </div>
   <div class="screen-body" id="stagesGrid"></div>
+</div>
+
+<!-- ===== 2P PÁLYAVÁLASZTÓ ===== -->
+<div id="pitchScreen" class="screen">
+  <div class="screen-head">
+    <button class="btn small ghost" id="pitchBackBtn">← Back</button>
+    <div class="screen-title">Choose pitch</div>
+    <div class="screen-spacer"></div>
+    <div style="font-size:12px;color:var(--text-dim);">2 Player</div>
+  </div>
+  <div class="screen-body">
+    <div id="pitchHint" class="pitch-hint"></div>
+    <div id="pitchGrid" class="pitch-grid"></div>
+  </div>
 </div>
 
 <!-- ===== EREDMÉNY ===== -->
