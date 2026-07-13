@@ -551,3 +551,31 @@
 }
 /* Shop: gazdasági tier (Double coins) — nem bónusz, ezért más a keret */
 .shop-row.tier-econ { border-color: rgba(255,213,79,.35); }
+
+/* ============================================================
+   2P — FELVETT BÓNUSZ KIÍRÁSA
+   Eddig semmi nem jelezte, mit kaptál. Bal = P2, jobb = P1.
+   ============================================================ */
+#bonusBanner {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  z-index: 7;
+  display: flex; gap: 10px; align-items: center;
+  pointer-events: none;
+}
+.bonus-pill {
+  display: none;
+  font-size: clamp(9px, 1.4vw, 12px); font-weight: 800;
+  letter-spacing: .05em; white-space: nowrap;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(8,14,20,.82);
+  text-shadow: 0 1px 3px rgba(0,0,0,.9);
+  animation: bonusPop .28s ease-out;
+}
+.bonus-pill.p2 { color: #9fdcff; border: 1px solid rgba(79,195,247,.55); }  /* bal */
+.bonus-pill.p1 { color: #ffb0ae; border: 1px solid rgba(239,83,80,.55);  }  /* jobb */
+
+@keyframes bonusPop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
