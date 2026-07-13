@@ -72,32 +72,38 @@ var Sound = (function () {
   var FILES = {
     intro: ['intro.ogg'],
     menu:  ['menuhang2.ogg'],
-    // 4 aláfestő-csoport. TESZT: egyelőre mind a Season 1 hangja.
+
+    // ------------------------------------------------------------------
+    // A KÖZÖNSÉG MEGÉRKEZIK — a hang ugyanazt az ívet járja, mint a kép.
+    //   1. csoport (S1-2):   senki. Se aláfestő, se gólöröm. Csak a labda.
+    //   2. csoport (S3-4):   a falu. Nincs állandó zaj — de gólnál felkiáltanak.
+    //   3. csoport (S5-7):   a város. Állandó zaj, és megjelenik a sípszó.
+    //   4. csoport (S8-10):  a tömeg.
+    // Az üres lista SZÁNDÉKOS: a csend is döntés.
+    // ------------------------------------------------------------------
     ambience: {
-      1: ['stadionhang.ogg'],
-      2: ['stadionhang.ogg'],
-      3: ['stadionhang.ogg'],
-      4: ['stadionhang.ogg']
+      1: [],                                   // nincs közönség
+      2: [],                                   // falu: csend a gólok között
+      3: ['season5alaphang01.ogg'],
+      4: ['season8alaphang01.ogg', 'season8alaphang02.ogg', 'season8alaphang03.ogg']
     },
-    // 4 gólöröm-csoport. TESZT: egyelőre mind ugyanaz.
     goal: {
-      1: ['nagytaps2.ogg'],
-      2: ['nagytaps2.ogg'],
-      3: ['nagytaps2.ogg'],
-      4: ['nagytaps2.ogg']
+      1: [],                                   // gólnál sem szól semmi
+      2: ['season3gol01.ogg', 'season3gol02.ogg', 'season3gol03.ogg'],
+      3: ['season5gol01.ogg',  'season5gol02.ogg',  'season5gol03.ogg'],
+      4: ['season8gol01.ogg',  'season8gol02.ogg',  'season8gol03.ogg']
     },
-    paddle: { me: ['passz2.ogg'], cpu: ['passz3.ogg'] },
-    // Bírói sípszó — csak a 3. és 4. csoportban (Season 6-tól). Üres = nincs síp.
+    // Bírói sípszó a visszaszámlálás "3"-ánál. Season 5-től (3. és 4. csoport).
     whistle: {
-      1: [],
-      2: [],
-      3: [],          // ide jön pl. 'sip1.ogg'
-      4: []           // ide jön pl. 'sip2.ogg'
-    }
+      1: [], 2: [],
+      3: ['sipszokezdes.ogg'],
+      4: ['sipszokezdes.ogg']
+    },
+    paddle: { me: ['utohangsajat.ogg'], cpu: ['utohangellenfel.ogg'] }
   };
 
   // Season (1..10) -> hangcsoport (1..4). A season-tábla (js/seasons.js) az igazságforrás:
-  //   Season 1-2 -> 1,  3-5 -> 2,  6-7 -> 3,  8-10 -> 4
+  //   Season 1-2 -> 1,  3-4 -> 2,  5-7 -> 3,  8-10 -> 4
   function groupForSeason(s) {
     if (typeof seasonSoundGroup === 'function') return seasonSoundGroup(s);
     return 1;
@@ -209,10 +215,18 @@ var Sound = (function () {
       var arr = FILES.paddle[who === 'cpu' ? 'cpu' : 'me'];
       sfx(pick(arr), VOL.paddle, (typeof soundHit === 'function') ? soundHit : null);
     },
-    // Gól: a FUTÓ meccs csoportjából (ambGroup), random változat, végigfut
+    // Gól: a FUTÓ meccs csoportjából (ambGroup), random változat, végigfut.
+    // ÜRES LISTA = SZÁNDÉKOS CSEND (1. csoport). Ilyenkor a szintetizált
+    // tartalék sem szólalhat meg — különben pont a csend veszne el.
     goal: function () {
       var arr = FILES.goal[ambGroup || 1];
-      sfx(pick(arr), VOL.goal, (typeof soundGoal === 'function') ? soundGoal : null);
+      if (!arr || !arr.length) return;
+      sfx(pick(arr), VOL.goal, null);
+    },
+    // 2P bónuszlabda felvétele: ez NEM gól, csak visszajelzés. Mindig hallatszik,
+    // a pálya csendjétől függetlenül (különben a felvételnek nincs nyugtázása).
+    pickup: function () {
+      sfx(pick(FILES.paddle.me), VOL.goal, (typeof soundGoal === 'function') ? soundGoal : null);
     },
     // Bírói sípszó a visszaszámlálás "3"-ánál. Csak ott szól, ahol van hozzá fájl
     // (a manifest szerint a 3. és 4. csoportban -> Season 6-tól).

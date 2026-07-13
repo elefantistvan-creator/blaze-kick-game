@@ -95,7 +95,7 @@ function grantBonus2P(who) {
   var type = BONUS2P_TYPES[Math.floor(Math.random()*BONUS2P_TYPES.length)];
   var ms   = (type === 'freezeFoe') ? BONUS2P_FREEZE_MS : BONUS2P_MS;
   bonus2P[who] = { type:type, until:Date.now()+ms };
-  pb = null; Sound.goal(); triggerShake(6);
+  pb = null; Sound.pickup(); triggerShake(6);
 }
 function bonus2PActive(who, type) {
   return bonus2P[who] && bonus2P[who].type===type && Date.now() < bonus2P[who].until;

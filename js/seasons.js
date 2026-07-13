@@ -18,11 +18,11 @@ var SEASONS = [
   { pitch: 'season2.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 1 },  // újjáépítve, fából
   { pitch: 'season3.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 2 },  // falu — a pofon
   { pitch: 'season4.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 2 },  // már nem falu
-  { pitch: 'season5.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 2 },  // város, romos
-  { pitch: 'season6.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 3 },  // jobb városi (sípszó!)
+  { pitch: 'season5.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 3 },  // város, romos
+  { pitch: 'season6.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 3 },  // jobb városi
   { pitch: 'season7.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 3 },  // jó kis edzőpálya
   { pitch: 'season8.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 4 },  // sportcsarnok
-  { pitch: 'season9.jpg',  frame: [0.126, 0.876, 0.123, 0.869], sound: 4 },  // aréna
+  { pitch: 'season9.jpg',  frame: [0.139, 0.851, 0.154, 0.849], sound: 4 },  // aréna (új kép, saját keret)
   { pitch: 'season10.jpg', frame: [0.126, 0.876, 0.123, 0.869], sound: 4 }   // beteljesülés
 ];
 
