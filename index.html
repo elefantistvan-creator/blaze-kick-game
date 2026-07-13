@@ -48,6 +48,11 @@
 <div id="mid">
   <canvas id="c"></canvas>
   <button id="pauseBtn" title="Pause">⏸</button>
+  <!-- 2P: melyik játékos milyen bónuszt kapott (bal = P2, jobb = P1) -->
+  <div id="bonusBanner" style="display:none;">
+    <span id="bonusL" class="bonus-pill p2"></span>
+    <span id="bonusR" class="bonus-pill p1"></span>
+  </div>
   <div id="itemBar" style="display:none;"></div>
 </div>
 
@@ -56,25 +61,48 @@
   <div style="font-size:22px;font-weight:900;color:#4fc3f7;">📖 How to Play</div>
   <div style="max-width:520px;max-height:70vh;overflow-y:auto;font-size:13px;line-height:1.7;color:#ddd;padding:0 22px;text-align:left;">
     <b style="color:#4fc3f7">🎯 Gameplay</b><br>
-    Top-down football against the computer. First to 7 goals wins the match. Your ball speed stays the same for the whole match.<br><br>
+    Top-down football against the computer. <b>First to 7 goals</b> wins the match.<br><br>
+
     <b style="color:#4fc3f7">🕹️ Controls</b><br>
-    <b>Left lane</b> – drag up/down to move your goalkeeper.<br>
-    <b>Right lane</b> – drag up/down to move your striker.<br>
+    <b>Left lane</b> — drag up/down to move your <b>keeper</b>.<br>
+    <b>Right lane</b> — drag up/down to move your <b>striker</b>.<br>
     Use two fingers at once to control both.<br>
-    <b>Tap</b> near the ball to hit a power shot.<br>
-    Flick the paddle as it meets the ball to change the angle – the ball keeps its speed, only its direction changes.<br><br>
+    Flick a paddle as it meets the ball to change the angle — the ball keeps its speed, only its direction changes.<br><br>
+
+    <b style="color:#4fc3f7">⚡ Power shot</b><br>
+    <b>Tap</b> anywhere near the ball to fire a power shot — the nearest paddle strikes it hard. Watch for the ⚡ TAP marker.<br><br>
+
+    <b style="color:#4fc3f7">🔥 Rally</b><br>
+    Passing the ball back and forth forever won't save you. After <b>10 touches</b> the ball starts speeding up with every hit, up to <b>1.8×</b>. A goal resets it.<br><br>
+
     <b style="color:#4fc3f7">⚽ Formation</b><br>
-    Your striker plays in the opponent's half, in front of their goal. Their striker sits in front of yours. Goalkeepers stay on the goal line.<br><br>
-    <b style="color:#4fc3f7">✨ Bonus ball</b><br>
-    A small extra ball sometimes crosses the pitch. Hit it for a random effect lasting a few seconds – it may help you or favour the CPU. This will be replaced by the Shop later.<br><br>
+    Your striker plays in the opponent's half, in front of their goal. Their striker sits in front of yours. Keepers stay on the goal line.<br><br>
+
     <b style="color:#4fc3f7">📈 Stages &amp; seasons</b><br>
-    100 stages, grouped into 10 seasons of 10 matches.<br>
-    Inside a season the ball gets faster with every stage. At the start of a new season it slows back down – but the CPU gets sharper: it aims better, reacts faster, and starts reading where the ball will land.<br><br>
+    <b>100 stages</b>, grouped into <b>10 seasons</b> of 10 matches.<br>
+    Inside a season the ball gets faster with every stage. At the start of a new season it slows back down — but the CPU gets sharper: it aims better, reacts faster, and starts reading where the ball will land.<br><br>
+
     <b style="color:#4fc3f7">⭐ Stars</b><br>
     Concede 0–1 goals: ★★★<br>
     Concede 2–4 goals: ★★☆<br>
     Concede 5–6 goals: ★☆☆<br>
-    Your best result per stage is kept.
+    Your best result per stage is kept.<br><br>
+
+    <b style="color:#4fc3f7">💰 Coins</b><br>
+    You earn coins for every win. <b>First clears pay the most</b> — replaying a stage you've already beaten pays much less. More stars, more coins. Later seasons pay more.<br><br>
+
+    <b style="color:#4fc3f7">🛒 Shop</b><br>
+    Spend coins on boosts. Buy them in the Shop, then tap them <b>during a match</b> from the bar at the bottom.<br>
+    <b>Up to 3 activations per match.</b><br>
+    Most boosts last <b>until the next goal</b> (max 30s).<br>
+    <b>Pro boosts (120)</b> last the <b>whole match</b> — they are the way out when you're stuck.<br>
+    <b>💰 Double coins</b> is not a boost: it pays out on your <b>next win</b>, and it's kept if you lose.<br><br>
+
+    <b style="color:#4fc3f7">👥 2 Player</b><br>
+    Two players, one device — one on each side.<br>
+    <b>Pick your pitch before every match.</b> The pitch you choose also sets the <b>tempo</b>: ⚡ calm, ⚡⚡⚡ wild. New pitches unlock as you progress in Stage mode.<br>
+    Bonus balls cross the pitch during play — catch one with your <b>keeper</b> for a random effect. What you got is shown at the top of the screen.<br>
+    The Shop is Stage mode only: one device, one coin balance — buying boosts here wouldn't be a fair match.
   </div>
   <button id="howToBackBtn" style="padding:12px 32px;background:#4fc3f7;color:#111;border:none;border-radius:30px;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-top:4px;">← Back</button>
 </div>
