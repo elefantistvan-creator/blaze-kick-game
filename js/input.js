@@ -69,6 +69,7 @@ function doPowerHit(side) {
   prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
   bvx = Math.abs(bvx) * 2.5 * best.dir;      // a pad oldala szabja az irányt
   powerHitActive = true;
+  Sound.powerShot();          // saját robbanáshang, nem a sima passz
   fireTrailActive = true;
   spawnSparks(bx, by, bvx, bvy);
   triggerShake(8);

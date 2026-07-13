@@ -181,7 +181,7 @@ function updateBall() {
     // GÓL csak ha a labda TELJESEN a nyíláson belül van (különben kapufa/fal)
     if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
       sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left'; Shop.onGoal(); if(is2P) onGoal2P();
-      powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
+      powerHitActive = false; fireTrailActive = false; autoShotActive = false; fireTrail = []; burnMarks = [];
       Sound.goal(); spawnConfetti('left'); triggerGoalEffect('right');
       triggerGoalFlash(); triggerScoreAnim('right'); triggerShake(10);
       triggerGateFlash('left'); triggerVictoryJump('right'); checkDramatic();
@@ -196,7 +196,7 @@ function updateBall() {
                        (isPowerActive(powerLeft)  && powerLeft.type===12);
     if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
       sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right'; Shop.onGoal(); if(is2P) onGoal2P();
-      powerHitActive = false; fireTrailActive = false; fireTrail = []; burnMarks = [];
+      powerHitActive = false; fireTrailActive = false; autoShotActive = false; fireTrail = []; burnMarks = [];
       Sound.goal(); spawnConfetti('right'); triggerGoalEffect('left');
       triggerGoalFlash(); triggerScoreAnim('left'); triggerShake(10);
       triggerGateFlash('right'); triggerVictoryJump('left'); checkDramatic();
@@ -209,12 +209,16 @@ function updateBall() {
   var szGL = szGoalieLeft();
   if (hitRect(px-PW/2, py-szGL, PW, szGL*2, bx,by,BR)) {
     bounceRect(px, py, true, padVY, true);
+    autoShotActive = false;
     Sound.paddle('me'); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p'); rallyBoost();
   }
+  // Az auto-csatár lövése ÁTMEGY a gép kapusán (pro tier: "megállíthatatlan").
+  // A gép CSATÁRA viszont még blokkolhat -> nem garantált instant gól.
   var szGR = szGoalieRight();
-  if (!rGoalieGone() &&
+  if (!rGoalieGone() && !autoShotActive &&
       hitRect(ax-PW/2, ay-szGR, PW, szGR*2, bx,by,BR)) {
     bounceRect(ax, ay, false, aiVY, true);
+    autoShotActive = false;
     Sound.paddle('cpu'); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a'); rallyBoost();
   }
 
@@ -223,11 +227,17 @@ function updateBall() {
   var effAiMR     = rStrikerGone() ? 0 : szStrikerRight();
 
   if (effPlayerMR > 0 && hitRect(mx-PW/2, my-effPlayerMR, PW, effPlayerMR*2, bx,by,BR)) {
-    bounceRect(mx, my, true, midVY, false, is2P ? undefined : autoStrikerAim());
+    var aim = is2P ? undefined : autoStrikerAim();
+    bounceRect(mx, my, true, midVY, false, aim);
+    if (typeof aim === 'number') {            // auto-lövés: megjelöljük + tűzcsóva
+      autoShotActive = true;
+      fireTrailActive = true;
+    }
     Sound.paddle('me'); hitEffect={pad:'m', time:Date.now()}; addPadHeat('m'); rallyBoost();
   }
   if (effAiMR > 0 && hitRect(amx-PW/2, amy-effAiMR, PW, effAiMR*2, bx,by,BR)) {
     bounceRect(amx, amy, false, aiMidVY, false);
+    autoShotActive = false; fireTrailActive = false;   // a gép csatára blokkolta
     Sound.paddle('cpu'); hitEffect={pad:'am', time:Date.now()}; rallyBoost();
   }
 }

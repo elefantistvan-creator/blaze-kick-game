@@ -42,9 +42,9 @@ var SHOP_ITEMS = [
 
   // --- Meccs (120) — a beragadt játékos kiútja ---------------------
   { id:'autoStriker',  price:120, tier:'pro',    icon:'🎯', name:'Auto striker',
-    desc:'Your striker plays itself — and aims. Lasts the whole match.' },
+    desc:'Your striker aims itself — and their keeper cannot stop it. Whole match.' },
   { id:'autoGoalie',   price:120, tier:'pro',    icon:'🛡️', name:'Auto keeper',
-    desc:'Your keeper plays itself — flawlessly. Lasts the whole match.' },
+    desc:'Your keeper plays itself — flawlessly. Whole match.' },
 
   // --- Gazdaság (20) — NEM aktiválható, nem foglal a 3-as keretből --
   { id:'doubleCoins',  price:20,  tier:'econ',   icon:'💰', name:'Double coins',
@@ -188,20 +188,68 @@ function cpuSlowFactor()  {
 function cpuFrozen()      { return Shop.isActive('freeze'); }          // rajzoláshoz
 function ballSlowFactor() { return Shop.isActive('heavyBall') ? 0.75 : 1.0; }
 
-// Auto csatár célzása: az ellenfél kapusától MESSZE, a kapunyíláson belülre.
-// Visszaadja a kívánt kimeneti szöget (radián), vagy null-t, ha nincs aktív auto.
+// ------------------------------------------------------------------
+// AUTO CSATÁR (120 érme, pro tier) — a "megállíthatatlan lövés".
+//
+// MIÉRT NEM ELÉG A CÉLZÁS:
+//   A gép kapusa a labda repülési ideje alatt a kapunyílás KÉTSZERESÉT
+//   is befutja (408 px vs 216 px), és a késői stage-eken nulla hibával
+//   jelzi előre a becsapódást. Bármelyik sarkot eléri. Ráadásul a
+//   sebessége a labdáéval EGYÜTT skálázódik (spdMult), így a rally-
+//   gyorsítás sem segít. Geometriával megverhetetlen.
+//   -> Két hibátlan rendszer fixpontot talált: örök vízszintes passzolgatás.
+//
+// A MEGOLDÁS: a lövés ÁTMEGY a kapuson. Ez az autoGoalie tükörképe —
+//   az "nem kaphatsz gólt", ez "nem állíthatnak meg". A gép CSATÁRA
+//   viszont még blokkolhat középen, tehát nem instant gól.
+// ------------------------------------------------------------------
+var autoShotActive = false;      // a labdát épp az auto-csatár lőtte el?
+
+// A kívánt kimeneti szög (radián), vagy null, ha nincs aktív auto-csatár.
+// A szöget a labda VALÓS becsapódási pontjából (by) számoljuk, nem a
+// pálcika közepéből (my) — az volt a régi kód másik hibája.
 function autoStrikerAim() {
   if (!Shop.isActive('autoStriker')) return null;
+
   var goalX = PLX + PLW;
-  var topY = GY + BR*1.5, botY = GY + GH - BR*1.5;
+  var topY  = GY + BR*2, botY = GY + GH - BR*2;
+  var midY  = GY + GH/2;
+
   var targetY;
-  if (cpuGoalieGone()) targetY = GY + GH/2;
-  else targetY = (ay < GY + GH/2) ? botY : topY;   // a kapus túloldalára
-  var ang = Math.atan2(targetY - my, Math.max(1, goalX - mx));
+  if (cpuGoalieGone()) {
+    targetY = midY;                                    // nincs kapus: középre
+  } else {
+    targetY = (ay < midY) ? botY : topY;               // a kapus TÚLOLDALÁRA
+    // ...de kerüljük ki a gép CSATÁRÁT is: ha az útban áll, a másik sarok
+    var dist = Math.abs(goalX - bx) > 1 ? (amx - bx) / (goalX - bx) : 0;
+    var atStriker = by + (targetY - by) * Math.max(0, Math.min(1, dist));
+    if (Math.abs(atStriker - amy) < effAMR()) {
+      targetY = (targetY === botY) ? topY : botY;
+    }
+  }
+
+  var ang  = Math.atan2(targetY - by, Math.max(1, goalX - bx));
   var maxA = MAX_BOUNCE_ANGLE_DEG * Math.PI / 180;
+
+  // FIXPONT-GARANCIA: a lövés SOHA nem lehet vízszintes.
+  // Vízszintes labdánál két hibátlan rendszer örökre passzolgatna
+  // (ez volt az eredeti hiba). Minimum 4 fok, a kapussal ellentétes irányba.
+  var minA = 4 * Math.PI / 180;
+  if (Math.abs(ang) < minA) {
+    var away = (ay < GY + GH/2) ? 1 : -1;      // a kapustól elfelé
+    ang = away * minA;
+  }
+
   if (ang >  maxA) ang =  maxA;
   if (ang < -maxA) ang = -maxA;
   return ang;
+}
+
+// A gép csatárának fél-magassága (a kikerüléshez). A valós méretet használjuk,
+// ha elérhető — a 2P-s méretezés nem érinti (ott nincs auto-csatár).
+function effAMR() {
+  if (typeof szStrikerRight === 'function') return szStrikerRight() * 1.15;
+  return (typeof MR === 'number') ? MR * 1.15 : 20;
 }
 
 // ============================================================

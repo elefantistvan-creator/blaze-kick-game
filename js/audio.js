@@ -23,6 +23,82 @@ function playBeep(freq, type, dur, vol) {
 
 function soundHit()  { playBeep(280, 'square', 0.07, 0.22); }
 function soundWall() { playBeep(160, 'sine', 0.05, 0.12); }
+
+// ------------------------------------------------------------------
+// SZUPERÜTÉS (⚡ TAP) — nem ütőhang: robbanás.
+// Mély dörrenés (leszálló szinusz) + fémes felharmonikus + rövid zajlökés.
+// Azonnal felismerhető, és nem keverhető össze a sima passzal.
+// ------------------------------------------------------------------
+function soundPowerShot() {
+  if (!audioCtx) return;
+  try {
+    var t = audioCtx.currentTime;
+
+    // 1) Dörrenés: 180 Hz -> 45 Hz gyors lecsúszás
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(180, t);
+    o.frequency.exponentialRampToValueAtTime(45, t + 0.18);
+    g.gain.setValueAtTime(0.45, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.22);
+
+    // 2) Fémes felharmonikus: rövid, éles fűrészfog
+    var o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+    o2.type = 'sawtooth';
+    o2.frequency.setValueAtTime(880, t);
+    o2.frequency.exponentialRampToValueAtTime(220, t + 0.09);
+    g2.gain.setValueAtTime(0.16, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.10);
+    o2.connect(g2); g2.connect(audioCtx.destination);
+    o2.start(t); o2.stop(t + 0.10);
+
+    // 3) Zajlökés: az ütés "húsa"
+    noiseBurst(0.06, 0.18, 1800);
+  } catch (e) {}
+}
+
+// ------------------------------------------------------------------
+// BÓNUSZLABDA FELVÉTELE (2P) — varázshang.
+// Felfelé futó arpeggio + csillogó felharmonikusok. Nem gól, nem ütés:
+// "megszereztél valamit". Rövid, örömteli, nem tolakodó.
+// ------------------------------------------------------------------
+function soundPickup() {
+  if (!audioCtx) return;
+  try {
+    // Felfelé szaladó csillogás (C6-E6-G6-C7)
+    var notes = [1047, 1319, 1568, 2093];
+    for (var i = 0; i < notes.length; i++) {
+      (function (f, i) {
+        setTimeout(function () { playBeep(f, 'triangle', 0.11, 0.22); }, i * 55);
+      })(notes[i], i);
+    }
+    // Fölé egy halk, magas "szikra"
+    setTimeout(function () { playBeep(3136, 'sine', 0.22, 0.10); }, 190);
+  } catch (e) {}
+}
+
+// Rövid szűrt zajlökés (ütés-textúrához)
+function noiseBurst(dur, vol, cutoff) {
+  if (!audioCtx) return;
+  try {
+    var t = audioCtx.currentTime;
+    var n = Math.floor(audioCtx.sampleRate * dur);
+    var buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    var s = audioCtx.createBufferSource(); s.buffer = buf;
+    var f = audioCtx.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = cutoff || 1200;
+    var g = audioCtx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    s.connect(f); f.connect(g); g.connect(audioCtx.destination);
+    s.start(t);
+  } catch (e) {}
+}
+
 function soundGoal() {
   // Fanfár
   playBeep(523, 'sine', 0.12, 0.4);
@@ -113,7 +189,8 @@ var Sound = (function () {
   var GAP_MIN = 5000, GAP_MAX = 15000;   // ms
 
   // ---- Hangerők ----
-  var VOL = { music: 0.55, ambience: 0.45, goal: 0.8, paddle: 0.7, intro: 0.7, whistle: 0.75 };
+  var VOL = { music: 0.55, ambience: 0.45, goal: 0.8, paddle: 0.5, intro: 0.7, whistle: 0.75 };
+  //                                                          ^^^ 0.7 -> 0.5: az ütők hangosabbak voltak a többinél
 
   var pools = {};          // egyszerre szólható SFX-ekhez kis pool
   var musicEl = null;      // menü/intró zene
@@ -135,7 +212,10 @@ var Sound = (function () {
 
   // Rövid SFX: pool-ból (átfedő lejátszás), fallback a szintire
   function sfx(src, vol, fallback) {
-    if (!enabled || !unlocked) { if (fallback) fallback(); return; }
+    // BUG VOLT: némítva is meghívta a szintetizált tartalékot -> a "hang ki"
+    // beállítás mellett is szóltak az ütők. A némítás mostantól TELJES.
+    if (!enabled) return;
+    if (!unlocked) { if (fallback) fallback(); return; }
     if (!src) { if (fallback) fallback(); return; }
     try {
       pools[src] = pools[src] || [];
@@ -223,10 +303,17 @@ var Sound = (function () {
       if (!arr || !arr.length) return;
       sfx(pick(arr), VOL.goal, null);
     },
-    // 2P bónuszlabda felvétele: ez NEM gól, csak visszajelzés. Mindig hallatszik,
-    // a pálya csendjétől függetlenül (különben a felvételnek nincs nyugtázása).
+    // 2P bónuszlabda felvétele: NEM gól, NEM ütés — saját varázshang (szintetizált).
+    // Független a season-csoporttól: a csendes pályákon is nyugtázni kell a felvételt.
     pickup: function () {
-      sfx(pick(FILES.paddle.me), VOL.goal, (typeof soundGoal === 'function') ? soundGoal : null);
+      if (!enabled || !unlocked) return;
+      if (typeof soundPickup === 'function') soundPickup();
+    },
+
+    // Szuperütés (⚡ TAP): saját robbanáshang, nem a passz-hang.
+    powerShot: function () {
+      if (!enabled || !unlocked) return;
+      if (typeof soundPowerShot === 'function') soundPowerShot();
     },
     // Bírói sípszó a visszaszámlálás "3"-ánál. Csak ott szól, ahol van hozzá fájl
     // (a manifest szerint a 3. és 4. csoportban -> Season 6-tól).
