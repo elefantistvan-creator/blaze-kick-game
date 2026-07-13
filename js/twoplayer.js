@@ -12,7 +12,10 @@
 var is2P = false;
 var bonus2P = { p1:null, p2:null };   // {type, until} | null
 var BONUS2P_MS = 8000;
-var BONUS2P_TYPES = ['bigStriker','bigGoalie','slowFoe'];   // mind a felvevőt segíti
+var BONUS2P_TYPES = ['bigStriker','bigGoalie','slowFoe','freezeFoe'];   // mind a felvevőt segíti
+// A Freeze 2P-ben RÖVIDEBB: az AI ellen 3 mp taktika, egy ember ellen 3 mp
+// garantált gól — ő csak nézi. 1,5 mp drámai, de marad esélye.
+var BONUS2P_FREEZE_MS = 1500;
 
 // ------------------------------------------------------------
 // 2P TEMPÓ — a választott pálya EGYBEN sebességválasztás is.
@@ -90,7 +93,8 @@ function padHit2P(padX, padY, ball) {
 }
 function grantBonus2P(who) {
   var type = BONUS2P_TYPES[Math.floor(Math.random()*BONUS2P_TYPES.length)];
-  bonus2P[who] = { type:type, until:Date.now()+BONUS2P_MS };
+  var ms   = (type === 'freezeFoe') ? BONUS2P_FREEZE_MS : BONUS2P_MS;
+  bonus2P[who] = { type:type, until:Date.now()+ms };
   pb = null; Sound.goal(); triggerShake(6);
 }
 function bonus2PActive(who, type) {
@@ -105,8 +109,17 @@ function sizeP1Striker() { return MR * (bonus2PActive('p1','bigStriker') ? 1.5 :
 function sizeP2Goalie()  { return MR * (bonus2PActive('p2','bigGoalie')  ? 1.5 : 1); }
 function sizeP2Striker() { return MR * (bonus2PActive('p2','bigStriker') ? 1.5 : 1); }
 // lassítás: ha P1 vette fel a slowFoe-t, a P2 lassul (és fordítva)
-function slowP1() { return bonus2PActive('p2','slowFoe') ? 0.5 : 1; }
-function slowP2() { return bonus2PActive('p1','slowFoe') ? 0.5 : 1; }
+function slowP1() {
+  if (bonus2PActive('p2','freezeFoe')) return 0;             // P2 befagyasztotta P1-et
+  return bonus2PActive('p2','slowFoe') ? 0.5 : 1;
+}
+function slowP2() {
+  if (bonus2PActive('p1','freezeFoe')) return 0;             // P1 befagyasztotta P2-t
+  return bonus2PActive('p1','slowFoe') ? 0.5 : 1;
+}
+// Rajzoláshoz: be van-e fagyva az adott oldal? (p = bal/P2 pálcikák, a = jobb/P1)
+function frozenP1() { return bonus2PActive('p2','freezeFoe'); }
+function frozenP2() { return bonus2PActive('p1','freezeFoe'); }
 
 // --- Egységes méret-feloldók (1P és 2P is ezeket hívja) ---
 function szGoalieLeft()   { return is2P ? sizeP2Goalie()  : effPR(); }   // px/py

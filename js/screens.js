@@ -6,6 +6,7 @@
 var bkMode = 'stage';        // 'stage' = progresszió, 'quick' = gyors meccs
 var currentStage = 1;        // épp játszott pálya
 var lastCoinReward = 0;      // az utolsó meccs érme-jutalma
+var lastCoinDoubled = false; // Double coins beváltva ezen a meccsen?
 
 // Telepített appként fut? (TWA a Play Store-ból, vagy PWA a kezdőképernyőről)
 // Csak ekkor van értelme a "Exit game" gombnak — böngészőfülön a window.close() nem működik.
@@ -77,8 +78,10 @@ var Screens = (function() {
 
     var note = document.createElement('div');
     note.className = 'shop-note';
-    note.textContent = 'A boost lasts until the next goal (max 30s). Up to ' +
-                       Shop.maxActivations + ' per match.';
+    note.innerHTML = 'A boost lasts until the next goal (max 30s). Up to ' +
+                     Shop.maxActivations + ' per match.<br>' +
+                     '<b>Pro</b> boosts last the <b>whole match</b>. ' +
+                     '<b>Double coins</b> is not a boost — it pays out on your next win.';
     wrap.appendChild(note);
 
     for (var i=0;i<SHOP_ITEMS.length;i++) {
@@ -162,6 +165,7 @@ var Screens = (function() {
     var any = false;
     for (var i=0;i<SHOP_ITEMS.length;i++) {
       var it = SHOP_ITEMS[i];
+      if (it.tier === 'econ') continue;             // Double coins: nem meccs közbeni bónusz
       if (Progress.invCount(it.id) <= 0) continue;
       any = true;
       (function(item){
@@ -357,7 +361,10 @@ var Screens = (function() {
     }
     var cw = el('resultCoins');
     if (cw) {
-      cw.innerHTML = lastCoinReward > 0 ? ('+' + lastCoinReward + ' <img class="coin" src="assets/coin.svg" alt="">') : '';
+      cw.innerHTML = lastCoinReward > 0
+        ? ('+' + lastCoinReward + ' <img class="coin" src="assets/coin.svg" alt="">' +
+           (lastCoinDoubled ? ' <span class="coin-dbl">💰 DOUBLED</span>' : ''))
+        : '';
       cw.style.display = lastCoinReward > 0 ? 'block' : 'none';
     }
     var sub = el('resultSub');

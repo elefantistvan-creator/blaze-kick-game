@@ -74,6 +74,21 @@ function drawPad(x, y, halfH, col, padKey) {
   ctx.fillStyle='rgba(0,0,0,0.28)';
   ctx.fillRect(sx+2, sy+2, sw, sh);
 
+  // ------------------------------------------------------------
+  // FREEZE — a befagyasztott pálcika. Csak az ÜTŐN van hatás,
+  // a pálya érintetlen marad (a felfestés és a season-kép a játék arca).
+  //   1P: a Shop 'freeze' itemje  -> a gép mindkét pálcikája
+  //   2P: a 'freezeFoe' bónusz     -> az ellenfél mindkét pálcikája
+  // ------------------------------------------------------------
+  if (isPadFrozen(padKey)) {
+    drawFrozenPad(sx, sy, sw, sh, now);
+    if (squish > 0.1) {
+      ctx.fillStyle='rgba(255,255,255,' + (squish * 0.4) + ')';
+      ctx.fillRect(sx, sy, sw, sh);
+    }
+    return;                       // se hőizzás, se szikra: jég van
+  }
+
   // Pálcika alap - 3D gradient
   var pgrad = ctx.createLinearGradient(sx, sy, sx+sw, sy);
   pgrad.addColorStop(0, lightenColor(col, 40));
@@ -96,6 +111,76 @@ function drawPad(x, y, halfH, col, padKey) {
   if (heat > 0.8 && Math.random() > 0.7) {
     spawnSparks(x + (Math.random()-0.5)*sw, y + (Math.random()-0.5)*sh*0.5 + victOffset, 0, -1);
   }
+}
+
+// Melyik pálcika van befagyasztva?
+//   1P: 'a' (gép kapus) és 'am' (gép csatár)
+//   2P: a leképezés más — P1 = a/am (jobb), P2 = p/m (bal)
+function isPadFrozen(padKey) {
+  if (is2P) {
+    if (padKey === 'a' || padKey === 'am') return frozenP1();
+    return frozenP2();
+  }
+  if (typeof cpuFrozen !== 'function') return false;
+  return cpuFrozen() && (padKey === 'a' || padKey === 'am');
+}
+
+// Jeges pálcika: jégkék test, fehér repedések, dér-halo, csillanó szemcsék.
+function drawFrozenPad(sx, sy, sw, sh, now) {
+  ctx.save();
+
+  // Dér-halo
+  ctx.shadowColor = '#7fd8ff';
+  ctx.shadowBlur  = 14;
+  ctx.fillStyle   = 'rgba(180,232,255,0.28)';
+  ctx.fillRect(sx-2, sy-3, sw+4, sh+6);
+  ctx.shadowBlur  = 0;
+
+  // Jégtest
+  var ig = ctx.createLinearGradient(sx, sy, sx+sw, sy);
+  ig.addColorStop(0,   '#dff4ff');
+  ig.addColorStop(0.45,'#9fd9ef');
+  ig.addColorStop(1,   '#5aa9c9');
+  ctx.fillStyle = ig;
+  ctx.fillRect(sx, sy, sw, sh);
+
+  // Repedések (a pálcikán belülre vágva)
+  ctx.beginPath(); ctx.rect(sx, sy, sw, sh); ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 1;
+  var lines = 7;
+  for (var i = 0; i < lines; i++) {
+    var yy = sy + (i + 0.5) * sh / lines;
+    ctx.beginPath();
+    ctx.moveTo(sx, yy);
+    ctx.lineTo(sx + sw*0.55, yy - sh*0.02);
+    ctx.lineTo(sx + sw, yy + sh*0.013);
+    ctx.stroke();
+  }
+  ctx.beginPath();                       // hosszanti hasadás
+  ctx.moveTo(sx + sw*0.4, sy);
+  ctx.lineTo(sx + sw*0.6, sy + sh);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fillRect(sx+2, sy, 2.5, sh);       // fénysáv
+  ctx.restore();
+
+  // Peremjég
+  ctx.strokeStyle = '#e8f8ff';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(sx, sy, sw, sh);
+
+  // Csillanó szemcsék a széleken
+  ctx.save();
+  ctx.fillStyle = '#dff4ff';
+  var t = now / 200;
+  for (var k = 0; k < 5; k++) {
+    ctx.globalAlpha = 0.35 + 0.35 * Math.sin(t + k * 1.3);
+    ctx.beginPath();
+    ctx.arc(sx + (k % 2 ? sw + 4 : -4), sy + 8 + k * (sh - 16) / 4, 1.6, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 function lightenColor(hex, amt) {

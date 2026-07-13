@@ -43,12 +43,20 @@ function endGame(won) {
   }
   var earned = 0;
   lastCoinReward = 0;
+  lastCoinDoubled = false;
   if (bkMode === 'stage') {
     // FONTOS: az "első teljesítés" a recordWin ELŐTT dől el
     var firstClear = (Progress.stars(currentStage) === 0);
     if (won) {
       earned = Progress.recordWin(currentStage, sc2);   // sc2 = kapott gólok
       lastCoinReward = coinsForMatch(true, currentStage, earned, firstClear);
+      // Shop: Double coins — GYŐZELEMNÉL vált be, és csak akkor fogy el.
+      // Vereségnél megmarad: nem lehet vele rosszul járni, csak később nyerni vele.
+      if (Progress.invCount('doubleCoins') > 0) {
+        Progress.useInv('doubleCoins');
+        lastCoinReward *= 2;
+        lastCoinDoubled = true;
+      }
     } else {
       Progress.recordLoss(currentStage);
       lastCoinReward = coinsForMatch(false, currentStage, 0, false);

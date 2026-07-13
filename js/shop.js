@@ -10,25 +10,45 @@
 // ============================================================
 
 var SHOP_ITEMS = [
-  // olcsó
-  { id:'powerTap',     price:15,  tier:'cheap',  icon:'💥', name:'Power shot',
-    desc:'Your tap shots go through their keeper.' },
-  { id:'slowCpu',      price:15,  tier:'cheap',  icon:'🐢', name:'Slow opponent',
-    desc:'CPU paddles move at half speed.' },
+  // --------------------------------------------------------
+  // ÁRAZÁSI ELV:  ár = hány meccs munkája.  (Átlag bevétel: ~49 érme/meccs)
+  //   15      = 1/3 meccs  -> egy ESÉLY (nem gól)
+  //   25-45   = ~1 meccs   -> egy GÓL
+  //   120     = ~2,5 meccs -> egy MEGNYERT MECCS (tier:'pro' -> teljes meccsre szól)
+  // Skill-kedvezmény: amihez időzítés kell, olcsóbb (Freeze 35 < Remove keeper 45).
+  // Támadás > védekezés: a gól előrevisz, a védés csak megakadályoz.
+  // --------------------------------------------------------
+
+  // --- Esély (15) -------------------------------------------------
+  { id:'heavyBall',    price:15,  tier:'cheap',  icon:'🧊', name:'Heavy ball',
+    desc:'The ball moves 25% slower.' },
   { id:'bigStriker',   price:15,  tier:'cheap',  icon:'📏', name:'Big striker',
     desc:'Your striker is 50% larger.' },
-  // közepes
-  { id:'bigGoalie',    price:40,  tier:'mid',    icon:'🧤', name:'Big keeper',
+
+  // --- Védekezés (25-30) ------------------------------------------
+  { id:'bigGoalie',    price:25,  tier:'mid',    icon:'🧤', name:'Big keeper',
     desc:'Your keeper is 50% larger.' },
-  { id:'noCpuGoalie',  price:40,  tier:'mid',    icon:'🚫', name:'Remove their keeper',
-    desc:'Their keeper leaves the pitch.' },
-  { id:'noCpuStriker', price:40,  tier:'mid',    icon:'🚷', name:'Remove their striker',
+  { id:'noCpuStriker', price:30,  tier:'mid',    icon:'🚷', name:'Remove their striker',
     desc:'Their striker leaves the pitch.' },
-  // drága
+
+  // --- Gól (35-45) ------------------------------------------------
+  { id:'freeze',       price:35,  tier:'mid',    icon:'❄️', name:'Freeze',
+    desc:'Their paddles freeze solid for 3 seconds. Time it well.',
+    dur:3000 },                                    // FIX idő, nem gólig
+  { id:'slowCpu',      price:40,  tier:'mid',    icon:'🐢', name:'Slow opponent',
+    desc:'Their paddles move at half speed.' },
+  { id:'noCpuGoalie',  price:45,  tier:'mid',    icon:'🚫', name:'Remove their keeper',
+    desc:'Their keeper leaves the pitch.' },
+
+  // --- Meccs (120) — a beragadt játékos kiútja ---------------------
   { id:'autoStriker',  price:120, tier:'pro',    icon:'🎯', name:'Auto striker',
-    desc:'Your striker plays itself — and aims.' },
+    desc:'Your striker plays itself — and aims. Lasts the whole match.' },
   { id:'autoGoalie',   price:120, tier:'pro',    icon:'🛡️', name:'Auto keeper',
-    desc:'Your keeper plays itself — flawlessly.' }
+    desc:'Your keeper plays itself — flawlessly. Lasts the whole match.' },
+
+  // --- Gazdaság (20) — NEM aktiválható, nem foglal a 3-as keretből --
+  { id:'doubleCoins',  price:20,  tier:'econ',   icon:'💰', name:'Double coins',
+    desc:'Your next WIN pays double. Kept if you lose.' }
 ];
 
 // Csomagok: 1x teljes ár, 3x -10%, 5x -16%
@@ -94,11 +114,19 @@ var Shop = (function() {
     return Math.max(0, Math.ceil((active[id] - Date.now())/1000));
   }
 
-  // Gólnál minden hatás megszűnik (bármelyik oldal szerezte)
-  function onGoal() { active = {}; }
+  // Gólnál minden hatás megszűnik — KIVÉVE a pro tier (az a teljes meccsre szól).
+  function onGoal() {
+    for (var id in active) {
+      var it = shopItem(id);
+      if (it && it.tier === 'pro') continue;
+      delete active[id];
+    }
+  }
 
   function canActivate(id) {
     if (bkMode !== 'stage') return false;
+    var it = shopItem(id);
+    if (!it || it.tier === 'econ') return false;   // a Double coins nem meccs közbeni bónusz
     if (used >= MAX_ACTIVATIONS) return false;
     if (isActive(id)) return false;
     return Progress.invCount(id) > 0;
@@ -106,8 +134,9 @@ var Shop = (function() {
 
   function activate(id) {
     if (!canActivate(id)) return false;
+    var it = shopItem(id);
     Progress.useInv(id);
-    active[id] = Date.now() + DURATION_MS;
+    active[id] = Date.now() + durationOf(it);
     used++;
     return true;
   }
@@ -139,7 +168,14 @@ function effPR()  { return Shop.isActive('bigGoalie')  ? PR * 1.5 : PR; }   // j
 function effMR()  { return Shop.isActive('bigStriker') ? MR * 1.5 : MR; }   // játékos csatár
 function cpuGoalieGone()  { return Shop.isActive('noCpuGoalie'); }
 function cpuStrikerGone() { return Shop.isActive('noCpuStriker'); }
-function cpuSlowFactor()  { return Shop.isActive('slowCpu') ? 0.5 : 1.0; }
+// Freeze = teljes megállás (0), Slow opponent = fél sebesség.
+// A Freeze erősebb, ezért 3 mp-ig él, míg a Slow a következő gólig.
+function cpuSlowFactor()  {
+  if (Shop.isActive('freeze')) return 0;
+  return Shop.isActive('slowCpu') ? 0.5 : 1.0;
+}
+function cpuFrozen()      { return Shop.isActive('freeze'); }          // rajzoláshoz
+function ballSlowFactor() { return Shop.isActive('heavyBall') ? 0.75 : 1.0; }
 
 // Auto csatár célzása: az ellenfél kapusától MESSZE, a kapunyíláson belülre.
 // Visszaadja a kívánt kimeneti szöget (radián), vagy null-t, ha nincs aktív auto.

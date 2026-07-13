@@ -124,11 +124,9 @@ function updateBall() {
   aiMidVY= amy - prevAmY; prevAmY = amy;
 
   // Power 5/6: labda sebesség vizuális módosítás (csak mozgásra hat, bvx/bvy érintetlen)
-  var spdScale = 1.0;
-  if (isPowerActive(powerLeft)  && powerLeft.type===5)  spdScale = 0.5;
-  if (isPowerActive(powerLeft)  && powerLeft.type===6)  spdScale = 2.0;
-  if (isPowerActive(powerRight) && powerRight.type===5) spdScale = 0.5;
-  if (isPowerActive(powerRight) && powerRight.type===6) spdScale = 2.0;
+  // Shop: Heavy ball — a labda 25%-kal lassabban HALAD.
+  // A sebességvektort NEM írjuk át (nem halmozódik), csak a lépést skálázzuk.
+  var spdScale = ballSlowFactor();
 
   bx += bvx * spdScale;
   by += bvy * spdScale;
@@ -214,8 +212,7 @@ function updateBall() {
     Sound.paddle('me'); hitEffect={pad:'p', time:Date.now()}; addPadHeat('p'); rallyBoost();
   }
   var szGR = szGoalieRight();
-  var tapThrough = Shop.isActive('powerTap') && powerHitActive;
-  if (!rGoalieGone() && !tapThrough &&
+  if (!rGoalieGone() &&
       hitRect(ax-PW/2, ay-szGR, PW, szGR*2, bx,by,BR)) {
     bounceRect(ax, ay, false, aiVY, true);
     Sound.paddle('cpu'); hitEffect={pad:'a', time:Date.now()}; addPadHeat('a'); rallyBoost();
