@@ -1,6 +1,6 @@
 // Blaze Kick Service Worker - v2 (modularizált verzió)
 // FONTOS: minden deploy előtt növeld a verziószámot!
-var CACHE = 'blazekick-v59';
+var CACHE = 'blazekick-v61';
 
 var ASSETS = [
   './',
@@ -65,7 +65,8 @@ var ASSETS = [
   './assets/audio/season8gol03.ogg',
   './assets/audio/sipszokezdes.ogg',
   './assets/audio/utohangellenfel.ogg',
-  './assets/audio/utohangsajat.ogg'
+  './assets/audio/utohangsajat.ogg',
+  './assets/audio/utohangszuper.ogg'
 ];
 
 self.addEventListener('install', function(e) {
