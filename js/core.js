@@ -18,7 +18,9 @@ function setup() {
   MR  = H * 0.042;         // mezőnyjátékos fél-magasság
   GH  = H * 0.36;          // kapunyílás
   GY  = PLY + (PLH - GH) / 2;   // kapu a pálya közepére igazítva
-  baseSpd = H * DIFF.BALL_BASE * Difficulty.ballMult(stage);
+  // Alapsebesség: kampányban a fűrészfog-görbe (difficulty.js),
+  // 2P-ben a választott pálya saját tempója (twoplayer.js: P2_SPEED).
+  baseSpd = H * DIFF.BALL_BASE * (is2P ? p2SpeedMult(p2Season) : Difficulty.ballMult(stage));
   spd = baseSpd;
 
   // Labda eltűnési mélység a gólvonal mögött (a dekor-sávba gurulva) — hangolható

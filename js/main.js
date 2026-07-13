@@ -175,13 +175,14 @@ bindBtn('startBtn', function () {
   if (typeof startBlazeIntro === 'function') startBlazeIntro();
 });
 bindBtn('miStage',        openStages);bindBtn('miQuick',        startQuick);
-bindBtn('miTwo',          start2Player);
+bindBtn('miTwo',          openPitchSelect);
 bindBtn('miShop',         openShop);
 bindBtn('shopBackBtn',    function(){ Screens.show('menu'); });
 bindBtn('miSettings',     function(){ Screens.show('settings'); });
 bindBtn('miHow',          showHowTo);
 bindBtn('miExit',         exitGame);
 bindBtn('stagesBackBtn',  function(){ Screens.show('menu'); });
+bindBtn('pitchBackBtn',   function(){ Screens.show('menu'); });
 bindBtn('settingsBackBtn',function(){ Screens.show('menu'); });
 bindBtn('resetProgressBtn', resetProgress);
 

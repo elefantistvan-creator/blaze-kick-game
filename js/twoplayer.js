@@ -14,15 +14,37 @@ var bonus2P = { p1:null, p2:null };   // {type, until} | null
 var BONUS2P_MS = 8000;
 var BONUS2P_TYPES = ['bigStriker','bigGoalie','slowFoe'];   // mind a felvevőt segíti
 
-function start2Player() {
+// ------------------------------------------------------------
+// 2P TEMPÓ — a választott pálya EGYBEN sebességválasztás is.
+// Saját tábla, NEM a kampány fűrészfog-görbéje: ott a seasonök között
+// az AI erősödik, nem a labda (S1->S10 mindössze 1.00 -> 1.15).
+// 2P-ben nincs AI, tehát a különbséget a labdának kell hoznia.
+// Egy helyen hangolható.
+// ------------------------------------------------------------
+var P2_SPEED = [1.00, 1.08, 1.16, 1.24, 1.32, 1.40, 1.48, 1.56, 1.64, 1.75];
+//               S1    S2    S3    S4    S5    S6    S7    S8    S9    S10
+var p2Season = 1;                       // a 2P-ben választott pálya (1..10)
+
+function p2SpeedMult(s) {
+  var i = Math.max(1, Math.min(SEASON_COUNT, s || 1)) - 1;
+  return P2_SPEED[i] || 1;
+}
+// Villám-jelzés a pályaválasztón: ⚡ (S1-3) · ⚡⚡ (S4-7) · ⚡⚡⚡ (S8-10)
+function p2Bolts(s) { return s <= 3 ? 1 : (s <= 7 ? 2 : 3); }
+
+// Melyik season pályája választható? Amelyikbe a kampányban BELÉPTÉL.
+function p2SeasonUnlocked(s) { return s <= seasonOf(Progress.unlockedMax()); }
+
+function start2Player(season) {
+  p2Season = (season && p2SeasonUnlocked(season)) ? season : 1;
   bkMode = 'twoplayer';
   is2P = true;
-  currentStage = 1; stage = 1;
+  currentStage = 1; stage = 1;   // a kampány-görbe 2P-ben nem érvényes (l. P2_SPEED)
   bonus2P = { p1:null, p2:null }; pb = null;
   Screens.show('game');
-  loadSeasonPitch(1);        // 2P: Season 1 pálya
-  Sound.matchStart(1);       // 2P: Season 1 hangulat
-  doStart();                 // közös indítás (countdown, setup); a 2P ágakat a mód kapcsolja
+  loadSeasonPitch(p2Season);     // a választott pálya
+  Sound.matchStart(p2Season);    // és a hozzá tartozó hangcsoport
+  doStart();                     // közös indítás (countdown, setup); a 2P ágakat a mód kapcsolja
   scheduleBonus2P();
 }
 

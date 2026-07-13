@@ -28,7 +28,7 @@ function exitGame() {
 
 var Screens = (function() {
 
-  var NAMES = ['menuScreen','stagesScreen','resultScreen','settingsScreen','shopScreen'];
+  var NAMES = ['menuScreen','stagesScreen','pitchScreen','resultScreen','settingsScreen','shopScreen'];
   function el(id) { return document.getElementById(id); }
 
   function hideAll() {
@@ -53,6 +53,7 @@ var Screens = (function() {
     e.style.display = 'flex';
     if (name === 'menu')   refreshMenu();
     if (name === 'stages') buildGrid();
+    if (name === 'pitch')  buildPitchGrid();
     if (name === 'shop')   buildShop();
     if (typeof Sound !== 'undefined') Sound.menu();   // menü-zene a menü-képernyőkön (nem indul újra, ha már szól)
   }
@@ -273,6 +274,64 @@ var Screens = (function() {
     return t;
   }
 
+  // ---------- 2P pályaválasztó ----------
+  // Mind a 10 pálya látszik. A zároltak sötétek — ők a kampány reklámja:
+  // a haver meglátja az arénát, és megkérdezi, hogy azt hogyan lehet elérni.
+  // A pálya EGYBEN tempóválasztás is (twoplayer.js: P2_SPEED).
+  function buildPitchGrid() {
+    var wrap = el('pitchGrid');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+
+    for (var s = 1; s <= SEASON_COUNT; s++) {
+      wrap.appendChild(makePitchCard(s));
+    }
+
+    var hint = el('pitchHint');
+    if (hint) {
+      var maxS = seasonOf(Progress.unlockedMax());
+      hint.textContent = (maxS >= SEASON_COUNT)
+        ? 'All pitches unlocked.'
+        : 'Play Stage mode to unlock more pitches.';
+    }
+  }
+
+  function makePitchCard(s) {
+    var open = p2SeasonUnlocked(s);
+
+    var c = document.createElement('div');
+    c.className = 'pcard' + (open ? ' open' : ' locked');
+    c.setAttribute('data-season', s);
+
+    var thumb = document.createElement('div');
+    thumb.className = 'pcard-thumb';
+    thumb.style.backgroundImage = 'url(' + seasonPitchSrc(s) + ')';
+    c.appendChild(thumb);
+
+    var name = document.createElement('div');
+    name.className = 'pcard-name';
+    name.textContent = 'Season ' + s;
+    c.appendChild(name);
+
+    if (open) {
+      var sp = document.createElement('div');
+      sp.className = 'pcard-speed b' + p2Bolts(s);
+      sp.textContent = new Array(p2Bolts(s) + 1).join('⚡');
+      c.appendChild(sp);
+
+      c.addEventListener('pointerup', function(e){
+        e.stopPropagation(); e.preventDefault();
+        start2Player(parseInt(this.getAttribute('data-season'), 10));
+      });
+    } else {
+      var lock = document.createElement('div');
+      lock.className = 'pcard-lock';
+      lock.textContent = '🔒';
+      c.appendChild(lock);
+    }
+    return c;
+  }
+
   // ---------- Eredményképernyő ----------
   function showResult(won, myGoals, cpuGoals, earnedStars) {
     if (typeof Sound !== 'undefined') Sound.matchStop();   // aláfestő leáll, menü-zene jön a result képernyőn
@@ -312,6 +371,10 @@ var Screens = (function() {
       var hasNext = (bkMode==='stage') && won && currentStage < MAX_STAGE;
       next.style.display = hasNext ? 'inline-block' : 'none';
     }
+    // A 2P eredményképernyő átírja "Rematch"-re — itt vissza kell állítani,
+    // különben egy 2P meccs után a kampányban is "Rematch" maradna.
+    var retry = el('resultRetryBtn');
+    if (retry) retry.textContent = '↻ Retry';
     show('result');
   }
 
@@ -330,7 +393,7 @@ var Screens = (function() {
   }
 
   return { show:show, showResult:showResult, showResult2P:showResult2P, anyOpen:anyOpen, refreshMenu:refreshMenu,
-           buildGrid:buildGrid, buildShop:buildShop, buildItemBar:buildItemBar };
+           buildGrid:buildGrid, buildPitchGrid:buildPitchGrid, buildShop:buildShop, buildItemBar:buildItemBar };
 })();
 
 // ---------- Indítók ----------
@@ -360,12 +423,15 @@ function startQuick() {
   Screens.buildItemBar();
 }
 
-function retryStage()  { if (typeof is2P!=='undefined' && is2P) { start2Player(); } else { startStage(currentStage); } }
+// 2P-ben a "Rematch" NEM indít azonnal: visszavisz a pályaválasztóhoz.
+// (Meccs előtt mindig lehessen pályát/tempót váltani.)
+function retryStage()  { if (typeof is2P!=='undefined' && is2P) { openPitchSelect(); } else { startStage(currentStage); } }
 function nextStage()   { if (currentStage < MAX_STAGE) startStage(currentStage + 1); }
 function backToMenu()  { running = false; paused = false; if (typeof is2P!=='undefined') is2P=false; Shop.reset();
   var ib = document.getElementById('itemBar'); if (ib) ib.style.display='none';
   Screens.show('menu'); }
 function openStages()  { Screens.show('stages'); }
+function openPitchSelect() { running = false; paused = false; Screens.show('pitch'); }
 function openShop()    { Screens.show('shop'); }
 
 // ============ TESZT ESZKÖZÖK — KIADÁS ELŐTT TÖRLENDŐ ============
