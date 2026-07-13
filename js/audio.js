@@ -175,7 +175,11 @@ var Sound = (function () {
       3: ['sipszokezdes.ogg'],
       4: ['sipszokezdes.ogg']
     },
-    paddle: { me: ['utohangsajat.ogg'], cpu: ['utohangellenfel.ogg'] }
+    paddle: { me: ['utohangsajat.ogg'], cpu: ['utohangellenfel.ogg'] },
+
+    // ⚡ TAP (szuperütés) — saját felvétel. Ha nem tölt be, a szintetizált
+    // soundPowerShot() ugrik be tartalékként.
+    superShot: ['utohangszuper.ogg']
   };
 
   // Season (1..10) -> hangcsoport (1..4). A season-tábla (js/seasons.js) az igazságforrás:
@@ -310,10 +314,11 @@ var Sound = (function () {
       if (typeof soundPickup === 'function') soundPickup();
     },
 
-    // Szuperütés (⚡ TAP): saját robbanáshang, nem a passz-hang.
+    // Szuperütés (⚡ TAP): saját felvétel, a szintetizált robbanás a tartaléka.
+    // Kicsit hangosabb a passznál — ez a játék legerősebb pillanata.
     powerShot: function () {
-      if (!enabled || !unlocked) return;
-      if (typeof soundPowerShot === 'function') soundPowerShot();
+      sfx(pick(FILES.superShot), VOL.goal,
+          (typeof soundPowerShot === 'function') ? soundPowerShot : null);
     },
     // Bírói sípszó a visszaszámlálás "3"-ánál. Csak ott szól, ahol van hozzá fájl
     // (a manifest szerint a 3. és 4. csoportban -> Season 6-tól).

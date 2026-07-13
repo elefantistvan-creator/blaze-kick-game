@@ -13,9 +13,34 @@ var is2P = false;
 var bonus2P = { p1:null, p2:null };   // {type, until} | null
 var BONUS2P_MS = 8000;
 var BONUS2P_TYPES = ['bigStriker','bigGoalie','slowFoe','freezeFoe'];   // mind a felvevőt segíti
-// A Freeze 2P-ben RÖVIDEBB: az AI ellen 3 mp taktika, egy ember ellen 3 mp
-// garantált gól — ő csak nézi. 1,5 mp drámai, de marad esélye.
-var BONUS2P_FREEZE_MS = 1500;
+// A Freeze 2P-ben külön időt kap (a többi bónusz 8 mp).
+var BONUS2P_FREEZE_MS = 5000;
+
+// --- A felvett bónusz KIÍRÁSA (eddig semmi nem jelezte, mit kaptál) ---
+var BONUS2P_LABEL = {
+  bigStriker: '📏 BIG STRIKER',
+  bigGoalie:  '🧤 BIG KEEPER',
+  slowFoe:    '🐢 SLOW OPPONENT',
+  freezeFoe:  '❄️ FREEZE'
+};
+function bonus2PText(who) {
+  var b = bonus2P[who];
+  if (!b || Date.now() >= b.until) return '';
+  var left = Math.ceil((b.until - Date.now()) / 1000);
+  return (BONUS2P_LABEL[b.type] || b.type) + '  ' + left + 's';
+}
+// P1 = JOBB oldal (ax/amx), P2 = BAL oldal (px/mx)
+function updateBonusBanner() {
+  var bar = document.getElementById('bonusBanner');
+  if (!bar) return;
+  if (!is2P) { if (bar.style.display !== 'none') bar.style.display = 'none'; return; }
+  var l = document.getElementById('bonusL'), r = document.getElementById('bonusR');
+  var tl = bonus2PText('p2'), tr = bonus2PText('p1');
+  if (l && l.textContent !== tl) { l.textContent = tl; l.style.display = tl ? 'inline-block' : 'none'; }
+  if (r && r.textContent !== tr) { r.textContent = tr; r.style.display = tr ? 'inline-block' : 'none'; }
+  var show = !!(tl || tr);
+  bar.style.display = show ? 'flex' : 'none';
+}
 
 // ------------------------------------------------------------
 // 2P TEMPÓ — a választott pálya EGYBEN sebességválasztás is.

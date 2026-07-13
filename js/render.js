@@ -1,5 +1,6 @@
 // --- Rajzolás ---
 function draw() {
+  if (typeof updateBonusBanner === 'function') updateBonusBanner();   // 2P: mi az aktív bónusz
   // Screen shake
   ctx.save();
   var shakeAge = Date.now() - shakeTime;

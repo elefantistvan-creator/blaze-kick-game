@@ -69,11 +69,19 @@ function doPowerHit(side) {
   prePowerHitSpeed = Math.sqrt(bvx*bvx + bvy*bvy);
   bvx = Math.abs(bvx) * 2.5 * best.dir;      // a pad oldala szabja az irányt
   powerHitActive = true;
-  Sound.powerShot();          // saját robbanáshang, nem a sima passz
+
+  // BUG VOLT: a tap akkor is elsül, ha a labda ÉRINTI a pálcikát (d < BR*2.5).
+  // Ilyenkor a következő frame-ben lefutott a bounceRect(), ami visszaállította
+  // az eredeti sebességet, eloltotta a tűzcsóvát és megszólaltatta a sima
+  // passz-hangot -> a szuperütés azonnal megsemmisült. Toljuk ki a labdát az
+  // ütközési zónából, hogy tényleg elrepüljön.
+  var clearX = PW/2 + BR + 1;
+  if (Math.abs(bx - best.x) < clearX) bx = best.x + best.dir * clearX;
+
+  Sound.powerShot();          // saját felvétel (a régi 440 Hz-es bip KIVÉVE)
   fireTrailActive = true;
   spawnSparks(bx, by, bvx, bvy);
   triggerShake(8);
-  playBeep(440, 'square', 0.15, 0.1);
   hitEffect = { pad: best.tag, time: Date.now() };
 }
 
