@@ -90,12 +90,23 @@ function coinsForMatch(won, stage, stars, firstClear) {
 // ---------- Shop állapot ----------
 var Shop = (function() {
   var MAX_ACTIVATIONS = 3;
-  var DURATION_MS     = 30000;   // 30 mp plafon, de gólig él
+  var DURATION_MS     = 30000;   // alap: 30 mp plafon, de gólig él
 
   var active = {};        // id -> lejárati időbélyeg
   var used   = 0;         // meccsenkénti aktiválások
 
   function reset() { active = {}; used = 0; }
+
+  // Meddig él egy hatás?
+  //   dur megadva (Freeze)   -> pontosan annyi ideig
+  //   tier 'pro'             -> A TELJES MECCSRE (2,5 meccs munkája = 1 megnyert meccs)
+  //   egyébként              -> a következő gólig, max 30 mp
+  function durationOf(it) {
+    if (!it) return DURATION_MS;
+    if (it.dur) return it.dur;
+    if (it.tier === 'pro') return Infinity;
+    return DURATION_MS;
+  }
 
   function isActive(id) {
     var until = active[id];
