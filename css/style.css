@@ -105,8 +105,6 @@ html, body {
   0%,100% { transform:translateX(-50%) scale(1);    opacity:1;   }
   50%      { transform:translateX(-50%) scale(1.05); opacity:0.7; }
 }
-  50%      { transform:translateX(-50%) scale(1.06); }
-}
 
 #overlay {
   position:absolute; inset:0;
