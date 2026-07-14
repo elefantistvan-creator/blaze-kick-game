@@ -673,3 +673,70 @@
 .skin-tag.own { color: var(--accent); }
 .skin-price { font-size: 11px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 3px; }
 .skin-note { font-size: 10px; color: var(--text-dim); text-align: center; margin: -4px auto 12px; max-width: 620px; line-height: 1.5; }
+
+/* ---- Skin-bolt: a hiányzó fejléc + a rendes kártya ---- */
+.shop-sec {
+  max-width: 620px; margin: 20px auto 4px;
+  font-size: 13px; font-weight: 800; letter-spacing: .06em;
+  color: var(--accent);
+}
+.skin-card { padding: 10px 9px 0; }
+.skin-name { color: var(--text); }
+.skin-desc {
+  font-size: 10px; line-height: 1.4; color: var(--text-dim);
+  text-align: center; min-height: 28px;
+  padding: 0 2px;
+}
+.skin-foot {
+  width: 100%; margin-top: 2px;
+  padding: 7px 4px; border-top: 1px solid var(--line);
+  font-size: 11px; font-weight: 800; letter-spacing: .05em;
+  text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.skin-foot.is-on   { color: var(--accent); }
+.skin-foot.is-own  { color: var(--text-dim); }
+.skin-foot.is-buy  { color: var(--gold); }
+.skin-foot.is-poor { color: #6b737d; }
+.skin-card.toopoor .skin-prev { filter: grayscale(0.85) brightness(0.65); }
+.skin-card.buyable { border-color: rgba(255,213,79,.32); }
+
+@keyframes skinShake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-4px); }
+  40%,80% { transform: translateX(4px); }
+}
+.skin-card.shake { animation: skinShake .32s ease-in-out; }
+
+/* ============================================================
+   ⚡ TAP TÖLTŐCSÍK
+   Szürkén tölt -> sárgán telik -> teljesnél izzik.
+   A ⚡ csak akkor gyullad narancsra, ha TELJES ÉS a labda közel van.
+   ============================================================ */
+.tap-bar {
+  width: clamp(22px, 3.4vh, 34px);
+  height: 3px;
+  background: rgba(255,255,255,0.13);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.tap-bar > i {
+  display: block; height: 100%; width: 0%;
+  background: #c9a227;
+  border-radius: 2px;
+  transition: width .12s linear;
+}
+/* Feltöltve: a csík izzó sárga */
+.tap-hint.charged .tap-bar > i {
+  background: #ffd54f;
+  box-shadow: 0 0 6px rgba(255,213,79,0.9);
+}
+/* Feltöltve, de a labda messze: a ⚡ már nem szürke, csak halvány sárga */
+.tap-hint.charged {
+  color: #b99a3e;
+  opacity: 0.72;
+  filter: none;
+}
+.tap-hint.charged span { color: #b99a3e; }
+/* Feltöltve ÉS közel: teljes narancs, lüktet (a meglévő .on) */
