@@ -219,6 +219,47 @@ function toggleSound() {
   updateSoundLabel();
 })();
 bindBtn('miSound', toggleSound);
+
+// --- Vibráció ki/be (Settings) ---
+function updateVibeLabel() {
+  var b = document.getElementById('miVibe');
+  if (!b || typeof Haptics === 'undefined') return;
+  if (!Haptics.isSupported()) {          // pl. iOS Safari: nincs Vibration API
+    b.className = 'menu-item soon';
+    b.innerHTML = '<span class="ico">📳</span> Vibration: not supported';
+    return;
+  }
+  var on = Haptics.isEnabled();
+  b.innerHTML = '<span class="ico">' + (on ? '📳' : '📴') + '</span> Vibration: ' + (on ? 'ON' : 'OFF');
+}
+function toggleVibe() {
+  if (typeof Haptics === 'undefined' || !Haptics.isSupported()) return;
+  var on = !Haptics.isEnabled();
+  Haptics.setEnabled(on);
+  if (on) Haptics.paddle();              // azonnali visszajelzés: érzed, mit kapcsoltál be
+  updateVibeLabel();
+}
+bindBtn('miVibe', toggleVibe);
+updateVibeLabel();
+
+// --- Csúszka-érzékenység 1-5 (Settings) ---
+// Körbeér: 5 után újra 1. Egy gomb, nincs szükség csúszka-widgetre.
+function updateSensLabel() {
+  var b = document.getElementById('miSens');
+  if (!b || typeof getSensLevel !== 'function') return;
+  var v = getSensLevel();
+  var bar = '';
+  for (var i = 1; i <= 5; i++) bar += (i <= v ? '●' : '○');
+  b.innerHTML = '<span class="ico">🎚</span> Sensitivity: ' + bar + ' ' + v;
+}
+function cycleSens() {
+  if (typeof setSensLevel !== 'function') return;
+  setSensLevel(getSensLevel() % 5 + 1);   // 1->2->3->4->5->1
+  updateSensLabel();
+  if (typeof Haptics !== 'undefined') Haptics.paddle();
+}
+bindBtn('miSens', cycleSens);
+updateSensLabel();
 // TESZT ESZKÖZÖK — kiadás előtt törlendő
 bindBtn('testCoinsBtn',  testAddCoins);
 bindBtn('testStockBtn',  testStockAll);

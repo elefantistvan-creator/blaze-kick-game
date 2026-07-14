@@ -49,8 +49,9 @@ function updateBonusBanner() {
 // 2P-ben nincs AI, tehát a különbséget a labdának kell hoznia.
 // Egy helyen hangolható.
 // ------------------------------------------------------------
-var P2_SPEED = [1.00, 1.08, 1.16, 1.24, 1.32, 1.40, 1.48, 1.56, 1.64, 1.75];
+var P2_SPEED = [1.00, 1.06, 1.11, 1.17, 1.22, 1.28, 1.33, 1.39, 1.44, 1.50];
 //               S1    S2    S3    S4    S5    S6    S7    S8    S9    S10
+// (volt 1.00 -> 1.75; az 1.75 rally-vel 3.15x-ig ment fel — játszhatatlan)
 var p2Season = 1;                       // a 2P-ben választott pálya (1..10)
 
 function p2SpeedMult(s) {
@@ -120,7 +121,7 @@ function grantBonus2P(who) {
   var type = BONUS2P_TYPES[Math.floor(Math.random()*BONUS2P_TYPES.length)];
   var ms   = (type === 'freezeFoe') ? BONUS2P_FREEZE_MS : BONUS2P_MS;
   bonus2P[who] = { type:type, until:Date.now()+ms };
-  pb = null; Sound.pickup(); triggerShake(6);
+  pb = null; Sound.pickup(); Haptics.bonus(); triggerShake(6);
 }
 function bonus2PActive(who, type) {
   return bonus2P[who] && bonus2P[who].type===type && Date.now() < bonus2P[who].until;

@@ -149,6 +149,10 @@ var Shop = (function() {
     Progress.useInv(id);
     active[id] = Date.now() + durationOf(it);
     used++;
+    if (typeof Haptics !== 'undefined') {
+      if (id === 'freeze') Haptics.freeze();    // didergés
+      else                 Haptics.bonus();
+    }
     return true;
   }
 

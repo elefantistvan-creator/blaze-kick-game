@@ -182,7 +182,7 @@ function updateBall() {
     if (!leftBlocked && by-BR >= leftGY && by+BR <= leftGY+leftGH) {
       sc2++; s2El.textContent=sc2; goalTime=Date.now(); goalScored='left'; Shop.onGoal(); if(is2P) onGoal2P();
       powerHitActive = false; fireTrailActive = false; autoShotActive = false; fireTrail = []; burnMarks = [];
-      Sound.goal(); spawnConfetti('left'); triggerGoalEffect('right');
+      Sound.goal(); Haptics.goal(); spawnConfetti('left'); triggerGoalEffect('right');
       triggerGoalFlash(); triggerScoreAnim('right'); triggerShake(10);
       triggerGateFlash('left'); triggerVictoryJump('right'); checkDramatic();
       if (sc2>=7) { endGame(false); return; }
@@ -197,7 +197,7 @@ function updateBall() {
     if (!rightBlocked && by-BR >= rightGY && by+BR <= rightGY+rightGH) {
       sc1++; s1El.textContent=sc1; goalTime=Date.now(); goalScored='right'; Shop.onGoal(); if(is2P) onGoal2P();
       powerHitActive = false; fireTrailActive = false; autoShotActive = false; fireTrail = []; burnMarks = [];
-      Sound.goal(); spawnConfetti('right'); triggerGoalEffect('left');
+      Sound.goal(); Haptics.goal(); spawnConfetti('right'); triggerGoalEffect('left');
       triggerGoalFlash(); triggerScoreAnim('left'); triggerShake(10);
       triggerGateFlash('right'); triggerVictoryJump('left'); checkDramatic();
       if (sc1>=7) { endGame(true); return; }

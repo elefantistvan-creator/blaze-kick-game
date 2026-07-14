@@ -79,6 +79,7 @@ function doPowerHit(side) {
   if (Math.abs(bx - best.x) < clearX) bx = best.x + best.dir * clearX;
 
   Sound.powerShot();          // saját felvétel (a régi 440 Hz-es bip KIVÉVE)
+  Haptics.power();            // hármas, erős rezgés — ez a játék legerősebb pillanata
   fireTrailActive = true;
   spawnSparks(bx, by, bvx, bvy);
   triggerShake(8);
@@ -121,7 +122,7 @@ document.addEventListener('pointermove', function(e) {
   if (e.target.tagName === 'INPUT' || uiBlocking()) return;
   if (e.pointerId===touchLeft && lastLeftY!==null) {
     e.preventDefault();
-    var d = (e.clientY - lastLeftY) * 1.5;
+    var d = (e.clientY - lastLeftY) * dragScale();
     lastLeftVY = e.clientY - lastLeftY;  // csavar sebessége
     if (is2P) {
       // Bal fél = 2. játékos: kapus (py, bal szél) + csatár (my) EGYÜTT
@@ -138,7 +139,7 @@ document.addEventListener('pointermove', function(e) {
   }
   if (e.pointerId===touchRight && lastRightY!==null) {
     e.preventDefault();
-    var d = (e.clientY - lastRightY) * 1.5;
+    var d = (e.clientY - lastRightY) * dragScale();
     lastRightVY = e.clientY - lastRightY;  // csavar sebessége
     if (is2P) {
       // Jobb fél = 1. játékos: kapus (ay, jobb szél) + csatár (amy) EGYÜTT
@@ -184,6 +185,27 @@ document.addEventListener('pointercancel', function(e) {
 /* --- Tap-jelzés: megmutatja, HOL kell koppintani a szuperütéshez ---
    1P: a SZABAD oldalon (amit épp nem húzol) -> a húzás nem zavarodik meg.
    2P: mindenki a saját térfelén. */
+// ------------------------------------------------------------
+// CSÚSZKA-ÉRZÉKENYSÉG (Settings, 1-5, alap = 3)
+// Az ujjmozgást skálázza, NEM a pálcika sebességkorlátját.
+// Szűk tartomány (±30%): elég, hogy megérezd, kevés ahhoz,
+// hogy elrontsa a nehézségi balanszot (az AI sebessége fix).
+// ------------------------------------------------------------
+var DRAG_BASE  = 1.5;                                 // az eredeti szorzó
+var SENS_STEPS = [0.7, 0.85, 1.0, 1.15, 1.3];         // 1..5
+var sensLevel  = 3;
+try {
+  var _sv = parseInt(localStorage.getItem('bk_sens'), 10);
+  if (_sv >= 1 && _sv <= 5) sensLevel = _sv;
+} catch (e) {}
+
+function dragScale()      { return DRAG_BASE * SENS_STEPS[sensLevel - 1]; }
+function getSensLevel()   { return sensLevel; }
+function setSensLevel(v) {
+  sensLevel = Math.max(1, Math.min(5, v | 0));
+  try { localStorage.setItem('bk_sens', String(sensLevel)); } catch (e) {}
+}
+
 var _hintL = null, _hintR = null;
 function updateTapHints() {
   if (_hintL === null) {
@@ -192,8 +214,14 @@ function updateTapHints() {
   }
   if (!_hintL || !_hintR) return;
 
+  // Meccsen kívül teljesen eltűnik; meccs közben MINDIG ott van
+  // (szürkén, ha nem lehet tapelni — így tudod, hogy létezik).
+  var inMatch = running && !uiBlocking();
+  _hintL.classList.toggle('hidden', !inMatch);
+  _hintR.classList.toggle('hidden', !inMatch);
+
   var showL = false, showR = false;
-  if (running && !uiBlocking()) {
+  if (inMatch) {
     if (!is2P) {
       if (powerHitAvailable()) {
         // a szabad oldalt ajánljuk; ha nem húzol semmit, mindkettő jó
