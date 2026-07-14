@@ -54,8 +54,35 @@ function powerHitAvailable(side) {
   return false;
 }
 
+// ------------------------------------------------------------
+// ⚡ SZUPERÜTÉS TÖLTŐIDŐ
+//
+// MIÉRT KELL: a gép kapusa a távolság 8%-ával közelít frame-enként —
+// ez egy lassuló rááll, kb. 30-40 frame kell neki. A szuperütés 2,5x
+// sebességgel indít, tehát 2,5x kevesebb frame marad neki. A SEBESSÉGÉT
+// felhúzza a spdMult, de a REAKCIÓGÖRBÉJÉT nem. Ezért egy jól időzített
+// tap gyakorlatilag mindig gól — a 90-es stage-en is.
+//
+// A töltőidő ERŐFORRÁSSÁ teszi azt, ami eddig eszköz volt: dönteni kell,
+// mikor használod. A döntés az, amitől játék.
+//
+// Egy szám. Ha kevés, emeld; ha sok, csökkentsd.
+// ------------------------------------------------------------
+var POWER_COOLDOWN_MS = 20000;
+var powerReadyAt = 0;                      // mikor lesz újra tölve (timestamp)
+
+function powerCharge() {                   // 0..1 — a töltőcsíknak
+  if (!running) return 1;
+  var left = powerReadyAt - Date.now();
+  if (left <= 0) return 1;
+  return Math.max(0, 1 - left / POWER_COOLDOWN_MS);
+}
+function powerCharged() { return Date.now() >= powerReadyAt; }
+function resetPowerCooldown() { powerReadyAt = 0; }     // meccs elején tölve indul
+
 function doPowerHit(side) {
   if (!running) return;
+  if (!powerCharged()) return;             // még tölt
   var pads = myPads(side), best = null, bestD = Infinity;
   for (var i = 0; i < pads.length; i++) {
     var p = pads[i];
@@ -78,6 +105,7 @@ function doPowerHit(side) {
   var clearX = PW/2 + BR + 1;
   if (Math.abs(bx - best.x) < clearX) bx = best.x + best.dir * clearX;
 
+  powerReadyAt = Date.now() + POWER_COOLDOWN_MS;   // indul a töltés
   Sound.powerShot();          // saját felvétel (a régi 440 Hz-es bip KIVÉVE)
   Haptics.power();            // hármas, erős rezgés — ez a játék legerősebb pillanata
   fireTrailActive = true;
@@ -206,7 +234,7 @@ function setSensLevel(v) {
   try { localStorage.setItem('bk_sens', String(sensLevel)); } catch (e) {}
 }
 
-var _hintL = null, _hintR = null;
+var _hintL = null, _hintR = null, _barL = null, _barR = null;
 function updateTapHints() {
   if (_hintL === null) {
     _hintL = document.getElementById('tapHintL');
@@ -221,10 +249,10 @@ function updateTapHints() {
   _hintR.classList.toggle('hidden', !inMatch);
 
   var showL = false, showR = false;
-  if (inMatch) {
+  var charged = powerCharged();
+  if (inMatch && charged) {                 // csak feltöltve ajánljuk
     if (!is2P) {
       if (powerHitAvailable()) {
-        // a szabad oldalt ajánljuk; ha nem húzol semmit, mindkettő jó
         if (touchLeft !== null)       showR = true;
         else if (touchRight !== null) showL = true;
         else { showL = true; showR = true; }
@@ -236,5 +264,18 @@ function updateTapHints() {
   }
   _hintL.classList.toggle('on', showL);
   _hintR.classList.toggle('on', showR);
+
+  // TÖLTŐCSÍK: sárgán telik, teljesnél izzik. A ⚡ csak akkor gyullad
+  // narancsra, ha teljes ÉS a labda közel van.
+  var ch = powerCharge();
+  _hintL.classList.toggle('charged', charged);
+  _hintR.classList.toggle('charged', charged);
+  if (_barL === null) {
+    _barL = document.getElementById('tapBarL');
+    _barR = document.getElementById('tapBarR');
+  }
+  var pct = (ch * 100).toFixed(0) + '%';
+  if (_barL && _barL.style.width !== pct) _barL.style.width = pct;
+  if (_barR && _barR.style.width !== pct) _barR.style.width = pct;
 }
 

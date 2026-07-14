@@ -111,6 +111,9 @@ function exitToMenu() {
 function doStart() {
   initAudio();
   paused = false;
+  // ⚡ A szuperütés MECCS ELEJÉN tölve indul — de a meccsen BELÜL a gól
+  // nem tölti újra (különben a töltőidő értelmét vesztené).
+  if (typeof resetPowerCooldown === 'function') resetPowerCooldown();
   var po = document.getElementById('pauseOverlay');
   if (po) po.style.display = 'none';
   // Véletlenszerű napszak

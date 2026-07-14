@@ -19,14 +19,17 @@ function drawPad(x, y, halfH, col, padKey) {
   var bonusActive = activePower && isPowerActive(activePower);
   var isWarning = bonusActive && (activePower.endTime - Date.now() < 3000);
 
+  // HŐIZZÁS — rajzolt, nem elmosott.
+  // Volt: ctx.shadowBlur = heat*20  -> mobilon szoftveres elmosás, minden
+  // felmelegedett pálcikánál, minden frame-ben. Ez a lag egyik forrása.
   var heat = padHeat[padKey] || 0;
   if (heat > 0.2) {
     ctx.save();
-    ctx.shadowColor = heat > 0.7 ? '#ff6600' : '#ffaa00';
-    ctx.shadowBlur = heat * 20;
-    ctx.globalAlpha = heat * 0.8;
-    ctx.fillStyle = heat > 0.7 ? '#ff4400' : '#ffcc00';
-    ctx.fillRect(sx-2, sy-2, sw+4, sh+4);
+    var hc = heat > 0.7 ? '#ff4400' : '#ffcc00';
+    if (typeof glowRect === 'function') glowRect(sx, sy, sw, sh, hc, heat);
+    ctx.globalAlpha = heat * 0.35;
+    ctx.fillStyle = hc;
+    ctx.fillRect(sx-1, sy-1, sw+2, sh+2);
     ctx.restore();
   }
 
@@ -91,7 +94,14 @@ function drawPad(x, y, halfH, col, padKey) {
 
   // Pálcika festése — a viselt SKIN dönti (skins.js).
   // A skin CSAK a kinézetet változtatja: méret, ütközés, sebesség érintetlen.
-  if (typeof paintPad === 'function') paintPad(sx, sy, sw, sh, col, now);
+  //
+  // KIZÁRÓLAG A JÁTÉKOSÉ. A gép (és 2P-ben az ellenfél) MINDIG Classic.
+  // Egy 500 érmés arany ütő nem jutalom, ha a gép is azt viseli. Ráadásul
+  // így magától megkülönböztethető: az ellenfél mindig piros -> minden más TE vagy.
+  var mySide = isPlayerPad;                    // 'p','m' = bal = te
+  if (typeof paintPad === 'function') {
+    paintPad(sx, sy, sw, sh, col, now, mySide ? undefined : 'classic');
+  }
   else {                                            // tartalék: a klasszikus
     var pgrad = ctx.createLinearGradient(sx, sy, sx+sw, sy);
     pgrad.addColorStop(0, lightenColor(col, 40));
@@ -130,12 +140,10 @@ function isPadFrozen(padKey) {
 function drawFrozenPad(sx, sy, sw, sh, now) {
   ctx.save();
 
-  // Dér-halo
-  ctx.shadowColor = '#7fd8ff';
-  ctx.shadowBlur  = 14;
-  ctx.fillStyle   = 'rgba(180,232,255,0.28)';
+  // Dér-halo — rajzolt keret, nem elmosás
+  if (typeof glowRect === 'function') glowRect(sx, sy, sw, sh, '#9fe4ff', 1.0);
+  ctx.fillStyle = 'rgba(180,232,255,0.22)';
   ctx.fillRect(sx-2, sy-3, sw+4, sh+6);
-  ctx.shadowBlur  = 0;
 
   // Jégtest
   var ig = ctx.createLinearGradient(sx, sy, sx+sw, sy);

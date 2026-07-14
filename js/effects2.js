@@ -83,8 +83,13 @@ function drawFireBall() {
   // Lángoló labda - sárgás/narancsos glow
   var intensity = fireTrailActive ? 1.0 : (fireTrail.length / 15);
   ctx.save();
-  ctx.shadowColor = '#ff6600';
-  ctx.shadowBlur = BR * 3 * intensity;
+  // Volt: ctx.shadowBlur = BR*3*intensity -> szoftveres elmosás minden frame-ben.
+  // Helyette egy kifelé halványuló radiális gradiens: ugyanaz a korona, GPU-n.
+  var halo = ctx.createRadialGradient(bx, by, BR*0.9, bx, by, BR*2.6);
+  halo.addColorStop(0, 'rgba(255,140,20,' + (0.5*intensity).toFixed(2) + ')');
+  halo.addColorStop(1, 'rgba(255,60,0,0)');
+  ctx.beginPath(); ctx.arc(bx, by, BR*2.6, 0, Math.PI*2);
+  ctx.fillStyle = halo; ctx.fill();
   ctx.globalAlpha = intensity;
   ctx.beginPath();
   ctx.arc(bx, by, BR*1.1, 0, Math.PI*2);

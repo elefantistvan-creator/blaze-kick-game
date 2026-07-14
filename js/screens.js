@@ -339,48 +339,66 @@ var Screens = (function() {
   }
 
   function makeSkinCard(cat, sk) {
-    var owned = Progress.ownsSkin(cat, sk.id);
-    var on    = (Progress.equipped(cat) === sk.id);
+    var owned  = Progress.ownsSkin(cat, sk.id);
+    var on     = (Progress.equipped(cat) === sk.id);
+    var afford = Progress.coins() >= sk.price;
 
-    var c = document.createElement('div');
-    c.className = 'skin-card' + (on ? ' equipped' : '') + (owned ? '' : ' locked');
+    var card = document.createElement('div');
+    card.className = 'skin-card' + (on ? ' equipped' : '') +
+                     (owned ? ' owned' : (afford ? ' buyable' : ' toopoor'));
 
     var cv = document.createElement('canvas');
     cv.className = 'skin-prev';
     cv.width = 220; cv.height = 116;
-    c.appendChild(cv);
+    card.appendChild(cv);
 
-    var n = document.createElement('div');
-    n.className = 'skin-name'; n.textContent = sk.name;
-    c.appendChild(n);
+    var nm = document.createElement('div');
+    nm.className = 'skin-name';
+    nm.textContent = sk.name;
+    card.appendChild(nm);
 
-    if (!owned) {
-      var pr = document.createElement('div');
-      pr.className = 'skin-price';
-      pr.innerHTML = sk.price + ' <img class="coin" src="assets/coin.svg" alt="">';
-      c.appendChild(pr);
+    var ds = document.createElement('div');
+    ds.className = 'skin-desc';
+    ds.textContent = sk.desc || '';
+    card.appendChild(ds);
+
+    var foot = document.createElement('div');
+    foot.className = 'skin-foot';
+    if (on) {
+      foot.className += ' is-on';
+      foot.textContent = '✓ EQUIPPED';
+    } else if (owned) {
+      foot.className += ' is-own';
+      foot.textContent = 'Tap to wear';
+    } else if (afford) {
+      foot.className += ' is-buy';
+      foot.innerHTML = 'BUY · ' + sk.price + ' <img class="coin" src="assets/coin.svg" alt="">';
     } else {
-      var tg = document.createElement('div');
-      tg.className = 'skin-tag' + (on ? ' own' : '');
-      tg.textContent = on ? 'EQUIPPED' : 'Tap to wear';
-      c.appendChild(tg);
+      foot.className += ' is-poor';
+      foot.innerHTML = sk.price + ' <img class="coin" src="assets/coin.svg" alt=""> — not enough';
     }
+    card.appendChild(foot);
 
-    c.addEventListener('pointerup', function (e) {
+    card.addEventListener('pointerup', function (e) {
       e.stopPropagation(); e.preventDefault();
       if (Progress.ownsSkin(cat, sk.id)) {
         Progress.equipSkin(cat, sk.id);
+        if (typeof Haptics !== 'undefined') Haptics.paddle();
       } else if (Progress.buySkin(cat, sk.id, sk.price)) {
-        Progress.equipSkin(cat, sk.id);       // amit veszel, azt fel is veszed
+        Progress.equipSkin(cat, sk.id);              // amit veszel, azt fel is veszed
         if (typeof Haptics !== 'undefined') Haptics.bonus();
+        if (typeof Sound !== 'undefined' && Sound.pickup) Sound.pickup();
       } else {
-        return;                                // nincs elég érme: nem történik semmi
+        card.classList.remove('shake');              // nincs elég érme: rázás
+        void card.offsetWidth;
+        card.classList.add('shake');
+        return;
       }
       buildShop();
     });
 
     drawSkinPreview(cv, cat, sk.id);
-    return c;
+    return card;
   }
 
   // Az előnézet UGYANAZT a rajzoló kódot futtatja, amit a pálya.

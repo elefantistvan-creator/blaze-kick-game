@@ -89,10 +89,16 @@ function draw() {
   // Bónuszlabda (2P) — arany gömb
   if (is2P && pb) {
     ctx.save();
+    // Volt: ctx.shadowBlur = 14 -> szoftveres elmosás. Helyette rajzolt korona.
+    var ph = ctx.createRadialGradient(pb.x, pb.y, pb.r*0.85, pb.x, pb.y, pb.r*1.9);
+    ph.addColorStop(0, 'rgba(255,190,50,0.45)');
+    ph.addColorStop(1, 'rgba(255,150,0,0)');
+    ctx.beginPath(); ctx.arc(pb.x, pb.y, pb.r*1.9, 0, Math.PI*2);
+    ctx.fillStyle = ph; ctx.fill();
+
     var pg = ctx.createRadialGradient(pb.x-pb.r*0.3, pb.y-pb.r*0.3, pb.r*0.1, pb.x, pb.y, pb.r);
     pg.addColorStop(0, '#fff6c8'); pg.addColorStop(0.5, '#ffd54f'); pg.addColorStop(1, '#ff9800');
     ctx.fillStyle = pg;
-    ctx.shadowColor = 'rgba(255,180,40,0.8)'; ctx.shadowBlur = 14;
     ctx.beginPath(); ctx.arc(pb.x, pb.y, pb.r, 0, Math.PI*2); ctx.fill();
     ctx.restore();
   }
