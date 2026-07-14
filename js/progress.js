@@ -16,7 +16,11 @@ function skillToT(s){ return Math.max(0, Math.min(1, (s - SKILL_MIN) / (SKILL_MA
 
 var Progress = (function() {
   var KEY = 'bk_progress_v1';
-  var data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false, skill:SKILL_START, skillMatches:0 };
+  var data = { unlocked:1, stars:{}, coins:0, losses:{}, inv:{}, welcomed:false,
+               skill:SKILL_START, skillMatches:0,
+               // Skinek: mit birtokolsz, mit viselsz. A 'classic' mindig a tiéd.
+               skinsOwned: { paddle:{classic:1}, ball:{classic:1}, pitch:{} },
+               skinsEquip: { paddle:'classic', ball:'classic', pitch:null } };
 
   function load() {
     try {
@@ -31,6 +35,14 @@ var Progress = (function() {
     } catch(e) {}
     if (!data.stars)  data.stars  = {};
     if (!data.losses) data.losses = {};
+    // Migráció: régi mentésben még nincs skin-adat
+    if (!data.skinsOwned) data.skinsOwned = { paddle:{classic:1}, ball:{classic:1}, pitch:{} };
+    if (!data.skinsOwned.paddle) data.skinsOwned.paddle = { classic:1 };
+    if (!data.skinsOwned.ball)   data.skinsOwned.ball   = { classic:1 };
+    if (!data.skinsOwned.pitch)  data.skinsOwned.pitch  = {};
+    data.skinsOwned.paddle.classic = 1;    // az alap SOHA nem veszhet el
+    data.skinsOwned.ball.classic   = 1;
+    if (!data.skinsEquip) data.skinsEquip = { paddle:'classic', ball:'classic', pitch:null };
     if (!data.inv)    data.inv    = {};
     if (typeof data.welcomed !== 'boolean') data.welcomed = false;
     if (!data.unlocked) data.unlocked = 1;
@@ -51,7 +63,34 @@ var Progress = (function() {
     return 1;
   }
 
+  // ---------- Skinek ----------
+  function ownsSkin(cat, id) {
+    if (id === 'classic') return true;
+    return !!(data.skinsOwned[cat] && data.skinsOwned[cat][id]);
+  }
+  function buySkin(cat, id, price) {
+    if (ownsSkin(cat, id)) return false;
+    if (data.coins < price) return false;
+    data.coins -= price;
+    if (!data.skinsOwned[cat]) data.skinsOwned[cat] = {};
+    data.skinsOwned[cat][id] = 1;
+    save();
+    return true;
+  }
+  function equipSkin(cat, id) {
+    if (!ownsSkin(cat, id)) return false;
+    data.skinsEquip[cat] = id;
+    save();
+    return true;
+  }
+  function equipped(cat) {
+    var v = data.skinsEquip ? data.skinsEquip[cat] : null;
+    if (cat === 'pitch') return v || null;
+    return v || 'classic';
+  }
+
   return {
+    ownsSkin:ownsSkin, buySkin:buySkin, equipSkin:equipSkin, equipped:equipped,
     load: load,
     save: save,
     starsFor: starsFor,
