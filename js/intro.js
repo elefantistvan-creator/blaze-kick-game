@@ -62,5 +62,16 @@ function startIntroExit() {
     if (typeof Screens !== 'undefined') Screens.show('menu');
     // 3) a fekete visszahalványul -> a menü tűnik elő
     if (cover) cover.style.opacity = '0';
+
+    // ELSŐ INDÍTÁS: névbekérő. Csak egyszer, és átugorható —
+    // nem kapuőr, csak egy kérdés. A menü már ott van mögötte.
+    if (typeof Profile !== 'undefined' && !Profile.has()) {
+      try {
+        if (localStorage.getItem('bk_name_asked') !== '1') {
+          localStorage.setItem('bk_name_asked', '1');
+          setTimeout(function () { openNamePrompt(true); }, 420);
+        }
+      } catch (e) {}
+    }
   }, 300);
 }
