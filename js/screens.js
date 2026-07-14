@@ -60,6 +60,25 @@ var Screens = (function() {
   }
 
   // ---------- Shop ----------
+  // ---------- Shop fülek: Boosts / Skins ----------
+  var shopTab = 'boosts';
+  function setShopTab(t) { shopTab = t; buildShop(); }
+
+  function buildShopTabs(wrap) {
+    var t = document.createElement('div');
+    t.className = 'shop-tabs';
+    [['boosts','⚡ Boosts'], ['skins','🎨 Skins']].forEach(function (p) {
+      var b = document.createElement('div');
+      b.className = 'shop-tab' + (shopTab === p[0] ? ' on' : '');
+      b.textContent = p[1];
+      b.addEventListener('pointerup', function (e) {
+        e.stopPropagation(); e.preventDefault(); setShopTab(p[0]);
+      });
+      t.appendChild(b);
+    });
+    wrap.appendChild(t);
+  }
+
   function buildShop() {
     // Nyitóajándék: egyszer, az első látogatáskor
     var gift = Progress.claimWelcome(ECON.WELCOME);
@@ -68,6 +87,9 @@ var Screens = (function() {
     if (cn) cn.textContent = Progress.coins();
     if (!wrap) return;
     wrap.innerHTML = '';
+
+    buildShopTabs(wrap);
+    if (shopTab === 'skins') { buildSkinTab(wrap); return; }
 
     if (gift > 0) {
       var g = document.createElement('div');
@@ -276,6 +298,113 @@ var Screens = (function() {
       t.appendChild(lock);
     }
     return t;
+  }
+
+  // ---------- Skin-fül ----------
+  // A pálya-kategória CSAK akkor jelenik meg, ha van benne valami.
+  // Üres polcot nem mutatunk.
+  function buildSkinTab(wrap) {
+    var cats = [
+      ['paddle', '🏓 Paddles', 'Your paddles, in every mode.'],
+      ['ball',   '⚽ Balls',   'Your ball, in every mode.'],
+      ['pitch',  '🏟 Pitches', 'Used in 2 Player. Stage mode always shows the season\'s own pitch — that story is not for sale.']
+    ];
+    var any = false;
+    for (var c = 0; c < cats.length; c++) {
+      var cat = cats[c][0], list = skinList(cat);
+      if (!list.length) continue;
+      any = true;
+
+      var h = document.createElement('div');
+      h.className = 'shop-sec';
+      h.textContent = cats[c][1];
+      wrap.appendChild(h);
+
+      var note = document.createElement('div');
+      note.className = 'skin-note';
+      note.textContent = cats[c][2];
+      wrap.appendChild(note);
+
+      var grid = document.createElement('div');
+      grid.className = 'skin-grid';
+      for (var i = 0; i < list.length; i++) grid.appendChild(makeSkinCard(cat, list[i]));
+      wrap.appendChild(grid);
+    }
+    if (!any) {
+      var e = document.createElement('div');
+      e.className = 'skin-note';
+      e.textContent = 'Nothing here yet.';
+      wrap.appendChild(e);
+    }
+  }
+
+  function makeSkinCard(cat, sk) {
+    var owned = Progress.ownsSkin(cat, sk.id);
+    var on    = (Progress.equipped(cat) === sk.id);
+
+    var c = document.createElement('div');
+    c.className = 'skin-card' + (on ? ' equipped' : '') + (owned ? '' : ' locked');
+
+    var cv = document.createElement('canvas');
+    cv.className = 'skin-prev';
+    cv.width = 220; cv.height = 116;
+    c.appendChild(cv);
+
+    var n = document.createElement('div');
+    n.className = 'skin-name'; n.textContent = sk.name;
+    c.appendChild(n);
+
+    if (!owned) {
+      var pr = document.createElement('div');
+      pr.className = 'skin-price';
+      pr.innerHTML = sk.price + ' <img class="coin" src="assets/coin.svg" alt="">';
+      c.appendChild(pr);
+    } else {
+      var tg = document.createElement('div');
+      tg.className = 'skin-tag' + (on ? ' own' : '');
+      tg.textContent = on ? 'EQUIPPED' : 'Tap to wear';
+      c.appendChild(tg);
+    }
+
+    c.addEventListener('pointerup', function (e) {
+      e.stopPropagation(); e.preventDefault();
+      if (Progress.ownsSkin(cat, sk.id)) {
+        Progress.equipSkin(cat, sk.id);
+      } else if (Progress.buySkin(cat, sk.id, sk.price)) {
+        Progress.equipSkin(cat, sk.id);       // amit veszel, azt fel is veszed
+        if (typeof Haptics !== 'undefined') Haptics.bonus();
+      } else {
+        return;                                // nincs elég érme: nem történik semmi
+      }
+      buildShop();
+    });
+
+    drawSkinPreview(cv, cat, sk.id);
+    return c;
+  }
+
+  // Az előnézet UGYANAZT a rajzoló kódot futtatja, amit a pálya.
+  // Nincs külön ikonkészlet, amit karban kellene tartani — amit látsz, azt kapod.
+  // A skint PARAMÉTERKÉNT adjuk át: a mentéshez nem nyúlunk.
+  function drawSkinPreview(cv, cat, id) {
+    var g = cv.getContext('2d');
+    var W = cv.width, H = cv.height;
+    g.fillStyle = '#0d1a12'; g.fillRect(0, 0, W, H);
+
+    var prev = (typeof ctx !== 'undefined') ? ctx : null;
+    ctx = g;                                    // a rajzolók a globális ctx-et használják
+    try {
+      var now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+      if (cat === 'paddle') {
+        paintPad(W*0.24, H*0.14, 15, H*0.72, '#4fc3f7', now, id);   // te
+        paintPad(W*0.66, H*0.14, 15, H*0.72, '#ef5350', now, id);   // gép
+      } else if (cat === 'ball') {
+        g.save(); g.translate(W/2, H/2);
+        paintBall(Math.min(W, H) * 0.32, 0.5, now, id);
+        g.restore();
+      }
+    } catch (e) {}
+    ctx = prev;
   }
 
   // ---------- 2P pályaválasztó ----------
