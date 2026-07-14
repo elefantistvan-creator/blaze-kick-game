@@ -260,6 +260,19 @@ function cycleSens() {
 }
 bindBtn('miSens', cycleSens);
 updateSensLabel();
+
+// --- Profilnév ---
+bindBtn('miName',     function () { openNamePrompt(false); });
+bindBtn('nameOkBtn',  saveNameFromPrompt);
+bindBtn('nameSkipBtn', closeNamePrompt);
+(function () {
+  var inp = document.getElementById('nameInput');
+  if (inp) inp.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter')  { e.preventDefault(); saveNameFromPrompt(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeNamePrompt(); }
+  });
+  applyName();
+})();
 // TESZT ESZKÖZÖK — kiadás előtt törlendő
 bindBtn('testCoinsBtn',  testAddCoins);
 bindBtn('testStockBtn',  testStockAll);
