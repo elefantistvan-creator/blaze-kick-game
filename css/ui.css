@@ -380,22 +380,43 @@
 }
 
 /* ===== Szuperütés tap-jelzés (a sávban) ===== */
+/* ⚡ TAP — MINDIG látszik. Alapból szürke és halvány (tudod, hogy létezik),
+   aktívan narancs és lüktet (tudod, hogy MOST lehet). Eddig csak akkor
+   jelent meg, amikor aktív volt — a játékos nem is sejtette, hogy van. */
 .tap-hint {
-  display: none;
+  display: flex;
   flex-direction: column; align-items: center; gap: 2px;
   margin: 10px 0;
-  color: #ffd08a;
   font-size: clamp(20px, 3.4vh, 30px);
   line-height: 1;
-  text-shadow: 0 0 14px rgba(255,150,40,0.95), 0 2px 6px rgba(0,0,0,0.9);
   pointer-events: none;
+
+  /* INAKTÍV alapállapot */
+  color: #6b737d;
+  opacity: 0.42;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.85);
+  filter: grayscale(1);
+  transition: color .18s, opacity .18s, filter .18s, text-shadow .18s;
 }
 .tap-hint span {
   font-size: clamp(8px, 1.3vh, 11px);
   font-weight: 900; letter-spacing: 0.2em; padding-left: 0.2em;
-  color: #ff9a3c;
+  color: inherit;
+  transition: color .18s;
 }
-.tap-hint.on { display: flex; animation: tapPulse 0.75s ease-in-out infinite; }
+
+/* AKTÍV: most lehet tapelni */
+.tap-hint.on {
+  color: #ffd08a;
+  opacity: 1;
+  filter: none;
+  text-shadow: 0 0 14px rgba(255,150,40,0.95), 0 2px 6px rgba(0,0,0,0.9);
+  animation: tapPulse 0.75s ease-in-out infinite;
+}
+.tap-hint.on span { color: #ff9a3c; }
+
+/* Meccsen kívül (menü, szünet) egyáltalán ne lógjon ott */
+.tap-hint.hidden { display: none; }
 @keyframes tapPulse {
   0%, 100% { transform: scale(1);    opacity: 0.75; }
   50%      { transform: scale(1.18); opacity: 1; }
