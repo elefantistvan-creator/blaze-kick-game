@@ -89,17 +89,18 @@ function drawPad(x, y, halfH, col, padKey) {
     return;                       // se hőizzás, se szikra: jég van
   }
 
-  // Pálcika alap - 3D gradient
-  var pgrad = ctx.createLinearGradient(sx, sy, sx+sw, sy);
-  pgrad.addColorStop(0, lightenColor(col, 40));
-  pgrad.addColorStop(0.4, col);
-  pgrad.addColorStop(1, darkenColor(col, 40));
-  ctx.fillStyle = pgrad;
-  ctx.fillRect(sx, sy, sw, sh);
-
-  // Fény sáv
-  ctx.fillStyle='rgba(255,255,255,0.3)';
-  ctx.fillRect(sx, sy, sw*0.35, sh);
+  // Pálcika festése — a viselt SKIN dönti (skins.js).
+  // A skin CSAK a kinézetet változtatja: méret, ütközés, sebesség érintetlen.
+  if (typeof paintPad === 'function') paintPad(sx, sy, sw, sh, col, now);
+  else {                                            // tartalék: a klasszikus
+    var pgrad = ctx.createLinearGradient(sx, sy, sx+sw, sy);
+    pgrad.addColorStop(0, lightenColor(col, 40));
+    pgrad.addColorStop(0.4, col);
+    pgrad.addColorStop(1, darkenColor(col, 40));
+    ctx.fillStyle = pgrad; ctx.fillRect(sx, sy, sw, sh);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillRect(sx, sy, sw*0.35, sh);
+  }
 
   // Ha squish aktív: villanás
   if (squish > 0.1) {
@@ -235,44 +236,17 @@ function drawBall(x,y,r) {
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  // 3D alap
-  var grad = ctx.createRadialGradient(-r*0.35, -r*0.35, r*0.05, 0, 0, r);
-  grad.addColorStop(0, '#ffffff');
-  grad.addColorStop(0.3, '#e8e8e8');
-  grad.addColorStop(0.7, '#c0c0c0');
-  grad.addColorStop(1, '#888888');
-  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
-  ctx.fillStyle = grad; ctx.fill();
-
-  // Forgó fociminta
-  ctx.save();
-  ctx.rotate(ballAngle);
-  ctx.save();
-  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.clip();
-  // Pentagon origóban
-  ctx.beginPath();
-  var ps = r*0.36;
-  for (var pi=0; pi<5; pi++) {
-    var pa = (pi*72-90)*Math.PI/180;
-    if (pi===0) ctx.moveTo(Math.cos(pa)*ps, Math.sin(pa)*ps);
-    else ctx.lineTo(Math.cos(pa)*ps, Math.sin(pa)*ps);
+  // Gömb + minta — a viselt LABDA-SKIN dönti (skins.js).
+  // Már eltolt/forgatott rendszerben vagyunk: a labda közepe = (0,0).
+  if (typeof paintBall === 'function') {
+    paintBall(r, ballAngle, (typeof performance !== 'undefined') ? performance.now() : Date.now());
+  } else {
+    var grad = ctx.createRadialGradient(-r*0.35, -r*0.35, r*0.05, 0, 0, r);
+    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, '#e8e8e8');
+    grad.addColorStop(0.7, '#c0c0c0'); grad.addColorStop(1, '#888888');
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+    ctx.fillStyle = grad; ctx.fill();
   }
-  ctx.closePath(); ctx.fillStyle='#222'; ctx.fill();
-  var angles2=[0,72,144,216,288];
-  for(var i=0;i<5;i++) {
-    var rad=(angles2[i]-90)*Math.PI/180;
-    var cx2=Math.cos(rad)*r*0.63, cy2=Math.sin(rad)*r*0.63;
-    var ps2=r*0.27;
-    ctx.beginPath();
-    for (var pi2=0; pi2<5; pi2++) {
-      var pa2=(pi2*72-90)*Math.PI/180;
-      if (pi2===0) ctx.moveTo(cx2+Math.cos(pa2)*ps2, cy2+Math.sin(pa2)*ps2);
-      else ctx.lineTo(cx2+Math.cos(pa2)*ps2, cy2+Math.sin(pa2)*ps2);
-    }
-    ctx.closePath(); ctx.fillStyle='#222'; ctx.fill();
-  }
-  ctx.restore();
-  ctx.restore();
 
   // Highlight
   var hgrad = ctx.createRadialGradient(-r*0.38, -r*0.38, 0, -r*0.2, -r*0.2, r*0.55);
