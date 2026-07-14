@@ -220,8 +220,12 @@
       <div class="menu-item soon"><span class="ico">⏱</span> Play-time reminder</div>
       <button class="btn danger" id="resetProgressBtn" style="margin-top:10px;">Reset progress</button>
 
-      <!-- ============ TESZT ESZKÖZÖK — KIADÁS ELŐTT TÖRLENDŐ ============ -->
-      <div id="testTools" style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);">
+      <!-- ============ TESZT ESZKÖZÖK ============
+           ALAPBÓL REJTETT. A tesztelők és a játékosok soha nem látják.
+           Bekapcsolás: 7x koppintás a Settings CÍMÉRE (Android-minta),
+           vagy a "#debug" URL. Kikapcsolás: újabb 7 koppintás.
+           ======================================================= -->
+      <div id="testTools" style="display:none;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);">
         <div style="font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Test tools</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn small" id="testCoinsBtn">+1000 <img class="coin" src="assets/coin.svg" alt=""></button>
