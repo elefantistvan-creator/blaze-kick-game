@@ -50,7 +50,7 @@
 
 <div id="mid">
   <canvas id="c"></canvas>
-  <button id="pauseBtn" title="Pause">⏸</button>
+  <button id="pauseBtn" title="Pause" aria-label="Pause"></button>
   <!-- 2P: melyik játékos milyen bónuszt kapott (bal = P2, jobb = P1) -->
   <div id="bonusBanner" style="display:none;">
     <span id="bonusL" class="bonus-pill p2"></span>
@@ -219,22 +219,6 @@
       <div class="menu-item ice" id="miSens"><span class="ico">🎚</span> Sensitivity: 3</div>
       <div class="menu-item soon"><span class="ico">⏱</span> Play-time reminder</div>
       <button class="btn danger" id="resetProgressBtn" style="margin-top:10px;">Reset progress</button>
-
-      <!-- ============ TESZT ESZKÖZÖK ============
-           ALAPBÓL REJTETT. A tesztelők és a játékosok soha nem látják.
-           Bekapcsolás: 7x koppintás a Settings CÍMÉRE (Android-minta),
-           vagy a "#debug" URL. Kikapcsolás: újabb 7 koppintás.
-           ======================================================= -->
-      <div id="testTools" style="display:none;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);">
-        <div style="font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Test tools</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn small" id="testCoinsBtn">+1000 <img class="coin" src="assets/coin.svg" alt=""></button>
-          <button class="btn small" id="testStockBtn">Stock all items ×5</button>
-          <button class="btn small" id="testUnlockBtn">Unlock all stages</button>
-        </div>
-        <div id="testInfo" style="font-size:11px;color:var(--text-dim);margin-top:8px;"></div>
-      </div>
-      <!-- ============ /TESZT ESZKÖZÖK ============ -->
     </div>
   </div>
 </div>
@@ -254,9 +238,6 @@
 
 <!-- Fekete átúszó réteg: intró -> menü váltás (elrejti a pályavillanást is) -->
 <div id="fadeCover"></div>
-
-<!-- Teszt-kijelző: az aktuális AI-skill. Rejtett; a "#debug" URL-lel jelenik meg. -->
-<div id="skillDebug"></div>
 
 <script src="js/intro.js"></script>
 <script src="js/haptics.js"></script>
