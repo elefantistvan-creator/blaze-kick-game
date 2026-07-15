@@ -470,23 +470,6 @@
   transition: opacity 0.28s ease;
 }
 
-/* ===== Teszt: AI-skill kijelző (alapból rejtett, csak #debug URL-lel) ===== */
-#skillDebug {
-  display: none;
-  position: fixed;
-  top: 6px; left: 6px;
-  z-index: 9999;
-  padding: 4px 9px;
-  font: 700 13px/1.2 "Consolas", "Menlo", monospace;
-  color: #7CFF9B;
-  background: rgba(0,0,0,0.62);
-  border: 1px solid rgba(124,255,155,0.4);
-  border-radius: 6px;
-  letter-spacing: 0.02em;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
 /* ============================================================
    2P PÁLYAVÁLASZTÓ
    Mind a 10 pálya látszik. A zároltak sötétek — ők a kampány csalija.

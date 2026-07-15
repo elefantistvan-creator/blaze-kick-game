@@ -138,7 +138,13 @@ canvas { display:block; position:absolute; top:0; left:0; }
   cursor:pointer;
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
-  display:flex; align-items:center; justify-content:center;
+  display:flex; align-items:center; justify-content:center; gap:4px;
+}
+#pauseBtn::before, #pauseBtn::after {
+  content:"";
+  width:4px; height:15px;
+  background:#fff;
+  border-radius:1px;
 }
 #pauseBtn:active { background:rgba(0,0,0,0.65); }
 
