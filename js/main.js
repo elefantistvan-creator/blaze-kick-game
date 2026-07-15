@@ -1,68 +1,4 @@
 
-// --- Teszt: AI-skill kijelző (rejtett; a "#debug" URL kapcsolja be) ---
-var BK_DEBUG = false;
-(function(){
-  try {
-    if (location.hash.indexOf('debug') >= 0 || localStorage.getItem('bk_debug') === '1') {
-      BK_DEBUG = true;
-      var el = document.getElementById('skillDebug');
-      if (el) el.style.display = 'block';
-      var tt = document.getElementById('testTools');
-      if (tt) tt.style.display = 'block';
-    }
-  } catch(e){}
-})();
-// --- Rejtett fejlesztői mód: 7x koppintás a Settings címére ---
-// A tesztelők nem találják meg. Én egy mozdulattal elérem.
-(function () {
-  var taps = 0, last = 0;
-  function applyDebug() {
-    var tt = document.getElementById('testTools');
-    if (tt) tt.style.display = BK_DEBUG ? 'block' : 'none';
-    var sd = document.getElementById('skillDebug');
-    if (sd) sd.style.display = BK_DEBUG ? 'block' : 'none';
-  }
-  function onTitleTap() {
-    var now = Date.now();
-    if (now - last > 900) taps = 0;      // túl lassú -> újraszámol
-    last = now;
-    if (++taps < 7) return;
-    taps = 0;
-    BK_DEBUG = !BK_DEBUG;
-    try { localStorage.setItem('bk_debug', BK_DEBUG ? '1' : '0'); } catch (e) {}
-    applyDebug();
-    if (typeof Haptics !== 'undefined') Haptics.power();
-  }
-  document.addEventListener('DOMContentLoaded', function () {
-    applyDebug();
-    var ss = document.getElementById('settingsScreen');
-    if (!ss) return;
-    var title = ss.querySelector('.screen-title');
-    if (title) {
-      title.style.cursor = 'default';
-      title.addEventListener('pointerup', onTitleTap);
-    }
-  });
-  // ha a DOM már kész
-  if (document.readyState !== 'loading') {
-    applyDebug();
-    var ss2 = document.getElementById('settingsScreen');
-    var t2 = ss2 && ss2.querySelector('.screen-title');
-    if (t2) t2.addEventListener('pointerup', onTitleTap);
-  }
-})();
-
-function updateSkillDebug() {
-  if (!BK_DEBUG) return;
-  var el = document.getElementById('skillDebug');
-  if (!el || typeof Progress === 'undefined') return;
-  var line = 'SKILL ' + Progress.getSkill() + '  ·  AI ' + Math.round(Progress.skillT() * 100) + '%';
-  if (typeof bkMode !== 'undefined' && bkMode === 'stage' && typeof currentStage !== 'undefined') {
-    line += '  ·  stage ' + currentStage;
-    if (typeof assistActive === 'function' && assistActive(currentStage)) line += '  ·  ASSIST';
-  }
-  el.textContent = line;
-}
 
 function loop() {
   if (running) {
@@ -71,7 +7,6 @@ function loop() {
   }
   draw();
   updateTapHints();
-  updateSkillDebug();
   requestAnimationFrame(loop);
 }
 
@@ -318,10 +253,6 @@ bindBtn('nameSkipBtn', closeNamePrompt);
   });
   applyName();
 })();
-// TESZT ESZKÖZÖK — kiadás előtt törlendő
-bindBtn('testCoinsBtn',  testAddCoins);
-bindBtn('testStockBtn',  testStockAll);
-bindBtn('testUnlockBtn', testUnlockAll);
 bindBtn('resultRetryBtn', retryStage);
 bindBtn('resultNextBtn',  nextStage);
 bindBtn('resultMenuBtn',  backToMenu);

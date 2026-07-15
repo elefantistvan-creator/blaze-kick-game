@@ -588,23 +588,6 @@ function openStages()  { Screens.show('stages'); }
 function openPitchSelect() { running = false; paused = false; Screens.show('pitch'); }
 function openShop()    { Screens.show('shop'); }
 
-// ============ TESZT ESZKÖZÖK — KIADÁS ELŐTT TÖRLENDŐ ============
-function testInfo(msg) {
-  var e = document.getElementById('testInfo');
-  if (e) e.textContent = msg + '   (coins: ' + Progress.coins() + ')';
-}
-function testAddCoins() { Progress.addCoins(1000); testInfo('+1000 coins'); Screens.refreshMenu(); }
-function testStockAll() {
-  for (var i=0;i<SHOP_ITEMS.length;i++) Progress.addInv(SHOP_ITEMS[i].id, 5);
-  testInfo('every item +5');
-}
-function testUnlockAll() {
-  Progress.unlockAll();          // csak feloldás, csillagot NEM ad
-  testInfo('all ' + MAX_STAGE + ' stages unlocked');
-  Screens.refreshMenu();
-}
-// ============ /TESZT ESZKÖZÖK ============
-
 function resetProgress() {
   if (!window.confirm('Delete all progress? This cannot be undone.')) return;
   Progress.reset();
