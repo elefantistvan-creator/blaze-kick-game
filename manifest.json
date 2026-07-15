@@ -1,7 +1,7 @@
 {
   "name": "Blaze Kick",
   "short_name": "Blaze Kick",
-  "description": "Air hockey game",
+  "description": "Top-down football game",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
